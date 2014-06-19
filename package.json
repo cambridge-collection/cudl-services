@@ -1,0 +1,21 @@
+{
+  "name": "metadata-api",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www"
+  },
+  "dependencies": {
+    "express": "~4.2.0",
+    "static-favicon": "~1.0.0",
+    "morgan": "~1.0.0",
+    "cookie-parser": "~1.0.1",
+    "body-parser": "~1.0.0",
+    "debug": "~0.7.4",
+    "jade": "~1.3.0",
+    "passport-localapikey": "0.0.3",
+    "passport": "~0.2.0",
+    "Simple-Cache": "~1.0.0",
+    "xslt4node": "~0.1.1"
+  }
+}
