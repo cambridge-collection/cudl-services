@@ -3,10 +3,10 @@ var transform = xslt.transform;
 var express = require('express');
 var fs = require("fs"), json;
 var http = require("http");
-var cache = require('Simple-Cache').SimpleCache("/home/cudl/node/metadata-api/public/cache", console.log);
+var cache = require('Simple-Cache').SimpleCache(config.cacheDir, console.log);
 var router = express.Router();
 
-xslt.addLibrary('/home/cudl/node/metadata-api/saxon/saxon9he.jar');
+xslt.addLibrary(config.appDir+'/saxon/saxon9he.jar');
 
 /* GET home page. */
 router.get('/', function(req, res) {
@@ -50,11 +50,10 @@ router.get('/newton/:type/:location/:id/:from/:to', function(req, res) {
 });
 
 router.get('/bezae/:type/:location/:id/:from/:to', function(req, res) {
-xslt.addLibrary('/home/cudl/node/metadata-api/saxon/saxon9he.jar');
 	cache.get('bezae-'+req.params.type+'-'+req.params.id+'-'+req.params.from+'-'+req.params.to, function(callback) {
 		var config = {
-    			xsltPath: '/home/cudl/node/metadata-api/transforms/transcriptions/pageExtract.xsl',
-    			sourcePath: '/home/cudl/node/metadata-api/public/data/transcription/'+req.params.id+'/'+req.params.location,
+    			xsltPath: config.appDir+'transforms/transcriptions/pageExtract.xsl',
+    			sourcePath: config.dataDir+'/data/transcription/'+req.params.id+'/'+req.params.location,
     			result: String,
 			params: {
         			start: req.params.from,
@@ -73,7 +72,7 @@ xslt.addLibrary('/home/cudl/node/metadata-api/saxon/saxon9he.jar');
 				});
     			} else {
 				var config = {
-                        		xsltPath: '/home/cudl/node/metadata-api/transforms/transcriptions/bezaeHTML.xsl',
+                        		xsltPath: config.appDir+'/transforms/transcriptions/bezaeHTML.xsl',
                         		source: singlepage,
                         		result: String,
 				};
@@ -97,8 +96,8 @@ xslt.addLibrary('/home/cudl/node/metadata-api/saxon/saxon9he.jar');
 router.get('/tei/:type/:location/:id/:from/:to', function(req, res) {
         cache.get('tei-'+req.params.type+'-'+req.params.id+'-'+req.params.from+'-'+req.params.to, function(callback) {
                 var config = {
-                        xsltPath: '/home/cudl/node/metadata-api/transforms/transcriptions/pageExtract.xsl',
-                        sourcePath: '/home/cudl/node/metadata-api/public/data/tei/'+req.params.id+'/'+req.params.id+'.xml',
+                        xsltPath: config.appDir+'/transforms/transcriptions/pageExtract.xsl',
+                        sourcePath: config.dataDir+'/data/tei/'+req.params.id+'/'+req.params.id+'.xml',
                         result: String,
                         params: {
                                 start: req.params.from,
@@ -117,7 +116,7 @@ router.get('/tei/:type/:location/:id/:from/:to', function(req, res) {
                                 });
                         } else {
                                 var config = {
-                                        xsltPath: '/home/cudl/node/metadata-api/transforms/transcriptions/msTeiTrans.xsl',
+                                        xsltPath: config.appDir+'/transforms/transcriptions/msTeiTrans.xsl',
                                         source: singlepage,
                                         result: String,
                                 };
@@ -141,8 +140,8 @@ router.get('/tei/:type/:location/:id/:from/:to', function(req, res) {
 router.get('/dcp/:type/:location/:id/:from?/:to?', function(req, res) {
         cache.get('tei-'+req.params.type+'-'+req.params.id+'-'+req.params.from+'-'+req.params.to, function(callback) {
                 var config = {
-                        xsltPath: '/home/cudl/node/metadata-api/transforms/transcriptions/pageExtract.xsl',
-                        sourcePath: '/home/cudl/node/metadata-api/public/data/dcp/'+req.params.id+'/'+req.params.id+'.xml',
+                        xsltPath: config.appDir+'/transforms/transcriptions/pageExtract.xsl',
+                        sourcePath: config.dataDir+'/data/dcp/'+req.params.id+'/'+req.params.id+'.xml',
                         result: String,
                         params: {
                                 start: req.params.from,
@@ -161,7 +160,7 @@ router.get('/dcp/:type/:location/:id/:from?/:to?', function(req, res) {
                                 });
                         } else {
                                 var config = {
-                                        xsltPath: '/home/cudl/node/metadata-api/transforms/transcriptions/dcpTrans.xsl',
+                                        xsltPath: config.appDir+'/transforms/transcriptions/dcpTrans.xsl',
                                         source: singlepage,
                                         result: String,
                                 };

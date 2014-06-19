@@ -3,10 +3,10 @@ var transform = xslt.transform;
 var express = require('express');
 var fs = require("fs"), json;
 var http = require("http");
-var cache = require('Simple-Cache').SimpleCache("/home/cudl/node/metadata-api/public/cache", console.log);
+var cache = require('Simple-Cache').SimpleCache(config.cacheDir, console.log);
 var router = express.Router();
 
-xslt.addLibrary('/home/cudl/node/metadata-api/saxon/saxon9he.jar');
+xslt.addLibrary(config.appDir+'/saxon/saxon9he.jar');
 
 /* GET home page. */
 router.get('/', function(req, res) {
@@ -16,8 +16,8 @@ router.get('/', function(req, res) {
 router.get('/:language/:location/:id/:from/:to', function(req, res) {
 	cache.get('transcription-'+req.params.language+'-'+req.params.id+'-'+req.params.from+'-'+req.params.to, function(callback) {
 		var config = {
-    			xsltPath: '/home/cudl/node/metadata-api/transforms/transcriptions/pageExtract.xsl',
-    			sourcePath: '/home/cudl/node/metadata-api/public/data/tei/'+req.params.id+'/'+req.params.id+'.xml',
+    			xsltPath: config.appDir+'/transforms/transcriptions/pageExtract.xsl',
+    			sourcePath: config.dataDir+'/data/tei/'+req.params.id+'/'+req.params.id+'.xml',
     			result: String,
 			params: {
         			start: req.params.from,
@@ -35,7 +35,7 @@ router.get('/:language/:location/:id/:from/:to', function(req, res) {
     			} else {
 				console.log(singlepage);
 				var config = {
-                        		xsltPath: '/home/cudl/node/metadata-api/transforms/transcriptions/msTeiTrans.xsl',
+                        		xsltPath: config.appDir+'/transforms/transcriptions/msTeiTrans.xsl',
                         		source: singlepage,
                         		result: String,
 				};
