@@ -16,6 +16,8 @@
     "passport-localapikey": "0.0.3",
     "passport": "~0.2.0",
     "Simple-Cache": "~1.0.0",
-    "xslt4node": "~0.1.1"
+    "xslt4node": "~0.1.1",
+    "mysql": "~2.3.2",
+    "object-to-xml": "0.0.2"
   }
 }

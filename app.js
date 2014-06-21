@@ -6,12 +6,21 @@ var favicon = require('static-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-
+var mysql = require('mysql');
 var routes = require('./routes/index.js');
 var metadata = require('./routes/metadata.js');
 var transcription = require('./routes/transcription.js');
 var translation = require('./routes/translation.js');
+var membership = require('./routes/membership.js');
+
 var app = express();
+
+connection = mysql.createConnection({
+        host     : config.mysqlHost,
+        user     : config.mysqlUser,
+        password : config.mysqlPass,
+	database : config.mysqlData,
+});
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -28,6 +37,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/metadata', metadata);
 app.use('/transcription',transcription);
 app.use('/translation', translation);
+app.use('/membership', membership);
 
 /// catch 404 and forward to error handler
 app.use(function(req, res, next) {
