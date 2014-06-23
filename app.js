@@ -12,7 +12,8 @@ var metadata = require('./routes/metadata.js');
 var transcription = require('./routes/transcription.js');
 var translation = require('./routes/translation.js');
 var membership = require('./routes/membership.js');
-
+var embedded = require('./routes/embedded.js');
+var iiif = require('./routes/iiif.js');
 var app = express();
 
 connection = mysql.createConnection({
@@ -38,6 +39,8 @@ app.use('/metadata', metadata);
 app.use('/transcription',transcription);
 app.use('/translation', translation);
 app.use('/membership', membership);
+app.use('/embedded', embedded);
+app.use('/iiif', iiif);
 
 /// catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -70,5 +73,5 @@ app.use(function(err, req, res, next) {
     });
 });
 
-
+console.log('hmmm');
 module.exports = app;

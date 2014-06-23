@@ -1,0 +1,17 @@
+doctype html
+html
+	head
+		title= title
+		link(rel='stylesheet', href='/stylesheets/player.css')
+		script(type='text/javascript' src="/scripts/openseadragon.min.js")
+	body
+		#openseadragon.openseadragon
+			script(type='text/javascript').
+				OpenSeadragon({
+				id: "openseadragon",
+				showNavigator:  true,
+				visibilityRatio: 1,
+				minZoomLevel: 1,
+				prefixUrl: "/images/",
+				tileSources: !{images}
+				});
