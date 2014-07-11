@@ -3,7 +3,7 @@ var transform = xslt.transform;
 var express = require('express');
 var fs = require("fs"), json;
 var http = require("http");
-var cache = require('Simple-Cache').SimpleCache(config.cacheDir, console.log);
+var cache = require('Simple-Cache').SimpleCache(config.cacheDir+'/translations', console.log);
 var router = express.Router();
 
 xslt.addLibrary(config.appDir+'/saxon/saxon9he.jar');
@@ -13,9 +13,9 @@ router.get('/', function(req, res) {
   res.render('index', { title: 'Metadata' });
 });
 
-router.get('/:language/:location/:id/:from/:to', function(req, res) {
+router.get('/:localtion/:language/:id/:from/:to', function(req, res) {
 	cache.get('transcription-'+req.params.language+'-'+req.params.id+'-'+req.params.from+'-'+req.params.to, function(callback) {
-		var config = {
+		var tconfig = {
     			xsltPath: config.appDir+'/transforms/transcriptions/pageExtract.xsl',
     			sourcePath: config.dataDir+'/data/tei/'+req.params.id+'/'+req.params.id+'.xml',
     			result: String,
@@ -26,20 +26,19 @@ router.get('/:language/:location/:id/:from/:to', function(req, res) {
     			},
 		};
 
-		transform(config, function(err, singlepage) {
+		transform(tconfig, function(err, singlepage) {
 			if (err) {
         			res.render('error', { 
 					message: err,
 					error: { status: 404 }
 				});
     			} else {
-				console.log(singlepage);
-				var config = {
+				var tconfig = {
                         		xsltPath: config.appDir+'/transforms/transcriptions/msTeiTrans.xsl',
                         		source: singlepage,
                         		result: String,
 				};
-				transform(config, function(err, html) {
+				transform(tconfig, function(err, html) {
 					if (err) {
                                 		res.render('error', {
                                         		message: err,

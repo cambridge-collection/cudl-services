@@ -3,7 +3,7 @@ var transform = xslt.transform;
 var express = require('express');
 var fs = require("fs"), json;
 var http = require("http");
-var cache = require('Simple-Cache').SimpleCache(config.cacheDir, console.log);
+var cache = require('Simple-Cache').SimpleCache(config.cacheDir+'/transcriptions', console.log);
 var router = express.Router();
 
 xslt.addLibrary(config.appDir+'/saxon/saxon9he.jar');
@@ -51,7 +51,7 @@ router.get('/newton/:type/:location/:id/:from/:to', function(req, res) {
 
 router.get('/bezae/:type/:location/:id/:from/:to', function(req, res) {
 	cache.get('bezae-'+req.params.type+'-'+req.params.id+'-'+req.params.from+'-'+req.params.to, function(callback) {
-		var config = {
+		var tconfig = {
     			xsltPath: config.appDir+'transforms/transcriptions/pageExtract.xsl',
     			sourcePath: config.dataDir+'/data/transcription/'+req.params.id+'/'+req.params.location,
     			result: String,
@@ -64,7 +64,7 @@ router.get('/bezae/:type/:location/:id/:from/:to', function(req, res) {
     			}
 		};
 
-		transform(config, function(err, singlepage) {
+		transform(tconfig, function(err, singlepage) {
 			if (err) {
         			res.render('error', { 
 					message: err,
@@ -95,7 +95,7 @@ router.get('/bezae/:type/:location/:id/:from/:to', function(req, res) {
 
 router.get('/tei/:type/:location/:id/:from/:to', function(req, res) {
         cache.get('tei-'+req.params.type+'-'+req.params.id+'-'+req.params.from+'-'+req.params.to, function(callback) {
-                var config = {
+                var tconfig = {
                         xsltPath: config.appDir+'/transforms/transcriptions/pageExtract.xsl',
                         sourcePath: config.dataDir+'/data/tei/'+req.params.id+'/'+req.params.id+'.xml',
                         result: String,
@@ -108,19 +108,19 @@ router.get('/tei/:type/:location/:id/:from/:to', function(req, res) {
                         }
                 };
 
-                transform(config, function(err, singlepage) {
+                transform(tconfig, function(err, singlepage) {
                         if (err) {
                                 res.render('error', {
                                         message: err,
                                         error: { status: 500 }
                                 });
                         } else {
-                                var config = {
+                                var tconfig = {
                                         xsltPath: config.appDir+'/transforms/transcriptions/msTeiTrans.xsl',
                                         source: singlepage,
                                         result: String,
                                 };
-                                transform(config, function(err, html) {
+                                transform(tconfig, function(err, html) {
                                         if (err) {
                                                 res.render('error', {
                                                         message: err,
@@ -139,7 +139,7 @@ router.get('/tei/:type/:location/:id/:from/:to', function(req, res) {
 
 router.get('/dcp/:type/:location/:id/:from?/:to?', function(req, res) {
         cache.get('tei-'+req.params.type+'-'+req.params.id+'-'+req.params.from+'-'+req.params.to, function(callback) {
-                var config = {
+                var tconfig = {
                         xsltPath: config.appDir+'/transforms/transcriptions/pageExtract.xsl',
                         sourcePath: config.dataDir+'/data/dcp/'+req.params.id+'/'+req.params.id+'.xml',
                         result: String,
@@ -152,19 +152,19 @@ router.get('/dcp/:type/:location/:id/:from?/:to?', function(req, res) {
                         }
                 };
 
-                transform(config, function(err, singlepage) {
+                transform(tconfig, function(err, singlepage) {
                         if (err) {
                                 res.render('error', {
                                         message: err,
                                         error: { status: 500 }
                                 });
                         } else {
-                                var config = {
+                                var tconfig = {
                                         xsltPath: config.appDir+'/transforms/transcriptions/dcpTrans.xsl',
                                         source: singlepage,
                                         result: String,
                                 };
-                                transform(config, function(err, html) {
+                                transform(tconfig, function(err, html) {
                                         if (err) {
                                                 res.render('error', {
                                                         message: err,

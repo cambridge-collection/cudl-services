@@ -1,5 +1,11 @@
+//Config
 config = require('./config/base.js');
 
+var fs = require('fs-extra');
+fs.ensureDir(config.cacheDir+'/transcriptions');
+fs.ensureDir(config.cacheDir+'/translations');
+
+//Modules
 var express = require('express');
 var path = require('path');
 var favicon = require('static-favicon');
@@ -7,6 +13,8 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var mysql = require('mysql');
+
+//Routes
 var routes = require('./routes/index.js');
 var metadata = require('./routes/metadata.js');
 var transcription = require('./routes/transcription.js');
@@ -16,12 +24,17 @@ var embedded = require('./routes/embedded.js');
 var iiif = require('./routes/iiif.js');
 var app = express();
 
+//MySQL Connection
 connection = mysql.createConnection({
         host     : config.mysqlHost,
         user     : config.mysqlUser,
         password : config.mysqlPass,
 	database : config.mysqlData,
 });
+
+//Cache Directories
+fs.ensureDir(config.cacheDir+'/transcriptions');
+fs.ensureDir(config.cacheDir+'/translations');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -35,12 +48,12 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 //app.use('/', routes);
-app.use('/metadata', metadata);
-app.use('/transcription',transcription);
-app.use('/translation', translation);
-app.use('/membership', membership);
-app.use('/embedded', embedded);
-app.use('/iiif', iiif);
+app.use('/v1/metadata', metadata);
+app.use('/v1/transcription',transcription);
+app.use('/v1/translation', translation);
+app.use('/v1/membership', membership);
+app.use('/v1/embedded', embedded);
+app.use('/v1/iiif', iiif);
 
 /// catch 404 and forward to error handler
 app.use(function(req, res, next) {
