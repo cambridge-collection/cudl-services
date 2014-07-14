@@ -2,6 +2,7 @@
 config = require('./config/base.js');
 
 var fs = require('fs-extra');
+fs.ensureDir(config.cacheDir);
 fs.ensureDir(config.cacheDir+'/transcriptions');
 fs.ensureDir(config.cacheDir+'/translations');
 
