@@ -1,11 +1,12 @@
 var config = {}
 
 //Application settings and paths
-config.appDir = '/usr/local/cudl-services';
+config.appDir = '/home/digilib/cudl-services';
 config.dataDir = '/mnt/cudl-data';
 config.cacheDir = '/mnt/cache';
 
 //MySQL settings for cudl database services 
+config.mysqlPool = 10;
 config.mysqlHost = 'found-dom01.lib.cam.ac.uk';
 config.mysqlUser = 'viewerdevuser';
 config.mysqlPass = 'resuvedreweiv';

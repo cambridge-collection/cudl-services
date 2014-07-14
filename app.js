@@ -26,7 +26,8 @@ var iiif = require('./routes/iiif.js');
 var app = express();
 
 //MySQL Connection
-connection = mysql.createConnection({
+connection = mysql.createPool({
+	connectionLimit	: 10,
         host     : config.mysqlHost,
         user     : config.mysqlUser,
         password : config.mysqlPass,
@@ -52,7 +53,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/v1/metadata', metadata);
 app.use('/v1/transcription',transcription);
 app.use('/v1/translation', translation);
-app.use('/v1/membership', membership);
+app.use('/v1/rdb/membership', membership);
 app.use('/v1/embedded', embedded);
 app.use('/v1/iiif', iiif);
 
