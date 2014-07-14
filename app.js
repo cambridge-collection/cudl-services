@@ -42,7 +42,7 @@ fs.ensureDir(config.cacheDir+'/translations');
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
-app.use(favicon());
+app.use(favicon(path.join(__dirname, '/public/images/brand/favicon.ico'));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());

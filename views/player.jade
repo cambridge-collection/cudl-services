@@ -4,14 +4,30 @@ html
 		title= title
 		link(rel='stylesheet', href='/stylesheets/player.css')
 		script(type='text/javascript' src="/scripts/openseadragon.min.js")
-	body
-		#openseadragon.openseadragon
-			script(type='text/javascript').
-				OpenSeadragon({
-				id: "openseadragon",
-				showNavigator:  true,
-				visibilityRatio: 1,
-				minZoomLevel: 1,
-				prefixUrl: "/images/",
-				tileSources: !{images}
-				});
+		script(type='text/javascript' src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js")
+	body(id="player")
+			#header
+				#header-container
+					a(href="//cudl.lib.cam.ac.uk", rel="nofollow", title="University of Cambridge", class="logo")
+					img(src="/images/brand/sponsor_cam.png", alt="University of Cambridge logo")
+			#content
+				#viewer-container
+					#viewer
+						script(type='text/javascript').
+							OpenSeadragon({
+							id: "viewer",
+							debugMode:  false,
+							showNavigationControl: false,
+							showNavigator: false,
+							springStiffness: 3,
+							animationTime: 0.7,
+							minPixelRatio: 0.3,
+							visibilityRatio: 1,
+							prefixUrl: "/images/viewer/",
+							tileSources: !{images}
+							});
+				#metadata-container
+					#metadata
+						h2 Bacon ipsum dolor sit amet nulla ham qui sint exercitation eiusmod commodo, chuck duis velit. Aute in reprehenderit, dolore aliqua non est magna in labore pig pork biltong. Eiusmod swine spare ribs reprehenderit culpa.
+					#toggle
+					script(type='text/javascript' src="/scripts/cudl-callout.js")
