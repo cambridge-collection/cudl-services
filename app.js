@@ -1,10 +1,6 @@
 //Config
 config = require('./config/base.js');
-
-var fs = require('fs-extra');
-fs.ensureDir(config.cacheDir);
-fs.ensureDir(config.cacheDir+'/transcriptions');
-fs.ensureDir(config.cacheDir+'/translations');
+users = require('./config/users.js');
 
 //Modules
 var express = require('express');
@@ -14,6 +10,14 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var mysql = require('mysql');
+passport = require('passport')
+var strategy = require('passport-localapikey').Strategy;
+var fs = require('fs-extra');
+
+//cache directories
+fs.ensureDir(config.cacheDir);
+fs.ensureDir(config.cacheDir+'/transcriptions');
+fs.ensureDir(config.cacheDir+'/translations');
 
 //Routes
 var routes = require('./routes/index.js');
@@ -34,9 +38,27 @@ connection = mysql.createPool({
 	database : config.mysqlData,
 });
 
-//Cache Directories
-fs.ensureDir(config.cacheDir+'/transcriptions');
-fs.ensureDir(config.cacheDir+'/translations');
+
+function findByApiKey(apikey, fn) {
+    if (apikey in users) {
+      return fn(null, users[apikey]);
+    }
+  return fn(null, null);
+}
+
+
+passport.use(new strategy(
+  function(apikey, done) {
+    process.nextTick(function () {
+      findByApiKey(apikey, function(err, user) {
+        if (err) { return done(err); }
+        if (!user) { return done(null, false, { message: 'Unknown apikey : ' + apikey }); }
+        return done(null, user);
+      })
+    });
+  }
+));
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -47,6 +69,7 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
 app.use(cookieParser());
+app.use(passport.initialize());
 app.use(express.static(path.join(__dirname, 'public')));
 
 //app.use('/', routes);
