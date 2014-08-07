@@ -1,7 +1,7 @@
 var config = {}
 
 //Application settings and paths
-config.appDir = '/home/digilib/cudl-services';
+config.appDir = '/home/cudl/node/cudl-services2';
 config.dataDir = '/mnt/cudl-data';
 config.cacheDir = '/mnt/cache';
 
