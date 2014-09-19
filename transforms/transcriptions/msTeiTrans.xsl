@@ -11,6 +11,11 @@
    
    <xsl:output method="xml" indent="yes" encoding="UTF-8"/>
 
+   <xsl:variable name="transcriber">
+      <xsl:value-of select="//*:transcriber[1]"/>
+   </xsl:variable>
+   
+   
    <xsl:template match="/">
       
       <xsl:element name="html">
@@ -72,13 +77,34 @@
       <xsl:element name="div">
          <xsl:attribute name="class" select="'header'" />
          
-         <xsl:element name="p">
-            
-            <xsl:attribute name="style" select="'color: #3D3D8F'"/>
-            <xsl:value-of select="concat('&lt;', //*:text/*:body//*:pb/@n, '&gt;')"/></xsl:element>         
+         
+         <xsl:choose>
+            <xsl:when test="$transcriber='Corpus Coranicum'">
+               <xsl:element name="p">
+                  <xsl:attribute name="style" select="'text-align: right'"/>
+                  <xsl:text>Transcription by </xsl:text>
+                  <xsl:element name="a">
+                     <xsl:attribute name="href">http://www.corpuscoranicum.de/</xsl:attribute>
+                     <xsl:attribute name="target">_blank</xsl:attribute>
+                     <xsl:text>Corpus Coranicum</xsl:text>
+                  </xsl:element>
+               </xsl:element>
                
+            </xsl:when>
+            <xsl:otherwise>
+               <xsl:element name="p">
+                  
+                  <xsl:attribute name="style" select="'color: #3D3D8F'"/>
+                  <xsl:value-of select="concat('&lt;', //*:text/*:body//*:pb/@n, '&gt;')"/>
+               </xsl:element>   
+               
+            </xsl:otherwise>
+         </xsl:choose>
+         
+         
+         
       </xsl:element>
-            
+      
    </xsl:template>  
    
    <xsl:template name="make-body">      
@@ -108,6 +134,8 @@
       </xsl:element>
       
    </xsl:template>
+   
+   <xsl:template match="*:transcriber" mode="html"/>
    
    <xsl:function name="cudl:first-upper-case">
       <xsl:param name="text" />

@@ -58,8 +58,15 @@
         </xsl:choose>
         
     </xsl:variable>
+    
 
-
+    <xsl:variable name="transcriber">
+        
+        <xsl:value-of select="//tei:respStmt[tei:resp='transcriber']/tei:orgName"/>
+        
+    </xsl:variable>
+    
+    
     
     <xsl:output method="xml" version="1.0" encoding="UTF-8"/>
 
@@ -98,6 +105,15 @@
     <!--templates for extracting by page-->
     <!--if we start using for darwin correspondence, we may have to * the tei bits-->
     <xsl:template match="*[@xml:id=$startPage]" mode="page">
+        
+        <xsl:if test="normalize-space($transcriber)">
+            <transcriber>
+                <xsl:value-of select="$transcriber"/>
+            </transcriber>
+            
+        </xsl:if>
+        
+        
         <xsl:copy-of select="."/>
     </xsl:template>
 
