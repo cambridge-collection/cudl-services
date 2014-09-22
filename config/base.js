@@ -7,7 +7,7 @@ config.cacheDir = '/mnt/cache';
 
 //MySQL settings for cudl database services 
 config.mysqlPool = 10;
-config.mysqlHost = '10.0.0.5';
+config.mysqlHost = '10.0.0.15';
 config.mysqlUser = 'viewerdevuser';
 config.mysqlPass = 'resuvedreweiv';
 config.mysqlData = 'viewerdev';

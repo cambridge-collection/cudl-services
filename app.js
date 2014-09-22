@@ -1,6 +1,6 @@
 //Config
-config = require('./config/base.js');
-users = require('./config/users.js');
+config = require('../config/base.js');
+users = require('../config/users.js');
 
 //Modules
 var express = require('express');

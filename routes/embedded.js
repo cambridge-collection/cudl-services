@@ -9,7 +9,7 @@ router.get('/', function(req, res) {
 
 router.get('/:id', function(req, res) {
 	var images = [];
-	images.push("http://172.22.83.199:3000/iiif/image/output.tif/info.json")
+	images.push("http://found-dev-pres01.lib.cam.ac.uk/content/images/MS-DAR-00100-000-00001.dzi")
 	console.log('laa');
 	res.render('player', { title: req.params.id,
 			       images: JSON.stringify(images)
