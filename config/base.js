@@ -4,6 +4,8 @@ var config = {}
 config.appDir = '/usr/local/cudl-node-services';
 config.dataDir = '/mnt/cudl-data';
 config.cacheDir = '/mnt/cache';
+config.user = 'digilib';
+config.froup = 'digilib';
 
 //MySQL settings for cudl database services 
 config.mysqlPool = 10;
