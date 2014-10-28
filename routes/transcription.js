@@ -54,6 +54,45 @@ router.get('/newton/:type/:location/:id/:from/:to', function(req, res) {
 	});	
 });
 
+router.get('/dmp/:type/:location/:id/:from?/:to?', function(req, res) {
+        cache.get('dmp-'+req.params.type+'-'+req.params.id+'-'+req.params.from+'-'+req.params.to, function(callback) {
+                var options = {
+                        host: 'http://darwin.amnh.org/',
+                        path: 'transcription-viewer.php?eid='+req.params.id+
+                }
+
+                http.get(options, function(responce) {
+                        if (responce.statusCode != 200) {
+                                 res.render('error', {
+                                        message: 'Transcription not found at external provider',
+                                        error: { status: responce.statusCode }
+                                });
+
+                        }
+                        var body = '';
+                        responce.on('data', function(chunk) {
+                                body += chunk;
+                        });
+                        responce.on('end', function() {
+                                var opts = {};
+                                opts['output-xhtml'] = true;
+                                opts['char-encoding'] = 'utf8';
+                                tidy(body, opts, function(err, html) {
+                                        callback(html);
+                                });
+                        });
+
+                }).on('error', function(e) {
+                        res.render('error', {
+                                message: 'Could not contact external transcription provider',
+                                error: { status: 500 }
+                        });
+                });
+        }).fulfilled(function(data) {
+                res.send(data);
+        });
+});
+
 router.get('/bezae/:type/:location/:id/:from/:to', function(req, res) {
 	cache.get('bezae-'+req.params.type+'-'+req.params.id+'-'+req.params.from+'-'+req.params.to, function(callback) {
 		var tconfig = {
