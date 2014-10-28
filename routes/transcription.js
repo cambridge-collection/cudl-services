@@ -57,8 +57,8 @@ router.get('/newton/:type/:location/:id/:from/:to', function(req, res) {
 router.get('/dmp/:type/:location/:id/:from?/:to?', function(req, res) {
         cache.get('dmp-'+req.params.type+'-'+req.params.id+'-'+req.params.from+'-'+req.params.to, function(callback) {
                 var options = {
-                        host: 'http://darwin.amnh.org/',
-                        path: 'transcription-viewer.php?eid='+req.params.id+
+                        host: 'darwin.amnh.org',
+                        path: 'transcription-viewer.php?eid='+req.params.id
                 }
 
                 http.get(options, function(responce) {
