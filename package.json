@@ -21,6 +21,7 @@
     "object-to-xml": "0.0.2",
     "request": "~2.36.0",
     "fs-extra": "~0.10.0",
-    "htmltidy": "0.0.6"
+    "htmltidy": "0.0.6",
+    "glob": "~4.0.6"
   }
 }

@@ -1,15 +1,16 @@
 var config = {}
 
 //Application settings and paths
-config.appDir = '/usr/local/cudl-node-services';
+config.appDir = '/home/cms93/cudl-services';
 config.dataDir = '/mnt/cudl-data';
 config.cacheDir = '/mnt/cache';
+config.dcpdataDir = '/mnt/dcp-data';
 config.user = 'digilib';
-config.froup = 'digilib';
+config.group = 'digilib';
 
 //MySQL settings for cudl database services 
 config.mysqlPool = 10;
-config.mysqlHost = '10.0.0.15';
+config.mysqlHost = 'cudl.cmzjzpssbgnq.eu-west-1.rds.amazonaws.com';
 config.mysqlUser = 'viewerdevuser';
 config.mysqlPass = 'resuvedreweiv';
 config.mysqlData = 'viewerdev';

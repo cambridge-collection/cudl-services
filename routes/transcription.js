@@ -1,11 +1,14 @@
 var xslt = require("xslt4node");
-var transform = xslt.transform;
 var express = require('express');
 var fs = require("fs"), json;
 var http = require("http");
 var cache = require('Simple-Cache').SimpleCache(config.cacheDir+'/transcriptions', console.log);
 var tidy = require('htmltidy').tidy;
+var glob = require('glob');
+
+var transform = xslt.transform;
 var router = express.Router();
+
 xslt.addLibrary(config.appDir+'/saxon/saxon9he.jar');
 
 /* GET home page. */
@@ -225,6 +228,51 @@ router.get('/dcp/:type/:location/:id/:from?/:to?', function(req, res) {
         });
 });
 
+router.get('/dcpfull/:type/:location/:id/:from?/:to?', function(req, res) {
+        cache.get('tei-'+req.params.type+'-'+req.params.id+'-'+req.params.from+'-'+req.params.to, function(callback) {
+		glob(config.dcpdataDir+'/'+req.params.id+'*.xml', function(err, files) {
+			var tconfig = {
+                        	xsltPath: config.appDir+'/transforms/transcriptions/pageExtract.xsl',
+                        	sourcePath: files[0],
+                        	result: String,
+                        	params: {
+                                	start: req.params.from,
+                                	end: req.params.to
+                        	},
+                        	props: {
+                                	indent: 'yes'
+                        	}
+                	};
+
+                	transform(tconfig, function(err, singlepage) {
+                        	if (err) {
+                                	res.render('error', {
+                                        	message: err,
+                                        	error: { status: 500 }
+                                	});
+                        	} else {
+                                	var tconfig = {
+                                        	xsltPath: config.appDir+'/transforms/transcriptions/dcpTrans.xsl',
+                                        	source: singlepage,
+                                        	result: String,
+                                	};
+                                	transform(tconfig, function(err, html) {
+                                        	if (err) {
+                                                	res.render('error', {
+                                                        	message: err,
+                                                        	error: { status: 500 }
+                                                	});
+                                        	} else {
+                                                	callback(html);
+                                        	}
+                                	});
+                        	}
+                	});
+		});
+        }).fulfilled(function(data) {
+                res.send(data);
+        });
+});
 
 
 /*router.get('/:format/:type/:location/:id/:from/:to', function(req, res) {
