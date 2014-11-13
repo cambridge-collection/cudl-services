@@ -230,7 +230,7 @@ router.get('/dcp/:type/:location/:id/:from?/:to?', function(req, res) {
 
 router.get('/dcpfull/:type/:location/:id/:from?/:to?', function(req, res) {
         cache.get('tei-'+req.params.type+'-'+req.params.id+'-'+req.params.from+'-'+req.params.to, function(callback) {
-		glob(config.dcpdataDir+'/'+req.params.id+'*.xml', function(err, files) {
+		glob(config.dcpdataDir+'/'+req.params.id+'_*.xml', function(err, files) {
 			var tconfig = {
                         	xsltPath: config.appDir+'/transforms/transcriptions/pageExtract.xsl',
                         	sourcePath: files[0],
