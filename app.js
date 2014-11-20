@@ -13,11 +13,15 @@ var mysql = require('mysql');
 passport = require('passport')
 var strategy = require('passport-localapikey').Strategy;
 var fs = require('fs-extra');
+var userid = require('userid');
 
 //cache directories
 fs.ensureDir(config.cacheDir);
 fs.ensureDir(config.cacheDir+'/transcriptions');
 fs.ensureDir(config.cacheDir+'/translations');
+fs.chown(config.cacheDir, userid.uid(config.user), userid.gid(config.group), function (err) { if (err) throw err; });
+fs.chown(config.cacheDir+'/transcriptions', userid.uid(config.user), userid.gid(config.group), function (err) { if (err) throw err; });
+fs.chown(config.cacheDir+'/translations', userid.uid(config.user), userid.gid(config.group), function (err) { if (err) throw err; });
 
 //Routes
 var routes = require('./routes/index.js');
