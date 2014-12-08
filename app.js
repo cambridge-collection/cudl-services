@@ -1,5 +1,5 @@
 //Config
-config = require('../config/base.js');
+config = require('./config/base.js');
 users = require('../config/users.js');
 
 //Modules

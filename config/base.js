@@ -1,20 +1,19 @@
-var config = {};
+var path = require("path");
 
-//Application settings and paths
-config.appDir = '/home/cms93/cudl-services';
-config.dataDir = '/mnt/cudl-data';
-config.cacheDir = '/mnt/cache';
-config.dcpdataDir = '/mnt/dcp-data';
-config.user = 'digilib';
-config.group = 'digilib';
+var configEnvar = "CUDL_SERVICES_CONFIG";
 
-//MySQL settings for cudl database services
-config.mysqlPool = 10;
-config.mysqlHost = 'cudl.cmzjzpssbgnq.eu-west-1.rds.amazonaws.com';
-config.mysqlUser = 'viewerdevuser';
-config.mysqlPass = 'resuvedreweiv';
-config.mysqlData = 'viewerdev';
+var configModule;
+if(configEnvar in process.env) {
+    configModule = process.env[configEnvar];
 
-//Image server
-config.imageServer = 'http://172.22.83.199/iipsrv/iipsrv.fcgi?iiif=';
-module.exports = config;
+    // If the specified module is a relative path, make it relative to the root
+    // dir.
+    if(/^\.{1,2}\//.test(configModule)) {
+        configModule = path.join("../", configModule);
+    }
+}
+else {
+    configModule = "./default";
+}
+
+module.exports = require(configModule);
