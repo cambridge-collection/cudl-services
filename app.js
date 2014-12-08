@@ -76,6 +76,14 @@ app.use(cookieParser());
 app.use(passport.initialize());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Middleware to redirect trailing slashes to same URL without trailing slash
+app.use(function(req, res, next) {
+    if(req.url.substr(-1) == '/' && req.url.length > 1)
+        res.redirect(301, req.url.slice(0, -1));
+    else
+        next();
+});
+
 //app.use('/', routes);
 app.use('/v1/metadata', metadata);
 app.use('/v1/transcription',transcription);
