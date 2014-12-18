@@ -29,7 +29,6 @@ var metadata = require('./routes/metadata.js');
 var transcription = require('./routes/transcription.js');
 var translation = require('./routes/translation.js');
 var membership = require('./routes/membership.js');
-var embedded = require('./routes/embedded.js');
 var iiif = require('./routes/iiif.js');
 var app = express();
 
@@ -89,7 +88,6 @@ app.use('/v1/metadata', metadata);
 app.use('/v1/transcription',transcription);
 app.use('/v1/translation', translation);
 app.use('/v1/rdb/membership', membership);
-app.use('/v1/embedded', embedded);
 app.use('/v1/iiif', iiif);
 
 /// catch 404 and forward to error handler
