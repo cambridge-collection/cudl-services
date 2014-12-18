@@ -29,7 +29,6 @@ var metadata = require('./routes/metadata.js');
 var transcription = require('./routes/transcription.js');
 var translation = require('./routes/translation.js');
 var membership = require('./routes/membership.js');
-var embedded = require('./routes/embedded.js');
 var iiif = require('./routes/iiif.js');
 var app = express();
 
@@ -76,12 +75,19 @@ app.use(cookieParser());
 app.use(passport.initialize());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Middleware to redirect trailing slashes to same URL without trailing slash
+app.use(function(req, res, next) {
+    if(req.url.substr(-1) == '/' && req.url.length > 1)
+        res.redirect(301, req.url.slice(0, -1));
+    else
+        next();
+});
+
 //app.use('/', routes);
 app.use('/v1/metadata', metadata);
 app.use('/v1/transcription',transcription);
 app.use('/v1/translation', translation);
 app.use('/v1/rdb/membership', membership);
-app.use('/v1/embedded', embedded);
 app.use('/v1/iiif', iiif);
 
 /// catch 404 and forward to error handler
