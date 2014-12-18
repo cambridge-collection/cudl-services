@@ -2,7 +2,7 @@ var express = require('express');
 var fs = require("fs");
 var util = require("util");
 
-var config = require('../config/base');
+var config = require('../../config/base');
 var serviceUtil = require("../util.js");
 
 var CORS_HEADERS = {
