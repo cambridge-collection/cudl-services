@@ -180,7 +180,7 @@
 						<xsl:value-of select="@rend"/>
 					</xsl:attribute>
 					<xsl:text> </xsl:text>
-					
+
 				</span>
 			</xsl:when>
 			<xsl:otherwise>

@@ -3,117 +3,117 @@
     xmlns:tei="http://www.tei-c.org/ns/1.0"
      exclude-result-prefixes="tei">
     <xsl:output method="xml" encoding="UTF-8"/>
-    
-    
+
+
     <!--largely stolen from Mike Hawkins, Newton Project-->
-    
+
     <xsl:param name="extract">true</xsl:param>
-    
-    
+
+
     <!--if you only want one page, these should be the same
     if they are blank, the whole document will be returned-->
     <xsl:param name="start"/>
     <xsl:param name="end"/>
     <!--for type of text you want returned-->
     <xsl:param name="type"/>
-    
+
     <!--id of the start page-->
     <xsl:variable name="startPage">
-        
+
         <xsl:choose>
             <!--default is transcription-->
             <xsl:when test="$type='transcription' or $type=''">
-                
-                <xsl:value-of select="//tei:div[not(@type)]//tei:pb[@n=$start]/@xml:id"/>        
-        
+
+                <xsl:value-of select="//tei:div[not(@type)]//tei:pb[@n=$start]/@xml:id"/>
+
             </xsl:when>
             <xsl:when test="$type='translation'">
-                
+
                 <xsl:value-of select="//tei:div[@type='translation']//tei:pb[@n=$start]/@xml:id"/>
-                
+
             </xsl:when>
-        
+
         </xsl:choose>
-        
+
     </xsl:variable>
-    
-    
-    
+
+
+
     <!--id of of the next pb element-->
     <xsl:variable name="endPage">
-        
+
         <xsl:choose>
             <!--default is transcription-->
             <xsl:when test="$type='transcription' or $type=''">
-                
-                <xsl:value-of select="//tei:div[not(@type)]//tei:pb[@n=$end]/following::tei:pb[1]/@xml:id"/>        
-                
+
+                <xsl:value-of select="//tei:div[not(@type)]//tei:pb[@n=$end]/following::tei:pb[1]/@xml:id"/>
+
             </xsl:when>
             <xsl:when test="$type='translation'">
-                
+
                 <xsl:value-of select="//tei:div[@type='translation']//tei:pb[@n=$end]/following::tei:pb[1]/@xml:id"/>
-                
+
             </xsl:when>
-            
+
         </xsl:choose>
-        
+
     </xsl:variable>
-    
+
 
     <xsl:variable name="transcriber">
-        
+
         <xsl:value-of select="//tei:respStmt[tei:resp='transcriber']/tei:orgName"/>
-        
+
     </xsl:variable>
-    
-    
-    
+
+
+
     <xsl:output method="xml" version="1.0" encoding="UTF-8"/>
 
 
     <xsl:template match="/">
-        
+
         <xsl:choose>
-            
+
             <!--is this a paginated text?-->
             <xsl:when test="normalize-space($startPage)">
-                
+
                 <xsl:apply-templates mode="page"/>
-            
+
             </xsl:when>
             <!--or a non-paginated one?-->
             <xsl:otherwise>
-                
+
                 <all>
-                
+
                 <!--extracts the whole thing-->
                 <!--this is currently just for darwin correspondence stuff-->
                 <!--<xsl:copy-of select="//letdata"/>-->
-                    
-                    
+
+
                 <xsl:copy-of select="/"/>
-                
+
                 </all>
-                
+
             </xsl:otherwise>
         </xsl:choose>
-        
-        
+
+
     </xsl:template>
 
 
     <!--templates for extracting by page-->
     <!--if we start using for darwin correspondence, we may have to * the tei bits-->
     <xsl:template match="*[@xml:id=$startPage]" mode="page">
-        
+
         <xsl:if test="normalize-space($transcriber)">
             <transcriber>
                 <xsl:value-of select="$transcriber"/>
             </transcriber>
-            
+
         </xsl:if>
-        
-        
+
+
         <xsl:copy-of select="."/>
     </xsl:template>
 
@@ -129,7 +129,7 @@
             <xsl:apply-templates mode="page"/>
         </xsl:copy>
     </xsl:template>
-    
+
     <xsl:template match="*" mode="page">
         <xsl:choose>
             <xsl:when
@@ -138,6 +138,6 @@
             </xsl:when>
         </xsl:choose>
     </xsl:template>
-    
+
 
 </xsl:stylesheet>
