@@ -34,19 +34,19 @@ var app = express();
 
 //MySQL Connection
 connection = mysql.createPool({
-	connectionLimit	: 10,
-        host     : config.mysqlHost,
-        user     : config.mysqlUser,
-        password : config.mysqlPass,
-	database : config.mysqlData,
+    connectionLimit	: 10,
+    host            : config.mysqlHost,
+    user            : config.mysqlUser,
+    password        : config.mysqlPass,
+    database        : config.mysqlData,
 });
 
 
 function findByApiKey(apikey, fn) {
     if (apikey in users) {
-      return fn(null, users[apikey]);
+        return fn(null, users[apikey]);
     }
-  return fn(null, null);
+    return fn(null, null);
 }
 
 

@@ -8,10 +8,10 @@ router.get('/', function(req, res) {
   res.render('index', { title: 'Metadata' });
 });
 
-router.use('/image/', function(req, res) { 
-	 var url = config.imageServer + req.url;
-	 console.log(url);
-  	 req.pipe(request(url)).pipe(res);
+router.use('/image/', function(req, res) {
+    var url = config.imageServer + req.url;
+    console.log(url);
+    req.pipe(request(url)).pipe(res);
 });
 
 module.exports = router;

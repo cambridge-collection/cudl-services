@@ -9,19 +9,16 @@ var config = {
     source: ORDER,
     result: String,
     params : {
-    	hmmm: 'laaa',
-	foo: 'bar',
-	daa: 'hmmm',
+    hmmm: 'laaa',
+    foo: 'bar',
+    daa: 'hmmm',
     },
 };
 
 transform(config, function(err, res) {
-	if (err) {
-		console.log(err);
-	} else {
-		console.log(res);
-	}
+    if (err) {
+        console.log(err);
+    } else {
+        console.log(res);
+    }
 });
-
-
-
