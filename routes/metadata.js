@@ -77,8 +77,9 @@ router.get('/:format/:id',
 function loadJsonMetadata(path, cb) {
     fs.readFile(path, "utf-8", function(err, data) {
         if(err) cb(err);
+        var parsed;
         try{
-            var parsed = JSON.parse(data);
+            parsed = JSON.parse(data);
         }
         catch(e) {
             cb(util.format("Error parsing file as JSON: %s. %s", path, e));

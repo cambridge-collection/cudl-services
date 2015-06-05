@@ -1,4 +1,4 @@
-var config = {}
+var config = {};
 
 //Application settings and paths
 config.appDir = '/home/cms93/cudl-services';
@@ -8,7 +8,7 @@ config.dcpdataDir = '/mnt/dcp-data';
 config.user = 'digilib';
 config.group = 'digilib';
 
-//MySQL settings for cudl database services 
+//MySQL settings for cudl database services
 config.mysqlPool = 10;
 config.mysqlHost = 'cudl.cmzjzpssbgnq.eu-west-1.rds.amazonaws.com';
 config.mysqlUser = 'viewerdevuser';

@@ -10,7 +10,7 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var mysql = require('mysql');
-passport = require('passport')
+passport = require('passport');
 var strategy = require('passport-localapikey').Strategy;
 var fs = require('fs-extra');
 var userid = require('userid');
@@ -57,7 +57,7 @@ passport.use(new strategy(
         if (err) { return done(err); }
         if (!user) { return done(null, false, { message: 'Unknown apikey : ' + apikey }); }
         return done(null, user);
-      })
+      });
     });
   }
 ));

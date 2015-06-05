@@ -30,7 +30,7 @@ router.get('/', function(req, res) {
  */
 function detectEncoding(response) {
     if(typeof response === 'object' && response.headers) {
-        var charset = parseHttpHeader(response.headers['content-type'])['charset'];
+        var charset = parseHttpHeader(response.headers['content-type']).charset;
         if(charset !== undefined) {
             try {
                 response.setEncoding(charset);
@@ -49,10 +49,10 @@ router.get('/newton/:type/:location/:id/:from/:to', function(req, res) {
     cache.get('newton-'+req.params.type+'-'+req.params.id+'-'+req.params.from+'-'+req.params.to, function(callback) {
         var options = {
             host: 'www.newtonproject.sussex.ac.uk',
-            path: '/get/text/'+req.params.id+'?mode='+req.params.type
-            +'&format=minimal_html&skin=minimal&show_header=no&start='
-            +req.params.from+'&end='+req.params.to
-        }
+            path: '/get/text/' + req.params.id + '?mode=' + req.params.type +
+                '&format=minimal_html&skin=minimal&show_header=no&start=' +
+                req.params.from + '&end=' + req.params.to
+        };
 
         var request = http.get(options, function(responce) {
 
@@ -68,10 +68,10 @@ router.get('/newton/:type/:location/:id/:from/:to', function(req, res) {
                 requestFailed = true;
             }
 
-              if (responce.statusCode != 200) { 
+              if (responce.statusCode != 200) {
                  res.render('error', {
                             message: 'Transcription not found at external provider',
-                            error: { status: responce.statusCode } 
+                            error: { status: responce.statusCode }
                 });
 
             }
@@ -92,7 +92,7 @@ router.get('/newton/:type/:location/:id/:from/:to', function(req, res) {
                       callback(html);
                 });
             });
-        
+
         }).on('error', function(e) {
              res.render('error', {
                                 message: 'Could not contact external transcription provider',
@@ -101,7 +101,7 @@ router.get('/newton/:type/:location/:id/:from/:to', function(req, res) {
         });
     }).fulfilled(function(data) {
         res.send(data);
-    });	
+    });
 });
 
 router.get('/dmp/:type/:location/:id/:from?/:to?', function(req, res) {
@@ -109,7 +109,7 @@ router.get('/dmp/:type/:location/:id/:from?/:to?', function(req, res) {
                 var options = {
                         host: 'darwin.amnh.org',
                         path: '/transcription-viewer.php?eid='+req.params.id
-                }
+                };
 
                 http.get(options, function(responce) {
                         if (responce.statusCode != 200) {
@@ -160,7 +160,7 @@ router.get('/bezae/:type/:location/:id/:from/:to', function(req, res) {
 
         transform(tconfig, function(err, singlepage) {
             if (err) {
-                    res.render('error', { 
+                    res.render('error', {
                     message: err,
                     error: { status: 500 }
                 });
@@ -347,21 +347,21 @@ router.get('/dcpfull/:type/:location/:id/:from?/:to?', function(req, res) {
                                 error: { status: 500 }
                         });
                 });
-         
+
         } else {
             var options = { xsltPath: '/home/cudl/node/metadata-api/transforms/transcriptions/pageExtract.xsl',
                        result: String,
                        params: {
                         start: req.params.from,
                                         end: req.params.to
-                       }	
+                       }
              };
             if (req.params.format === 'bezae') { options.sourcePath = '/home/cudl/node/metadata-api/public/data/transcription/'+req.params.id+'/'+req.params.location }
             else if (req.params.format === 'tei') { options.sourcePath = '/home/cudl/node/metadata-api/public/data/transcription/'+req.params.id+'/'+req.params.location }
             else { res.render('error', { message: Unrecognised transcription format, error: { status: 404 } }); }
             transform(options, function(err, singlepage) {
                             if (err) { res.render('error', { message: err, error: { status: 500 } }); }
-                else { 
+                else {
                     var options = {  source: singlepage, result: String };
                      if (req.params.format === 'bezae') { options.xsltPath = '/home/cudl/node/metadata-api/transforms/transcriptions/bezaeHTML.xsl' }
                      if (req.params.format === 'tei') { options.xsltPath = '/home/cudl/node/metadata-api/transforms/transcriptions/msTeiTrans.xsl' }
@@ -370,8 +370,8 @@ router.get('/dcpfull/:type/:location/:id/:from?/:to?', function(req, res) {
                          else { callback(html); }
                     });
                      }
-            });	
-        }		
+            });
+        }
     }).fulfilled(function(data) {
            res.send(data);
     });
