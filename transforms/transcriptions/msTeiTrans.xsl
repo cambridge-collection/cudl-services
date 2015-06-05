@@ -21,8 +21,8 @@
       <xsl:element name="html">
          <xsl:element name="head">
             <xsl:element name="title">
-		<xsl:value-of select="concat('Folio ', //*:text/*:body//*:pb/@n)"/>
-	    </xsl:element>
+                <xsl:value-of select="concat('Folio ', //*:text/*:body//*:pb/@n)"/>
+            </xsl:element>
             <xsl:element name="style">
                <xsl:attribute name="type">text/css</xsl:attribute>
                @font-face
