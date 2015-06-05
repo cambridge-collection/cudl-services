@@ -34,7 +34,7 @@ var app = express();
 
 //MySQL Connection
 connection = mysql.createPool({
-    connectionLimit	: 10,
+    connectionLimit : 10,
     host            : config.mysqlHost,
     user            : config.mysqlUser,
     password        : config.mysqlPass,
