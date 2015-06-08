@@ -14,45 +14,45 @@ router.get('/', function(req, res) {
 });
 
 router.get('/:localtion/:language/:id/:from/:to', function(req, res) {
-	cache.get('transcription-'+req.params.language+'-'+req.params.id+'-'+req.params.from+'-'+req.params.to, function(callback) {
-		var tconfig = {
-    			xsltPath: config.appDir+'/transforms/transcriptions/pageExtract.xsl',
-    			sourcePath: config.dataDir+'/data/tei/'+req.params.id+'/'+req.params.id+'.xml',
-    			result: String,
-			params: {
-        			start: req.params.from,
-				end: req.params.to,
-				type: 'translation'
-    			},
-		};
+    cache.get('transcription-'+req.params.language+'-'+req.params.id+'-'+req.params.from+'-'+req.params.to, function(callback) {
+        var tconfig = {
+                xsltPath: config.appDir+'/transforms/transcriptions/pageExtract.xsl',
+                sourcePath: config.dataDir+'/data/tei/'+req.params.id+'/'+req.params.id+'.xml',
+                result: String,
+            params: {
+                    start: req.params.from,
+                end: req.params.to,
+                type: 'translation'
+                },
+        };
 
-		transform(tconfig, function(err, singlepage) {
-			if (err) {
-        			res.render('error', { 
-					message: err,
-					error: { status: 404 }
-				});
-    			} else {
-				var tconfig = {
-                        		xsltPath: config.appDir+'/transforms/transcriptions/msTeiTrans.xsl',
-                        		source: singlepage,
-                        		result: String,
-				};
-				transform(tconfig, function(err, html) {
-					if (err) {
-                                		res.render('error', {
-                                        		message: err,
-                                        		error: { status: 500 }
-						});
-					} else {
-						callback(html);
-					}
-				});
-			}
-		});
-	}).fulfilled(function(data) {
-		res.send(data);
-	});
+        transform(tconfig, function(err, singlepage) {
+            if (err) {
+                    res.render('error', {
+                    message: err,
+                    error: { status: 404 }
+                });
+                } else {
+                var tconfig = {
+                                xsltPath: config.appDir+'/transforms/transcriptions/msTeiTrans.xsl',
+                                source: singlepage,
+                                result: String,
+                };
+                transform(tconfig, function(err, html) {
+                    if (err) {
+                                        res.render('error', {
+                                                message: err,
+                                                error: { status: 500 }
+                        });
+                    } else {
+                        callback(html);
+                    }
+                });
+            }
+        });
+    }).fulfilled(function(data) {
+        res.send(data);
+    });
 });
 
 module.exports = router;
