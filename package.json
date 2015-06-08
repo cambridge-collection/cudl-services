@@ -24,6 +24,8 @@
     "htmltidy": "0.0.6",
     "glob": "~4.0.6",
     "userid": "~0.1.1",
-    "regexp-quote": "0.0.0"
+    "regexp-quote": "0.0.0",
+    "iconv-lite": "^0",
+    "parse-http-header": "^1"
   }
 }

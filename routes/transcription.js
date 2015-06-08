@@ -5,9 +5,15 @@ var http = require("http");
 var cache = require('Simple-Cache').SimpleCache(config.cacheDir+'/transcriptions', console.log);
 var tidy = require('htmltidy').tidy;
 var glob = require('glob');
+var iconv = require('iconv-lite');
+var parseHttpHeader = require('parse-http-header');
 
 var transform = xslt.transform;
 var router = express.Router();
+
+// The newtonproject's responses are latin1 encoded, which node doesn't support
+// by default. iconv-lite provides extra encodings such as latin1.
+iconv.extendNodeEncodings();
 
 xslt.addLibrary(config.appDir+'/saxon/saxon9he.jar');
 
@@ -15,6 +21,29 @@ xslt.addLibrary(config.appDir+'/saxon/saxon9he.jar');
 router.get('/', function(req, res) {
   res.render('index', { title: 'Metadata' });
 });
+
+/**
+ * Automatically set the encoding of an HTTP response according to the
+ * Content-Type header's charset field.
+ *
+ * @returns true if successful, false otherwise
+ */
+function detectEncoding(response) {
+    if(typeof response === 'object' && response.headers) {
+        var charset = parseHttpHeader(response.headers['content-type'])['charset'];
+        if(charset !== undefined) {
+            try {
+                response.setEncoding(charset);
+                return true;
+            }
+            catch(e) {
+                // unsupported encoding
+            }
+        }
+    }
+
+    return false;
+}
 
 router.get('/newton/:type/:location/:id/:from/:to', function(req, res) {
 	cache.get('newton-'+req.params.type+'-'+req.params.id+'-'+req.params.from+'-'+req.params.to, function(callback) {
@@ -25,7 +54,20 @@ router.get('/newton/:type/:location/:id/:from/:to', function(req, res) {
 			+req.params.from+'&end='+req.params.to
 		}
 
-  		http.get(options, function(responce) {
+        var request = http.get(options, function(responce) {
+
+            var requestFailed = false;
+            var detectedEncoding = detectEncoding(responce);
+            if(!detectedEncoding) {
+                request.abort();
+                responce.destroy();
+                res.render('error', {
+                    message: 'Unsupported external transcription provider encoding.',
+                    error: { status: 500 }
+                });
+                requestFailed = true;
+            }
+
   			if (responce.statusCode != 200) { 
 				 res.render('error', {
             				message: 'Transcription not found at external provider',
@@ -38,6 +80,11 @@ router.get('/newton/:type/:location/:id/:from/:to', function(req, res) {
     				body += chunk;
   			});
 		 	responce.on('end', function() {
+                // Don't cache the result of failed responses
+                if(requestFailed) {
+                    return;
+                }
+
 				var opts = {};
 				opts['output-xhtml'] = true;
 				opts['char-encoding'] = 'utf8';
