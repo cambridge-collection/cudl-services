@@ -26,7 +26,8 @@
     "userid": "~0.1.1",
     "regexp-quote": "0.0.0",
     "iconv-lite": "^0",
-    "parse-http-header": "^1"
+    "parse-http-header": "^1",
+    "pg": "~4.4.0"
   },
   "devDependencies": {
     "grunt": "^0.4",

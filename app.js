@@ -1,6 +1,5 @@
 //Config
 config = require('./config/base.js');
-users = require('../config/users.js');
 
 //Modules
 var express = require('express');
@@ -10,10 +9,11 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var mysql = require('mysql');
-passport = require('passport');
+var passport = require('passport');
 var strategy = require('passport-localapikey').Strategy;
 var fs = require('fs-extra');
 var userid = require('userid');
+var pg = require('pg');
 
 //cache directories
 fs.ensureDir(config.cacheDir);
@@ -43,8 +43,8 @@ connection = mysql.createPool({
 
 
 function findByApiKey(apikey, fn) {
-    if (apikey in users) {
-        return fn(null, users[apikey]);
+    if (apikey in config.users) {
+        return fn(null, config.users[apikey]);
     }
     return fn(null, null);
 }
