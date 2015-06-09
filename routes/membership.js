@@ -12,7 +12,6 @@ router.get('/', function(req, res) {
 
 router.get('/collections/:id', function(req, res) {
     var query = '(select title, collections.collectionid, collections.collectionorder from collections where collectionid IN (select parentcollectionid from collections where collectionid IN (select collectionid from itemsincollection where itemid = $1::text and visible=true))) UNION (select title, collections.collectionid, collections.collectionorder from itemsincollection, collections where collections.collectionid=itemsincollection.collectionid and itemid = $1::text and visible=true) order by collectionorder';
-    console.log(query);
     pg.connect(connection, function(err, client, done) {
     	client.query(query, [req.params.id], function(err, result) {
         	if (err) throw err;
