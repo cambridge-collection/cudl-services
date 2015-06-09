@@ -3,7 +3,7 @@ var o2x = require('object-to-xml');
 var pg = require('pg');
 
 var router = express.Router();
-var connection = 'postgres://'+config.User+':'+config.Pass+'@'+config.Host+'/'+config.Database;
+var connection = 'postgres://'+config.postUser+':'+config.postPass+'@'+config.postHost+'/'+config.postDatabase;
 
 /* GET home page. */
 router.get('/', function(req, res) {
