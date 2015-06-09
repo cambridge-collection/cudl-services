@@ -15,6 +15,7 @@ router.get('/collections/:id', function(req, res) {
     pg.connect(connection, function(err, client, done) {
     	client.query(query, [req.params.id], function(err, result) {
         	if (err) throw err;
+            done();
         	res.set('Content-Type', 'text/xml');
         	res.send(o2x({
             		'?xml version="1.0" encoding="utf-8"?': null,
