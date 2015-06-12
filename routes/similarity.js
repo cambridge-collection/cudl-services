@@ -11,11 +11,15 @@ var xmldom = require('xmldom');
 var xtf = require('../lib/xtf');
 var xslt = require('../lib/xslt');
 var xml2json = require('../lib/xml2json');
+var serviceUtil = require('../util');
 
 var XSLT_TX = path.join(__dirname, '..', 'transforms', 'similarity.xsl');
 
 /* */
 router.get('/:itemid/:similarityId', function(req, res) {
+    // Allow x-domain ajax access
+    res.set(serviceUtil.CORS_HEADERS);
+
     var item = req.params.itemid;
     // descriptive metadata id
     var similarityId = req.params.similarityId;
