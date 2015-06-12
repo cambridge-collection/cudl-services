@@ -15,12 +15,12 @@ var xml2json = require('../lib/xml2json');
 var XSLT_TX = path.join(__dirname, '..', 'transforms', 'similarity.xsl');
 
 /* */
-router.get('/:itemid/:dmdid', function(req, res) {
+router.get('/:itemid/:similarityId', function(req, res) {
     var item = req.params.itemid;
     // descriptive metadata id
-    var dmdid = req.params.dmdid;
+    var similarityId = req.params.similarityId;
 
-    xtf.getSimilarItems(item, dmdid)
+    xtf.getSimilarItems(item, similarityId)
         .then(function(result) {
             assert.equal(result.response.statusCode, 200);
 
