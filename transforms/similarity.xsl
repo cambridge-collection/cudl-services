@@ -41,16 +41,16 @@
             <xsl:value-of select="@score"/>
          </json:number>
 
-         <json:string key="title">
+         <!-- <json:string key="title">
             <xsl:value-of select="meta/title"/>
-         </json:string>
+         </json:string> -->
 
          <json:string key="ID">
-            <xsl:value-of select="meta/fileID"/>
+            <xsl:value-of select="meta/itemId"/>
          </json:string>
 
-         <json:string key="descriptiveMetadataID">
-            <xsl:value-of select="meta/fileID"/>
+         <json:string key="structureNodeId">
+            <xsl:value-of select="meta/structureNodeId"/>
          </json:string>
       </json:object>
    </xsl:template>

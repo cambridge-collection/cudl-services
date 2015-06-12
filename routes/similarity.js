@@ -2,12 +2,17 @@
 'use strict';
 
 var assert = require('assert');
+var util = require('util');
 var path = require('path');
+var fs = require('fs');
 
 var express = require('express');
 var router = express.Router();
 var xmldom = require('xmldom');
+var _ = require('lodash');
+var Q = require('q');
 
+var config = require('../config/base');
 var xtf = require('../lib/xtf');
 var xslt = require('../lib/xslt');
 var xml2json = require('../lib/xml2json');
@@ -32,6 +37,7 @@ router.get('/:itemid/:similarityId', function(req, res) {
         })
         .then(parseXml)
         .then(xml2json)
+        .then(embedMetadata(req.query.embedMeta))
         .then(function(json) {
             res.json(json);
         })
@@ -54,12 +60,122 @@ router.get('/:itemid/:similarityId', function(req, res) {
         .done();
 });
 
+/**
+ * Get a function to embed metadata in a similarity hit.
+ */
+function embedMetadata(level) {
+    // Don't embed anything unless requested
+    if(!(level === 'full' || level === 'partial')) {
+        return _.identity;
+    }
+
+    return function(results) {
+
+        // Load the JSON metadata from all the hits
+        var embeddedHits = _(results.hits).map(function(hit) {
+
+            var jsonPath = path.join(config.dataDir, 'json', hit.ID + '.json');
+
+            return Q.nfcall(fs.readFile, jsonPath, 'utf-8')
+                .then(JSON.parse)
+                .then(function(metadata) {
+
+                    var meta = (level === 'full' ? {metadata: metadata} :
+                        getReducedMetadata(metadata, hit.structureNodeId));
+
+                    return _.assign({}, hit, meta);
+                });
+        }).value();
+
+        return Q.all(embeddedHits)
+            .then(function(hitsWithEmbeds) {
+                return _.assign({}, results, {hits: hitsWithEmbeds});
+            });
+    };
+}
 
 /**
- * Convert an XTF raw XML response to a JSON response for similar items.
+ * Get a subset of the metadata applicable to the provided logical structure
+ * node.
  */
-function buildJson(xtfXmlResponse) {
+function getReducedMetadata(metadata, structureNodeId) {
 
+    var structureIndex = parseInt(structureNodeId, 10);
+    if(isNaN(structureIndex)) {
+        throw new Error(util.format('Invalid structureId: %s', structureNodeId));
+    }
+
+    var structurePath = nthStructureNode(metadata, structureIndex);
+    // Strip children from the structure path nodes
+    structurePath = _.map(
+        structurePath, function(node) { return _.omit(node, 'children'); });
+
+    // The first page of the most significant structure
+    var firstPage = metadata.pages[structurePath[structurePath.length - 1]
+        .startPagePosition - 1];
+
+    // We should really change descriptiveMetadata to be an object not an
+    // array...
+    var dmdLookup = _(metadata.descriptiveMetadata)
+        .map(function(dmd) { return [dmd.ID, dmd]; })
+        .object().value();
+
+    // The descriptive metadata related to the structure path nodes
+    var relatedMetadata = _(structurePath)
+        .map(function(structure) {
+            var dmdId = structure.descriptiveMetadataID;
+            assert(dmdId in dmdLookup);
+            return [dmdId, dmdLookup[dmdId]];
+        })
+        .object().value();
+
+    return {
+        structurePath: structurePath,
+        firstPage: firstPage,
+        descriptiveMetadata: relatedMetadata
+    };
+}
+
+/**
+ * Get the nth logical structure node, and its parents (ancestors).
+ */
+function nthStructureNode(metadata, n) {
+    if(n < 0)
+        throw new Error(util.format('n was negative: %s', n));
+
+    var result = _nthStructureNode(n, metadata.logicalStructures, 0, []);
+
+    if(_.isNumber(result))
+        throw new Error(util.format(
+            'structure index out of range. structure count: %d, index: %d',
+            result, n));
+
+    return result;
+}
+
+function _nthStructureNode(n, nodes, pos, context) {
+    for(var i in nodes) {
+        var node = nodes[i];
+        var newContext = _(context).concat([node]).value();
+
+        if(pos === n)
+            return newContext;
+
+        pos++;
+
+        if(node.children) {
+            var result = _nthStructureNode(n, node.children, pos, newContext);
+
+            // Result is either the identified node (and parents) or the new
+            // position to continue the search from
+            if(_.isArray(result))
+                return result; // node located
+
+            pos = result;
+        }
+    }
+
+    return pos;
 }
 
 function parseXml(xmlText) {
