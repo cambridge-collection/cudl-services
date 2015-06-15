@@ -17,6 +17,7 @@ var xtf = require('../lib/xtf');
 var xslt = require('../lib/xslt');
 var xml2json = require('../lib/xml2json');
 var serviceUtil = require('../util');
+var similarityTxNaitive = require('../transforms/similarity');
 
 var XSLT_TX = path.join(__dirname, '..', 'transforms', 'similarity.xsl');
 
@@ -30,13 +31,7 @@ router.get('/:itemid/:similarityId', function(req, res) {
     var similarityId = req.params.similarityId;
 
     xtf.getSimilarItems(item, similarityId)
-        .then(function(result) {
-            assert.equal(result.response.statusCode, 200);
-
-            return xslt.transform(XSLT_TX, result.body);
-        })
-        .then(parseXml)
-        .then(xml2json)
+        .then(mapToJsonNative)
         .then(embedMetadata(req.query.embedMeta))
         .then(function(json) {
             res.json(json);
@@ -59,6 +54,24 @@ router.get('/:itemid/:similarityId', function(req, res) {
         })
         .done();
 });
+
+/**
+ * Map the XTF response XML to our JSON XML format via Java (SAXON).
+ */
+function mapToJsonXslt(result) {
+    assert.equal(result.response.statusCode, 200);
+    return xslt.transform(XSLT_TX, result.body)
+        .then(parseXml)
+        .then(xml2json);
+}
+
+/**
+ * Map the XTF response XML to JSON in node.
+ */
+function mapToJsonNative(result) {
+    assert.equal(result.response.statusCode, 200);
+    return similarityTxNaitive(parseXml(result.body.toString('utf-8')));
+}
 
 /**
  * Get a function to embed metadata in a similarity hit.
