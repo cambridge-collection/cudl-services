@@ -26,7 +26,10 @@ router.get('/:itemid/:similarityId', function(req, res) {
     // descriptive metadata id
     var similarityId = req.params.similarityId;
 
-    xtf.getSimilarItems(item, similarityId)
+    var count = parseInt(req.query.count);
+    count = isNaN(count) || count < 1 ? undefined : count;
+
+    xtf.getSimilarItems(item, similarityId, count)
         .then(mapToJson)
         .then(embedMetadata(req.query.embedMeta))
         .then(function(json) {
