@@ -90,7 +90,7 @@ app.use('/v1/transcription',transcription);
 app.use('/v1/translation', translation);
 app.use('/v1/rdb/membership', membership);
 app.use('/v1/iiif', iiif);
-app.use('/v1/similarity', similarity);
+app.use('/v1/xtf/similarity', similarity);
 
 /// catch 404 and forward to error handler
 app.use(function(req, res, next) {
