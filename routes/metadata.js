@@ -20,7 +20,7 @@ router.get('/', function(req, res) {
 router.get('/:format/:id',
     function(req, res) {
         // We always want to allow remote ajax access
-        res.set(CORS_HEADERS);
+        res.set(serviceUtil.CORS_HEADERS);
 
         // The response depends on the Origin header, as we block access to
         // non-embeddable items from non-cudl origins. If we don't set
