@@ -33,6 +33,7 @@ router.get('/:itemid/:similarityId', function(req, res) {
         .then(mapToJson)
         .then(embedMetadata(req.query.embedMeta))
         .then(function(json) {
+            res.set({'content-type': 'application/json; charset=UTF-8'});
             res.json(json);
         })
         .catch(function(error) {
