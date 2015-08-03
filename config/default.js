@@ -22,4 +22,6 @@ config.users["51ce1fb4-0d91-11e4-ad30-77b11da19985"] = { username: 'huw', passwo
 
 //Image server
 config.imageServer = 'http://172.22.83.199/iipsrv/iipsrv.fcgi?iiif=';
+config.darwinXTF = 'http://dcp-dev.lib.cam.ac.uk';
+
 module.exports = config;
