@@ -11,6 +11,6 @@ router.get('/',
 		console.log(url);
 		req.pipe(request(url)).pipe(res);	
 	}
-});
+);
 
 module.exports = router;
