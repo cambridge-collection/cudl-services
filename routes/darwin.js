@@ -4,7 +4,7 @@ var request = require('request');
 var router = express.Router();
 
 /* GET home page. */
-router.get('/', 
+router.get('/*', 
 	/* passport.authenticate('localapikey', { session: false }), */
 	function(req, res) {
     		var url = config.darwinXTF + req.url;
