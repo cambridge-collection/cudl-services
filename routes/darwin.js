@@ -1,17 +1,17 @@
 var express = require('express');
 var request = require('request');
-var passport = require('passport');
 
 var router = express.Router();
 
-/* GET home page. */
-router.get('/*', 
-   passport.authenticate('localapikey', { session: false }),
-	function(req, res) {
-    		var url = config.darwinXTF + req.url;
-		console.log(url);
-		req.pipe(request(url)).pipe(res);	
-	}
-);
+module.exports = function(passport) {
 
-module.exports = router;
+	router.get('/*', passport.authenticate('token', { session: false }),
+		function(req, res) {
+			var url = config.darwinXTF + req.url;
+			console.log(url);
+			req.pipe(request(url)).pipe(res);	
+		}
+	);
+	
+	return router;
+};

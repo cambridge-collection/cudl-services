@@ -10,7 +10,7 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var mysql = require('mysql');
 var passport = require('passport');
-var strategy = require('passport-localapikey').Strategy;
+var strategy = require('passport-accesstoken').Strategy;
 var fs = require('fs-extra');
 var userid = require('userid');
 var pg = require('pg');
@@ -24,14 +24,14 @@ fs.chown(config.cacheDir+'/transcriptions', userid.uid(config.user), userid.gid(
 fs.chown(config.cacheDir+'/translations', userid.uid(config.user), userid.gid(config.group), function (err) { if (err) throw err; });
 
 //Routes
-var routes = require('./routes/index.js');
+//var routes = require('./routes/index.js');
 var metadata = require('./routes/metadata.js');
 var transcription = require('./routes/transcription.js');
 var translation = require('./routes/translation.js');
 var membership = require('./routes/membership.js');
 var iiif = require('./routes/iiif.js');
 var similarity = require('./routes/similarity');
-var darwin	= require('./routes/darwin.js');
+var darwin	= (require('./routes/darwin.js')(passport));
 var app = express();
 
 //MySQL Connection
@@ -45,19 +45,20 @@ connection = mysql.createPool({
 
 
 function findByApiKey(apikey, fn) {
+    console.log(apikey);
     if (apikey in config.users) {
         return fn(null, config.users[apikey]);
     }
     return fn(null, null);
 }
 
-
+console.log(config.users);
 passport.use(new strategy(
-  function(apikey, done) {
+  function(token, done) {
     process.nextTick(function () {
-      findByApiKey(apikey, function(err, user) {
+      findByApiKey(token, function(err, user) {
         if (err) { return done(err); }
-        if (!user) { return done(null, false, { message: 'Unknown apikey : ' + apikey }); }
+        //if (!user) { return done(null, false, { message: 'Unknown apikey : ' + apikey }); }
         return done(null, user);
       });
     });
@@ -125,5 +126,5 @@ app.use(function(err, req, res, next) {
     });
 });
 
-console.log('hmmm');
+console.log('hmmmi1');
 module.exports = app;

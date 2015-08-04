@@ -22,20 +22,18 @@
     "object-to-xml": "0.0.2",
     "parse-http-header": "^1",
     "passport": "~0.2.0",
-    "passport-localapikey": "0.0.3",
     "q": "^1",
     "regexp-quote": "0.0.0",
     "request": "~2.36.0",
     "static-favicon": "~1.0.0",
     "uri-template": "^1",
     "userid": "~0.1.1",
-    "regexp-quote": "0.0.0",
-    "iconv-lite": "^0",
-    "parse-http-header": "^1",
     "pg": "~4.4.0",
     "xmldom": "^0.1.19",
     "xpath": "0.0.9",
-    "xslt4node": "~0.1.1"
+    "xslt4node": "~0.1.1",
+    "passport-token": "~0.1.3",
+    "passport-accesstoken": "~0.1.0"
   },
   "devDependencies": {
     "grunt": "^0.4",
