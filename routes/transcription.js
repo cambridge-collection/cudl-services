@@ -61,19 +61,18 @@ router.get('/newton/:type/:location/:id/:from/:to', function(req, res) {
             if(!detectedEncoding) {
                 request.abort();
                 responce.destroy();
-                res.render('error', {
+                res.status(500).render('error', {
                     message: 'Unsupported external transcription provider encoding.',
                     error: { status: 500 }
                 });
                 requestFailed = true;
             }
 
-              if (responce.statusCode != 200) {
-                 res.render('error', {
-                            message: 'Transcription not found at external provider',
-                            error: { status: responce.statusCode }
+            if (responce.statusCode != 200) {
+                res.status(500).render('error', {
+                    message: 'Transcription not found at external provider',
+                    error: { status: responce.statusCode }
                 });
-
             }
             var body = '';
             responce.on('data', function(chunk) {
@@ -94,10 +93,10 @@ router.get('/newton/:type/:location/:id/:from/:to', function(req, res) {
             });
 
         }).on('error', function(e) {
-             res.render('error', {
-                                message: 'Could not contact external transcription provider',
-                                error: { status: 500 }
-                        });
+            res.status(500).render('error', {
+                message: 'Could not contact external transcription provider',
+                error: { status: 500 }
+            });
         });
     }).fulfilled(function(data) {
         res.send(data);
@@ -113,7 +112,7 @@ router.get('/dmp/:type/:location/:id/:from?/:to?', function(req, res) {
 
                 http.get(options, function(responce) {
                         if (responce.statusCode != 200) {
-                                 res.render('error', {
+                                 res.status(500).render('error', {
                                         message: 'Transcription not found at external provider',
                                         error: { status: responce.statusCode }
                                 });
@@ -133,7 +132,7 @@ router.get('/dmp/:type/:location/:id/:from?/:to?', function(req, res) {
                         });
 
                 }).on('error', function(e) {
-                        res.render('error', {
+                        res.status(500).render('error', {
                                 message: 'Could not contact external transcription provider',
                                 error: { status: 500 }
                         });
@@ -160,7 +159,7 @@ router.get('/bezae/:type/:location/:id/:from/:to', function(req, res) {
 
         transform(tconfig, function(err, singlepage) {
             if (err) {
-                    res.render('error', {
+                    res.status(500).render('error', {
                     message: err,
                     error: { status: 500 }
                 });
@@ -172,7 +171,7 @@ router.get('/bezae/:type/:location/:id/:from/:to', function(req, res) {
                 };
                 transform(tconfig, function(err, html) {
                     if (err) {
-                                        res.render('error', {
+                                        res.status(500).render('error', {
                                                 message: err,
                                                 error: { status: 500 }
                         });
@@ -204,7 +203,7 @@ router.get('/tei/:type/:location/:id/:from/:to', function(req, res) {
 
                 transform(tconfig, function(err, singlepage) {
                         if (err) {
-                                res.render('error', {
+                                res.status(500).render('error', {
                                         message: err,
                                         error: { status: 500 }
                                 });
@@ -216,7 +215,7 @@ router.get('/tei/:type/:location/:id/:from/:to', function(req, res) {
                                 };
                                 transform(tconfig, function(err, html) {
                                         if (err) {
-                                                res.render('error', {
+                                                res.status(500).render('error', {
                                                         message: err,
                                                         error: { status: 500 }
                                                 });
@@ -248,7 +247,7 @@ router.get('/dcp/:type/:location/:id/:from?/:to?', function(req, res) {
 
                 transform(tconfig, function(err, singlepage) {
                         if (err) {
-                                res.render('error', {
+                                res.status(500).render('error', {
                                         message: err,
                                         error: { status: 500 }
                                 });
@@ -260,7 +259,7 @@ router.get('/dcp/:type/:location/:id/:from?/:to?', function(req, res) {
                                 };
                                 transform(tconfig, function(err, html) {
                                         if (err) {
-                                                res.render('error', {
+                                                res.status(500).render('error', {
                                                         message: err,
                                                         error: { status: 500 }
                                                 });
@@ -293,7 +292,7 @@ router.get('/dcpfull/:type/:location/:id/:from?/:to?', function(req, res) {
 
                     transform(tconfig, function(err, singlepage) {
                             if (err) {
-                                    res.render('error', {
+                                    res.status(500).render('error', {
                                             message: err,
                                             error: { status: 500 }
                                     });
@@ -305,7 +304,7 @@ router.get('/dcpfull/:type/:location/:id/:from?/:to?', function(req, res) {
                                     };
                                     transform(tconfig, function(err, html) {
                                             if (err) {
-                                                    res.render('error', {
+                                                    res.status(500).render('error', {
                                                             message: err,
                                                             error: { status: 500 }
                                                     });

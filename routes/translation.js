@@ -28,7 +28,7 @@ router.get('/:localtion/:language/:id/:from/:to', function(req, res) {
 
         transform(tconfig, function(err, singlepage) {
             if (err) {
-                    res.render('error', {
+                    res.status(404).render('error', {
                     message: err,
                     error: { status: 404 }
                 });
@@ -40,7 +40,7 @@ router.get('/:localtion/:language/:id/:from/:to', function(req, res) {
                 };
                 transform(tconfig, function(err, html) {
                     if (err) {
-                                        res.render('error', {
+                                        res.status(500).render('error', {
                                                 message: err,
                                                 error: { status: 500 }
                         });
