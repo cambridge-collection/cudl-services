@@ -8,11 +8,11 @@ config.dcpdataDir = '/mnt/dcp-data';
 config.user = 'chris';
 config.group = 'chris';
 
-//Postgres settings for cudl database services 
-config.Host = 'cudl-postgres.cmzjzpssbgnq.eu-west-1.rds.amazonaws.com';
-config.User = 'cudldev';
-config.Pass = 'anwqxJcONu1NjUl';
-config.Database = 'viewerdev';
+//Postgres settings for cudl database services
+config.postHost = 'cudl-postgres.cmzjzpssbgnq.eu-west-1.rds.amazonaws.com';
+config.postUser = 'cudldev';
+config.postPass = 'anwqxJcONu1NjUl';
+config.postDatabase = 'viewerdev';
 
 config.users = {}
 config.users["1a1c31e8-0c04-11e4-b6a8-bf55e15d8c9d"] = { username: 'cudl-dev', password: 'secret', email: 'cudl-admin@lib.cam.ac.uk' };
