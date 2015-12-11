@@ -7,8 +7,10 @@
   },
   "dependencies": {
     "Simple-Cache": "~1.0.0",
+    "accepts": "^1.3.0",
     "body-parser": "~1.0.0",
     "cookie-parser": "~1.0.1",
+    "csv-stringify": "0.0.8",
     "debug": "~0.7.4",
     "express": "~4.2.0",
     "fs-extra": "~0.10.0",
@@ -22,18 +24,18 @@
     "object-to-xml": "0.0.2",
     "parse-http-header": "^1",
     "passport": "~0.2.0",
+    "passport-accesstoken": "~0.1.0",
+    "passport-token": "~0.1.3",
+    "pg": "~4.4.0",
     "q": "^1",
     "regexp-quote": "0.0.0",
     "request": "~2.36.0",
     "static-favicon": "~1.0.0",
     "uri-template": "^1",
     "userid": "~0.1.1",
-    "pg": "~4.4.0",
     "xmldom": "^0.1.19",
     "xpath": "0.0.9",
-    "xslt4node": "~0.1.1",
-    "passport-token": "~0.1.3",
-    "passport-accesstoken": "~0.1.0"
+    "xslt4node": "~0.1.1"
   },
   "devDependencies": {
     "grunt": "^0.4",
