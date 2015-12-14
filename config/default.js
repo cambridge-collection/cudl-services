@@ -25,3 +25,6 @@ config.imageServer = 'http://172.22.83.199/iipsrv/iipsrv.fcgi?iiif=';
 config.darwinXTF = 'http://dcp-dev.lib.cam.ac.uk';
 
 module.exports = config;
+
+// Tagging
+config.defaultRemoveRatio = 1/5;
