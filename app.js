@@ -8,7 +8,6 @@ var favicon = require('static-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-var mysql = require('mysql');
 var passport = require('passport');
 var strategy = require('passport-accesstoken').Strategy;
 var fs = require('fs-extra');
@@ -34,15 +33,6 @@ var iiif = require('./routes/iiif.js');
 var similarity = require('./routes/similarity');
 var darwin	= (require('./routes/darwin.js')(passport));
 var app = express();
-
-//MySQL Connection
-connection = mysql.createPool({
-    connectionLimit : 10,
-    host            : config.mysqlHost,
-    user            : config.mysqlUser,
-    password        : config.mysqlPass,
-    database        : config.mysqlData,
-});
 
 
 function findByApiKey(apikey, fn) {
