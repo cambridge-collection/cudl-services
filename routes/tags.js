@@ -49,9 +49,15 @@ function sendTagResponse(req, res, options) {
         handleErrors(res)(e);
     }
 
-    db.connect()
-    .then(getTagsWithRemoveCount(req.params.classmark))
-    .then(incorporateRemoves(options.removeRatio))
+    Q.all([
+        // Returns list of tags
+        db.connect()
+            .then(getTagsWithRemoveCount(req.params.classmark)),
+        // Does not return value, only throws if tag doesn't exist
+        db.connect()
+            .then(ensureTagExists(req.params.classmark))
+    ])
+    .spread(incorporateRemoves(options.removeRatio))
     .then(getNegotiatedResponse(req, res, options.type))
     .then(sendResponse(res))
     .catch(handleErrors(res))
@@ -157,7 +163,7 @@ function handleErrors(res) {
         if(error instanceof NotFoundError) {
             res.status(404)
                 .set('Content-Type', 'text/plain')
-                .send('No tags found for item: ' + error.extra);
+                .send('Item does not exist: ' + error.extra);
         }
         else if(error instanceof ValueError) {
             res.status(400)
@@ -181,17 +187,30 @@ function getTagsWithRemoveCount(id) {
                 // Release the db client back to the pool
                 done();
 
-                if(result.rows.length === 0) {
-                    throw new NotFoundError(
-                        'No DocumentTags found with id: ' + id, id);
-                }
-
                 return {
                     id: id,
                     tags: result.rows
                 };
             });
     };
+}
+
+var TAG_EXISTS_SQL = 'SELECT exists(SELECT 1 FROM items WHERE itemid = $1);';
+
+function ensureTagExists(id) {
+    return function(args) {
+        var client = args[0], done = args[1];
+        return Q.ninvoke(client, 'query', TAG_EXISTS_SQL, [id])
+            .then(function(result) {
+                // Release the db client back to the pool
+                done();
+
+                if(!result.rows[0].exists) {
+                    throw new NotFoundError(
+                        'No item exists with ID: ' + id, id);
+                }
+            });
+    }
 }
 
 /**
