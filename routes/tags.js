@@ -16,6 +16,7 @@ var ValueError = require('../lib/errors/ValueError');
 var InvalidConfigError = require('../lib/errors/InvalidConfigError');
 var db = require('../lib/db');
 var config = require('../config/base');
+var items =  require('../lib/items');
 
 var router = express.Router();
 
@@ -53,7 +54,7 @@ function sendTagResponse(req, res, options) {
         // Returns list of tags
         getTagsWithRemoveCount(req.params.classmark),
         // Does not return value, only throws if tag doesn't exist
-        ensureTagExists(req.params.classmark)
+        items.ensureItemExists(req.params.classmark)
     ])
     .spread(incorporateRemoves(options.removeRatio))
     .then(getNegotiatedResponse(req, res, options.type))
@@ -184,17 +185,6 @@ function getTagsWithRemoveCount(id) {
             id: id,
             tags: result.rows
         };
-    });
-}
-
-var TAG_EXISTS_SQL = 'SELECT exists(SELECT 1 FROM items WHERE itemid = $1);';
-
-function ensureTagExists(id) {
-    return db.query(TAG_EXISTS_SQL, [id])
-    .then(function(result) {
-        if(!result.rows[0].exists) {
-            throw new NotFoundError('No item exists with ID: ' + id, id);
-        }
     });
 }
 
