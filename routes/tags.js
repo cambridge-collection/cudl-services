@@ -142,7 +142,7 @@ function getNegotiatedResponse(req, res, fixedType) {
                             tag.adjusted_frequency];
                 });
 
-                return (Q.nfcall(csvstringify, rows, {
+                return Q.nfcall(csvstringify, rows, {
                     header: true,
                     columns: ['tag', 'frequency', 'remove_count',
                               'adjusted_frequency']
@@ -152,7 +152,7 @@ function getNegotiatedResponse(req, res, fixedType) {
                         type: negotiatedType == 'csv' ? 'text/csv' : 'text/plain',
                         body: csv
                     };
-                }));
+                });
         }
     };
 }
