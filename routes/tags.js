@@ -224,4 +224,8 @@ function scoreWithRemoves(frequency, removes, ratio) {
     return Math.max(0, frequency - removes * ratio);
 }
 
-module.exports = router;
+module.exports = {
+    router: router,
+    sendResponse: sendResponse,
+    handleErrors: handleErrors
+};
