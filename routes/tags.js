@@ -51,11 +51,9 @@ function sendTagResponse(req, res, options) {
 
     Q.all([
         // Returns list of tags
-        db.connect()
-            .then(getTagsWithRemoveCount(req.params.classmark)),
+        getTagsWithRemoveCount(req.params.classmark),
         // Does not return value, only throws if tag doesn't exist
-        db.connect()
-            .then(ensureTagExists(req.params.classmark))
+        ensureTagExists(req.params.classmark)
     ])
     .spread(incorporateRemoves(options.removeRatio))
     .then(getNegotiatedResponse(req, res, options.type))
@@ -180,37 +178,24 @@ var TAGS_WITH_RM_COUNT_BY_ID_SQL = fs.readFileSync(
     require.resolve('../sql/tags-and-removedtags-by-id.sql'), 'utf-8');
 
 function getTagsWithRemoveCount(id) {
-    return function(args) {
-        var client = args[0], done = args[1];
-        return Q.ninvoke(client, 'query', TAGS_WITH_RM_COUNT_BY_ID_SQL, [id])
-            .then(function(result) {
-                // Release the db client back to the pool
-                done();
-
-                return {
-                    id: id,
-                    tags: result.rows
-                };
-            });
-    };
+    return db.query(TAGS_WITH_RM_COUNT_BY_ID_SQL, [id])
+    .then(function(result) {
+        return {
+            id: id,
+            tags: result.rows
+        };
+    });
 }
 
 var TAG_EXISTS_SQL = 'SELECT exists(SELECT 1 FROM items WHERE itemid = $1);';
 
 function ensureTagExists(id) {
-    return function(args) {
-        var client = args[0], done = args[1];
-        return Q.ninvoke(client, 'query', TAG_EXISTS_SQL, [id])
-            .then(function(result) {
-                // Release the db client back to the pool
-                done();
-
-                if(!result.rows[0].exists) {
-                    throw new NotFoundError(
-                        'No item exists with ID: ' + id, id);
-                }
-            });
-    }
+    return db.query(TAG_EXISTS_SQL, [id])
+    .then(function(result) {
+        if(!result.rows[0].exists) {
+            throw new NotFoundError('No item exists with ID: ' + id, id);
+        }
+    });
 }
 
 /**
