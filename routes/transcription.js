@@ -320,6 +320,63 @@ router.get('/dcpfull/:type/:location/:id/:from?/:to?', function(req, res) {
         });
 });
 
+/* Adding a new catch for Quranic palimpsests - 05/01/16 JF */
+router.get('/palimpsest/:type/:location/:id/:from/:to', function(req, res) {
+    cache.get('palimpsest-'+req.params.type+'-'+req.params.id+'-'+req.params.from+'-'+req.params.to, function(callback) {
+        var options = {
+            host: 'cal-itsee.bham.ac.uk',
+            path: '/itseeweb/fedeli/' + req.params.id + '/' +req.params.from + '_' + req.params.id + '.html'                 
+        };
+
+        var request = http.get(options, function(responce) {
+
+            var requestFailed = false;
+            var detectedEncoding = detectEncoding(responce);
+             
+            if(!detectedEncoding) {
+                request.abort();
+                responce.destroy();
+                res.status(500).render('error', {
+                    message: 'Unsupported external transcription provider encoding.',
+                    error: { status: 500 }
+                });
+                requestFailed = true;
+            }            
+
+            if (responce.statusCode != 200) {
+                res.status(500).render('error', {
+                    message: 'Transcription not found at external provider',
+                    error: { status: responce.statusCode }
+                });
+            }
+            var body = '';
+            responce.on('data', function(chunk) {
+                    body += chunk;
+              });
+             responce.on('end', function() {
+                // Don't cache the result of failed responses
+                if(requestFailed) {
+                    return;
+                }
+
+                var opts = {};
+                opts['output-xhtml'] = true;
+                opts['char-encoding'] = 'utf8';
+                tidy(body, opts, function(err, html) {
+                      callback(html);
+                });
+            });
+
+        }).on('error', function(e) {
+            res.status(500).render('error', {
+                message: 'Could not contact external transcription provider',
+                error: { status: 500 }
+            });
+        });
+    }).fulfilled(function(data) {
+        res.send(data);
+    });
+});
 
 /*router.get('/:format/:type/:location/:id/:from/:to', function(req, res) {
     cache.get(req.params.format+'-'+req.params.type+'-'+req.params.id+'-'+req.params.from+'-'+req.params.to, function(callback) {
