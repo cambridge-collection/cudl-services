@@ -26,8 +26,6 @@ fs.chown(config.cacheDir+'/translations', userid.uid(config.user), userid.gid(co
 //var routes = require('./routes/index.js');
 var metadata = require('./routes/metadata.js');
 var tags = require('./routes/tags');
-var tags2 = require('./routes/tags2');
-var annotations = require('./routes/annotations');
 var transcription = require('./routes/transcription.js');
 var translation = require('./routes/translation.js');
 var membership = require('./routes/membership.js');
@@ -81,9 +79,7 @@ app.use(function(req, res, next) {
 
 //app.use('/', routes);
 app.use('/v1/metadata', metadata);
-app.use('/v1/annotations', annotations.router);
 app.use('/v1/tags', tags.router);
-app.use('/v1/tags2', tags2.router);
 app.use('/v1/transcription',transcription);
 app.use('/v1/translation', translation);
 app.use('/v1/rdb/membership', membership);
