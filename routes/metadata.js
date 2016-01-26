@@ -68,8 +68,38 @@ router.get('/:format/:id',
                 res.json(data);
             });
         } else {
-            path = config.dataDir+'/data/'+req.params.format+'/'+req.params.id+'/'+req.params.id+'.xml';
-             res.sendfile(path);
+        	
+        	// This returns the original metadata.  We only want to return the metadata if
+        	// the metadataRights field is present (and non-empty) in the JSON. 
+        	
+        	// Find the relevant JSON file
+            path = config.dataDir + '/json/' + req.params.id + '.json';
+            loadJsonMetadata(path, function(err, data) {
+                if(err) {
+                    res.status(404).json({
+                        error: util.format(
+                            "ID does not exist: %s", req.params.id)
+                    });
+                    return;
+                }
+                
+                if (data.descriptiveMetadata[0].metadataRights && data.descriptiveMetadata[0].metadataRights.trim()!="")  {
+                	// Return metadata
+                    path = config.dataDir+'/data/'+req.params.format+'/'+req.params.id+'/'+req.params.id+'.xml';
+                    res.sendfile(path);
+                } else {
+                    res.status(403).json({
+                        error: util.format(
+                            "Access not allowed to requested metadata file.")
+                    });
+                    return;                	
+                }
+
+                
+            });
+        	
+        	
+
           }
     }
 );
