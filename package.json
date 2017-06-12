@@ -32,7 +32,7 @@
     "request": "~2.36.0",
     "static-favicon": "~1.0.0",
     "uri-template": "^1",
-    "userid": "~0.1.1",
+    "userid": "0.3.1",
     "xmldom": "^0.1.19",
     "xpath": "0.0.9",
     "xslt4node": "~0.1.1"
