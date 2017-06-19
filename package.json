@@ -35,7 +35,8 @@
     "userid": "0.3.1",
     "xmldom": "^0.1.19",
     "xpath": "0.0.9",
-    "xslt4node": "~0.1.1"
+    "xslt4node": "~0.1.1",
+    "npmlog": "~4.1.0"
   },
   "devDependencies": {
     "grunt": "^0.4",
