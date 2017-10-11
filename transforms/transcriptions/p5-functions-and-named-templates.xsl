@@ -27,6 +27,11 @@
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
+  
+  <xsl:function name="cudl:is_first_significant_child" as="xs:boolean">
+    <xsl:param name="node"/>
+    <xsl:value-of select="xs:boolean($node is $node/parent::*/(*|text()[normalize-space()])[1])"/>
+  </xsl:function>
 
   <xsl:function name="cudl:pluralize">
     <xsl:param name="string"/>

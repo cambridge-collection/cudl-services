@@ -62,6 +62,7 @@
     <div class="body">
       <xsl:apply-templates mode="#current"/>
     </div>
+    <xsl:call-template name="endnote"/>
   </xsl:template>
 
 
@@ -215,8 +216,15 @@
   
   <!-- NB: figure/@type is used to record the presence of charts within the case files and it should not be acted upon -->
   <xsl:template match="tei:figure[@type]" mode="#all" />
-
-  <xsl:template match="tei:figure[not(@type)]" mode="#all">
+  
+  <!-- TODO: This code needs to be rewritten so that it's less
+             preoccupied with staying within the grid layout of the 
+             old Casebooks site.
+             It's not a high priority right now since there aren't
+             ANY elements in the CDL Data that contain figure with
+             a child
+  -->
+  <xsl:template match="tei:figure[not(@type)][*]" mode="#all">
     <xsl:variable name="width_val">
       <xsl:variable name="grid_size" select="floor((number(replace(tei:graphic/@width,'px',''))+20) div 80)" />
       <xsl:choose>
@@ -299,7 +307,8 @@
         </span>
   </xsl:template>
 
-  <xsl:template match="tei:gap[not(@reason = ('blotDel', 'del', 'over'))]|tei:gap[@reason = ('blotDel', 'del', 'over')][ancestor::tei:del[contains(@type,'redacted')]]" mode="#all">
+  <xsl:template match="tei:gap[not(@reason = ('blotDel', 'del', 'over'))]|
+                       tei:gap[@reason = ('blotDel', 'del', 'over')][ancestor::tei:del[contains(@type,'redacted')]]" mode="#all">
     <xsl:variable name="parsedUnit" select="cudl:parseUnit(@unit,@extent)" />
       
     <xsl:variable name="title">
@@ -354,6 +363,16 @@
         <xsl:when test="@reason = 'over'">
           <xsl:text>Text is illegible or unclear because it is overwritten</xsl:text>
         </xsl:when>
+        <!-- The following are CDL values -->
+        <xsl:when test="@reason = 'omitted'">
+          <xsl:text>Text is illegible because it is omitted</xsl:text>
+        </xsl:when>
+        <xsl:when test="@reason = 'illigble'">
+          <xsl:text>Text is illegible</xsl:text>
+        </xsl:when>
+        <xsl:when test="@reason = 'bleedthrough'">
+          <xsl:text>Text is illegible because of bleedthrough</xsl:text>
+        </xsl:when>
         <xsl:otherwise>
           <xsl:text>Text is illegible or missing.</xsl:text>
         </xsl:otherwise>
@@ -361,16 +380,21 @@
     </xsl:variable>
 
     <span class="gap" title="{$title}">
-      <xsl:text>{illeg}</xsl:text>
+      <xsl:choose>
+        <xsl:when test="tei:desc">
+          <xsl:apply-templates mode="#current" />
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:text>[illeg]</xsl:text>
+        </xsl:otherwise>
+      </xsl:choose>
     </span>
   </xsl:template>
   
   
 
   <xsl:template match="tei:foreign" mode="#all">
-    <span class="{@xml:lang}">
       <xsl:apply-templates mode="#current"/>
-    </span>
   </xsl:template>
 
 <xsl:template match="tei:fw" mode="#all"/>
@@ -463,14 +487,21 @@
     <xsl:apply-templates mode="#current"/>
   </xsl:template>
 
-  <!-- NB: I'm keeping lb rendering as it is since I'm unsure whether
-           our transcripts will look OK if we start showing all the linebreaks.
-  -->
-  <xsl:template match="tei:lb[not(@type = 'intentional')]" mode="#all"/>
-  <xsl:template match="tei:lb[@type = 'intentional']" mode="#all">
+  <xsl:template match="tei:lb[not(cudl:is_first_significant_child(.))]" mode="#all">
     <br/>
   </xsl:template>
-
+  
+  <!-- According to TEI, lb specifies the beginning of the line. That means
+       that many projects start of a block element (say a <p>) with an <lb/>
+       We likely shouldn't display these initial linebreaks since it introduces
+       a superfluous extra line break - one for the block element and another for
+       the lb
+       There is no reason to check whether lb is the last significant node in a block
+       since a terminal br at the end of a block doesn't cause an extra line break
+       on the screen
+  -->
+  <xsl:template match="tei:lb[cudl:is_first_significant_child(.)]" mode="#all"/>
+  
   <xsl:template match="tei:list" mode="#all">
     <xsl:variable name="element_name" select="cudl:determine-output-element-name(., 'div')"/>
 
@@ -554,8 +585,25 @@
       </xsl:for-each>
     </span>
   </xsl:template>
+    
+  <xsl:template match="tei:milestone[@unit=('question','subsequentInfo','question','judgment','urineInfo','financialInfo','subsequentEventInfo','treatment')]" mode="#all"/>
 
-  <xsl:template match="tei:pb[@sameAs|@xml:id][ancestor::tei:div]|
+  <!-- NB: This pb code will fall apart if the page in question contains any page breaks.
+           This will happen in lots of transcriptions that take a less facsimile-oriented
+           approach to transcription. For example, a single page in a manuscript might have
+           an extended addition from multiple pages added in the middle of it via some visual
+           marker - check addSpan/anchor documentation.
+           Casebooks has numerous instances of this when cases jump from page to page, but
+           it isn't an issue right now since such internal page breaks are
+           converted to formatted text during the build process, but it is an issue that will
+           require a rethink of how the page extractor does its job.
+           The solution would either be to add the addSpan/anchor checking to the pageExtractor
+            - this will slow it down terribly
+           and/or implementing @next and @prev attributes on the casebooks and possibly the 
+           newton materials. That would make grabbing the next page break when you request a page
+           a simple @xml:id lookup.
+           -->
+  <xsl:template match="tei:pb[@sameAs|@xml:id][not(@xml:id = $requested_pb/@xml:id)][ancestor::tei:div]|
                        tei:cb[@sameAs|@xml:id][ancestor::tei:div]|
                        tei:milestone[@sameAs|@xml:id][ancestor::tei:div]" mode="diplomatic normalised">
     <xsl:if test="not(@edRef) or tokenize(@edRef,'\s+')=tokenize(@bestText,'\s+')">
@@ -723,7 +771,29 @@
     <xsl:apply-templates mode="#current"/>
   </xsl:template>
     
-  <xsl:template  match="text()[parent::tei:*]" mode="#all">
+  <xsl:template  match="text()[not($is_casebooks)]" mode="#all">
+    <xsl:analyze-string select="." regex="(&#x00A7;|\^{{2,}}|_ _ _)">
+      <xsl:matching-substring>
+        <xsl:choose>
+          <xsl:when test="matches(.,'&#x00A7;')">
+            <xsl:text>&#x30FB;</xsl:text>
+          </xsl:when>
+          <xsl:when test="matches(.,'\^{2,}')">
+            <xsl:text>&#160;&#160;&#160;</xsl:text>
+          </xsl:when>
+          <xsl:when test="matches(.,'_ _ _')">
+            <xsl:text>&#x2014;&#x2014;&#x2014;</xsl:text>
+          </xsl:when>
+        </xsl:choose>
+      </xsl:matching-substring>
+      
+      <xsl:non-matching-substring>
+        <xsl:value-of select="."/>
+      </xsl:non-matching-substring>
+    </xsl:analyze-string>
+  </xsl:template>
+  
+  <xsl:template  match="text()[$is_casebooks][parent::tei:*]" mode="#all">
     <xsl:variable name="string" select="."/>
     
     <xsl:variable name="cardo">[&#x2e2b;&#x0292;&#x2108;&#x2125;&#x2114;&#xe670;&#xe270;&#xa770;&#xa76b;&#xe8bf;&#xa75b;&#xe8b3;&#xa757;&#x180;&#x1e9c;&#xa75d;&#xa75f;&#xa76d;&#xdf;&#xa76f;&#x204a;&#x0119;&#x271d;&#x211e;&#x2720;&#x2641;&#x25b3;&#x260c;&#x260d;&#x2297;&#x260a;&#x260b;]</xsl:variable>
@@ -784,7 +854,7 @@
         <xsl:when test="matches($element_name,'Start$')">starts</xsl:when>
       </xsl:choose>
     </xsl:variable>
-    <span class="cb pagenum">
+    <span class="editorialGloss pagenum">
       <xsl:text>&lt;</xsl:text>
       <xsl:text>The </xsl:text>
       <xsl:value-of select="$noun"/>
@@ -803,7 +873,7 @@
 
   <xsl:template match="tei:handShift[not(ancestor::tei:lem|ancestor::tei:rdg)]|
     tei:handShift[(ancestor::tei:lem|ancestor::tei:rdg)[cudl:contains-text-or-displayable-elem(.)]]" mode="#all">
-    <span class="cb pagenum">
+    <span class="editorialGloss pagenum">
       <xsl:text>&lt;</xsl:text>
       <xsl:value-of select="cudl:write_handShift_msg(., false())"/>
       <xsl:text>&gt;</xsl:text>
@@ -857,9 +927,8 @@
   </xsl:template>
 
   <xsl:template name="endnote">
-    <xsl:param name="mode"/>
     <div id="endnotes">
-      <xsl:apply-templates select="tei:text//tei:note[not(@target)]" mode="footer"/>
+      <xsl:apply-templates select="/tei:TEI/tei:text//tei:note[not(@target)]" mode="footer"/>
     </div>
   </xsl:template>
 
@@ -928,7 +997,7 @@
      <xsl:variable name="final_msg" select="string-join(($msg, $msg2),' ')"/>
 
      <xsl:if test="$final_msg!=''">
-     <span class="cb pageNum">
+     <span class="editorialGloss pageNum">
        <xsl:text>&lt;</xsl:text>
        <xsl:value-of select="string-join(($msg, $msg2),' ')"/>
        <xsl:text>&gt;</xsl:text>
@@ -1041,9 +1110,9 @@
     <xsl:template match="tei:expan" mode="diplomatic"/>
 
     
-    <xsl:template match="tei:orig" mode="normalised"/>
+  <xsl:template match="tei:orig[parent::choice]" mode="normalised"/>
     
-    <xsl:template match="tei:orig" mode="diplomatic">
+  <xsl:template match="tei:orig[parent::choice]" mode="diplomatic">
         <xsl:variable name="gloss">
             <xsl:call-template name="gloss">
                 <xsl:with-param name="current_node" select="."/>
@@ -1062,7 +1131,7 @@
     </xsl:template>
     
 
-    <xsl:template match="tei:reg[not(@type='gloss')]" mode="normalised">
+  <xsl:template match="tei:reg[not(@type='gloss')][parent::choice]" mode="normalised">
         <xsl:variable name="gloss">
             <xsl:call-template name="gloss">
                 <xsl:with-param name="current_node" select="."/>
@@ -1080,11 +1149,11 @@
         </xsl:choose>
     </xsl:template>
     
-    <xsl:template match="tei:reg[@type='gloss'][not(preceding-sibling::tei:reg)][not(following-sibling::tei:reg)]" mode="normalised">
+  <xsl:template match="tei:reg[@type='gloss'][parent::choice][not(preceding-sibling::tei:reg)][not(following-sibling::tei:reg)]" mode="normalised">
         <xsl:apply-templates mode="#current"/>
     </xsl:template>
     
-    <xsl:template match="tei:reg[@type='gloss'][preceding-sibling::tei:reg or following-sibling::tei:reg]" mode="normalised"/>
+  <xsl:template match="tei:reg[@type='gloss'][parent::choice][preceding-sibling::tei:reg or following-sibling::tei:reg]" mode="normalised"/>
   
   <xsl:template match="tei:subst" mode="#all">
     <span class="subst">
@@ -1093,23 +1162,22 @@
   </xsl:template>
     
   <xsl:template match="tei:damage" mode="#all">
-    <span class="damage">
-      <span class="delim">
-        <xsl:text>[</xsl:text>
-      </span>
+    <span class="delim">
+      <xsl:text>[</xsl:text>
+    </span>
+    <span class="damage" title="This text damaged in source">
       <xsl:apply-templates mode="#current"/>
-      <span class="delim">
-        <xsl:text>]</xsl:text>
-      </span>
+    </span>
+    <span class="delim">
+      <xsl:text>]</xsl:text>
     </span>
   </xsl:template>
   
-    <xsl:template match="tei:reg" mode="diplomatic"/>
+  <xsl:template match="tei:reg[parent::choice]" mode="diplomatic"/>
 
-
-    <xsl:template match="tei:sic" mode="normalised"/>
+    <xsl:template match="tei:sic[parent::tei:choice]" mode="normalised"/>
     
-    <xsl:template match="tei:sic" mode="diplomatic">
+    <xsl:template match="tei:sic[parent::tei:choice]" mode="diplomatic">
         <xsl:variable name="correction">
             <xsl:choose>
                 <xsl:when test="parent::tei:choice[current()]/tei:corr/attribute::type">
@@ -1161,8 +1229,24 @@
             </xsl:otherwise>
         </xsl:choose>
     </xsl:template>
+  
+  <xsl:template match="tei:sic[not(parent::tei:choice)]" mode="#all">
+    <span class="sic" title="This text is in error in source">
+      <xsl:apply-templates mode="#current" />
+    </span>
+    <span class="delim">
+      <xsl:text>(!)</xsl:text>
+    </span>
+  </xsl:template>
 
-    <xsl:template match="tei:corr" mode="tooltip">
+  <!-- These templates should only fire in non-casebooks materials -->
+  <xsl:template match="tei:text//tei:corr[not(parent::choice)]|
+    tei:text//tei:orig[not(parent::choice)]|
+    tei:text//tei:reg[not(parent::choice)]" mode="#all">
+    <xsl:apply-templates mode="#current"/>
+  </xsl:template>
+  
+  <xsl:template match="tei:corr[parent::choice]" mode="tooltip">
         <xsl:choose>
             <xsl:when test="tei:choice">
                 <xsl:call-template name="apply-mode-to-templates">
@@ -1179,11 +1263,11 @@
         </xsl:choose>
     </xsl:template>
 
-    <xsl:template match="tei:corr" mode="normalised">
+  <xsl:template match="tei:corr[parent::choice]" mode="normalised">
         <xsl:apply-templates mode="#current"/>
     </xsl:template>
     
-    <xsl:template match="tei:corr" mode="diplomatic"/>
+  <xsl:template match="tei:corr[parent::choice]" mode="diplomatic"/>
 
     <!-- Additions and deletions -->
     
@@ -1341,9 +1425,7 @@
                     <xsl:attribute name="title" select="'Text is illegible or unclear because it is overwritten'"/>
                 </xsl:when>
             </xsl:choose>
-          <span class="delim">[</span>
-            <xsl:text>illeg</xsl:text>
-          <span class="delim">]</span>
+          <span class="gap">[illeg]</span>
         </span>
     </xsl:template>
 
