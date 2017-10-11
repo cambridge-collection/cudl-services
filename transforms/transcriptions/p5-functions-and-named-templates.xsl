@@ -7,6 +7,7 @@
   xmlns:xs="http://www.w3.org/2001/XMLSchema"
   xmlns:teix="http://www.tei-c.org/ns/Examples"
   xmlns:cudl="http://cudl.cam.ac.uk/xtf/"
+  xmlns="http://www.w3.org/1999/xhtml"
   exclude-result-prefixes="#all"
 >
 
