@@ -99,7 +99,9 @@
     <!--templates for extracting by page-->
     <!--if we start using for darwin correspondence, we may have to * the tei bits-->
     <xsl:template match="*[@xml:id=$startPage]" mode="page">
-
+        <xsl:if test="/tei:TEI/tei:teiHeader/tei:fileDesc/tei:publicationStmt/tei:publisher[matches(.,'Casebooks Project')]">
+            <xsl:copy-of select="/tei:TEI/tei:teiHeader/tei:fileDesc/tei:publicationStmt/tei:publisher"/>
+        </xsl:if>
         <xsl:if test="normalize-space($transcriber)">
             <transcriber>
                 <xsl:value-of select="$transcriber"/>
