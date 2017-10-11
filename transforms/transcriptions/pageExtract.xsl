@@ -2,8 +2,7 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="2.0"
     xmlns:tei="http://www.tei-c.org/ns/1.0"
      exclude-result-prefixes="tei">
-    <xsl:output method="xml" encoding="UTF-8"/>
-
+    <xsl:output method="xml" version="1.0" encoding="UTF-8" indent="no"/>
 
     <!--largely stolen from Mike Hawkins, Newton Project-->
 
@@ -65,11 +64,6 @@
         <xsl:value-of select="//tei:respStmt[tei:resp='transcriber']/tei:orgName"/>
 
     </xsl:variable>
-
-
-
-    <xsl:output method="xml" version="1.0" encoding="UTF-8"/>
-
 
     <xsl:template match="/">
 

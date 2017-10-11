@@ -9,7 +9,7 @@
    extension-element-prefixes="date"
    exclude-result-prefixes="#all">
 
-   <xsl:output method="xml" indent="yes" encoding="UTF-8"/>
+   <xsl:output method="xml" indent="no" encoding="UTF-8" omit-xml-declaration="yes"/>
    
    <xsl:param name="viewMode" select="'diplomatic'" />
    <xsl:param name="inTextMode" select="true()" />
