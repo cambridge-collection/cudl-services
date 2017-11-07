@@ -14,15 +14,15 @@ Currently, there are 3 independent instances of CUDL Services in deployment (dev
 
 ## Documentation
 
-The main source of documentation for CUDL Services is this [`README.md`](https://bitbucket.org/CUDL/cudl-services/src/e00c057a85e285a65ec967a986daeb48052ec2a6/README.md?at=master&fileviewer=file-view-default) 
+The main source of documentation for CUDL Services is this [`README.md`](README.md) 
 file. The diagrams are created using the  open-source, freely available editor [draw.io](https://www.draw.io/) 
-and stored in [`docs/diagrams/`](https://bitbucket.org/CUDL/cudl-services/src/e00c057a85e285a65ec967a986daeb48052ec2a6/docs/diagrams/?at=master) 
-(compressed XML) with PNG versions to insert here in [`docs/images/`](https://bitbucket.org/CUDL/cudl-services/src/e00c057a85e285a65ec967a986daeb48052ec2a6/docs/images/?at=master). 
+and stored in [`docs/diagrams/`](docs/diagrams/) 
+(compressed XML) with PNG versions to insert here in [`docs/images/`](docs/images/). 
 When making changes to the API, please update the documentation for a gold star :star:
 
 ## Configuration
 
-The main configuration file is [`default.js`](https://bitbucket.org/CUDL/cudl-services/src/d4947688a51173709d68ed0f9fc6d97069e63748/config/default.js?at=master&fileviewer=file-view-default),
+The main configuration file is [`default.js`](config/default.js),
  which configures:
 
 * Paths to mounted volumes that store metadata
@@ -31,21 +31,21 @@ The main configuration file is [`default.js`](https://bitbucket.org/CUDL/cudl-se
 * Darwin XTF host
 
 The external hosts responsible for returning transcription data for the Newton Project, Darwin Manuscripts Project 
-and Quranic Palimpsests are configured within the [`transcription.js`](https://bitbucket.org/CUDL/cudl-services/src/d4947688a51173709d68ed0f9fc6d97069e63748/routes/transcription.js?at=master&fileviewer=file-view-default) 
+and Quranic Palimpsests are configured within the [`transcription.js`](routes/transcription.js) 
 route file.
 
 (NB: the instance of CUDL Services the Viewer uses is configured in CUDL-Viewer `cudl-global.properties` file.)
 
 ## Routes and Responses
 
-The routes in use are defined in [`app.js`](https://bitbucket.org/CUDL/cudl-services/src/d4947688a51173709d68ed0f9fc6d97069e63748/app.js?at=master&fileviewer=file-view-default#app.js-81):
+The routes in use are defined in [`app.js`](app.js#app.js-81):
 
 ![Routes and Responses](docs/images/services-api.png)
 
 ### Darwin Correspondence Project (DCP)
 Route: `/v1/darwin/`
 
-Definition: [`routes/darwin.js`](https://bitbucket.org/CUDL/cudl-services/src/d4947688a51173709d68ed0f9fc6d97069e63748/routes/darwin.js?at=master&fileviewer=file-view-default)
+Definition: [`routes/darwin.js`](routes/darwin.js)
 
 Returns: Search results on the public DCP XTF index.
 
@@ -57,7 +57,7 @@ the Darwin Correspondence Project see [DCP on the CUDL Wiki](https://wiki.cam.ac
 ### IIIF
 Route: `/v1/iiif/`
 
-Definition: [`routes/iiif.js`](https://bitbucket.org/CUDL/cudl-services/src/d4947688a51173709d68ed0f9fc6d97069e63748/routes/iiif.js?at=master&fileviewer=file-view-default)
+Definition: [`routes/iiif.js`](routes/iiif.js)
 
 Returns: An image from an IIIF-compliant image server.
 
@@ -68,14 +68,14 @@ Example Usage: When displaying collection item images in the CUDL Viewer.
 ### Images
 Route: `/v1/images/`
 
-Definition: [`routes/images.js`](https://bitbucket.org/CUDL/cudl-services/src/d4947688a51173709d68ed0f9fc6d97069e63748/routes/images.js?at=master&fileviewer=file-view-default)
+Definition: [`routes/images.js`](routes/images.js)
 
 **NB:** The 'images' route is currently disused.
 
 ### Membership
 Route: `/v1/rdb/membership/`
 
-Definition: [`routes/membership.js`](https://bitbucket.org/CUDL/cudl-services/src/d4947688a51173709d68ed0f9fc6d97069e63748/routes/membership.js?at=master&fileviewer=file-view-default)
+Definition: [`routes/membership.js`](routes/membership.js)
 
 Returns: Title, collection id and collection order of the parent collection(s) of an item by item id.
 
@@ -84,7 +84,7 @@ Example Usage: By the CUDL and DCU XTF search instances.
 ### Metadata
 Route: `/v1/metadata/`
 
-Definition: [`routes/metadata.js`](https://bitbucket.org/CUDL/cudl-services/src/d4947688a51173709d68ed0f9fc6d97069e63748/routes/metadata.js?at=master&fileviewer=file-view-default)
+Definition: [`routes/metadata.js`](routes/metadata.js)
 
 Returns: Original metadata file in specified format, e.g. JSON, TEI-XML, EAD-XML.
 
@@ -93,7 +93,7 @@ Example Usage: When the 'Download metadata' button in the CUDL Viewer is clicked
 ### Similarity
 Route: `/v1/xtf/similarity/`
 
-Definition: [`routes/similarity.js`](https://bitbucket.org/CUDL/cudl-services/src/d4947688a51173709d68ed0f9fc6d97069e63748/routes/similarity.js?at=master&fileviewer=file-view-default)
+Definition: [`routes/similarity.js`](routes/similarity.js)
 
 Returns: JSON file of a list of similar items in collections.
 
@@ -102,18 +102,18 @@ Example Usage: When loading the content for the 'Similar items' tab in the CUDL 
 ### Genizah Tags
 Route: `/v1/tags/`
 
-Definition: [`routes/tags.js`](https://bitbucket.org/CUDL/cudl-services/src/d4947688a51173709d68ed0f9fc6d97069e63748/routes/tags.js?at=master&fileviewer=file-view-default)
+Definition: [`routes/tags.js`](routes/tags.js)
 
 Returns: JSON file of a list of annotation tags and their weighting factors.
 
 **NB**: The 'tags' route is not currently in use. CUDL Viewer (that is, CUDL-Viewer-Tagging-UI) uses routes defined in 
-the CUDL-Viewer code instead (see [CrowdsourcingController](https://bitbucket.org/CUDL/cudl-genizahtagging-server/src/21014bf488706fa9da50d79dabeff8d4e829b635/src/main/java/ulcambridge/foundations/viewer/crowdsourcing/CrowdsourcingController.java?at=master&fileviewer=file-view-default)). 
+the CUDL-Viewer code instead (see [CrowdsourcingController](https://bitbucket.org/CUDL/cudl-genizahtagging-server/src/HEAD/src/main/java/ulcambridge/foundations/viewer/crowdsourcing/CrowdsourcingController.java?at=master&fileviewer=file-view-default)). 
 For more on Genizah Annotation see [Genizah Annotation on the CUDL Wiki](https://wiki.cam.ac.uk/cudl-docs/Genizah_Annotation).
 
 ### Transcription
 Route: `/v1/transcription/`
 
-Definition: [`routes/transcription.js`](https://bitbucket.org/CUDL/cudl-services/src/d4947688a51173709d68ed0f9fc6d97069e63748/routes/transcription.js?at=master&fileviewer=file-view-default)
+Definition: [`routes/transcription.js`](routes/transcription.js)
 
 Returns: Transcription XML file of specified type (e.g. normalized, diplomatic) from internally hosted storage or an 
 external provider, transformed suitably for browser display.
@@ -123,7 +123,7 @@ Example Usage: When loading the content for the two 'Transcription' tabs in the 
 ### Translation
 Route: `/v1/translation/`
 
-Definition: [`routes/translation.js`](https://bitbucket.org/CUDL/cudl-services/src/d4947688a51173709d68ed0f9fc6d97069e63748/routes/translation.js?at=master&fileviewer=file-view-default)
+Definition: [`routes/translation.js`](routes/translation.js)
 
 Returns: Translation TEI-XML file from internally hosted storage, transformed suitably for browser display.
 
