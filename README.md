@@ -49,7 +49,7 @@ Definition: [`routes/darwin.js`](routes/darwin.js)
 
 Returns: Search results on the public DCP XTF index.
 
-Usage: By the Drupal public DCP portal at [www.darwinproject.ac.uk](www.darwinproject.ac.uk).
+Usage: By the Drupal public DCP portal at [www.darwinproject.ac.uk](https://www.darwinproject.ac.uk).
 
 **NB**: This route is secured by an authentication token so that only the DCP Drupal instance can use it. For more on 
 the Darwin Correspondence Project see [DCP on the CUDL Wiki](https://wiki.cam.ac.uk/cudl-docs/Darwin_Correspondence_Project).
