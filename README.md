@@ -14,10 +14,11 @@ Currently, there are 3 independent instances of CUDL Services in deployment (dev
 
 ## Documentation
 
-The main source of documentation for CUDL Services is this `README.md` file. The diagrams are created using the 
- open-source, freely available editor [draw.io](https://www.draw.io/) 
-and stored in `docs/diagrams/` (compressed XML) with PNG versions to insert here in `docs/images/`. When making changes to the API, 
-please update the documentation for a gold star :star:
+The main source of documentation for CUDL Services is this [`README.md`](https://bitbucket.org/CUDL/cudl-services/src/e00c057a85e285a65ec967a986daeb48052ec2a6/README.md?at=master&fileviewer=file-view-default) 
+file. The diagrams are created using the  open-source, freely available editor [draw.io](https://www.draw.io/) 
+and stored in [`docs/diagrams/`](https://bitbucket.org/CUDL/cudl-services/src/e00c057a85e285a65ec967a986daeb48052ec2a6/docs/diagrams/?at=master) 
+(compressed XML) with PNG versions to insert here in [`docs/images/`](https://bitbucket.org/CUDL/cudl-services/src/e00c057a85e285a65ec967a986daeb48052ec2a6/docs/images/?at=master). 
+When making changes to the API, please update the documentation for a gold star :star:
 
 ## Configuration
 
@@ -51,7 +52,7 @@ Returns: Search results on the public DCP XTF index.
 Usage: By the Drupal public DCP portal at [www.darwinproject.ac.uk](www.darwinproject.ac.uk).
 
 **NB**: This route is secured by an authentication token so that only the DCP Drupal instance can use it. For more on 
-the Darwin Correspondence Project see [DCP on the CUDL Wiki]().
+the Darwin Correspondence Project see [DCP on the CUDL Wiki](https://wiki.cam.ac.uk/cudl-docs/Darwin_Correspondence_Project).
 
 ### IIIF
 Route: `/v1/iiif/`
