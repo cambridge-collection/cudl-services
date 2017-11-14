@@ -30,11 +30,47 @@ The main configuration file is [`default.js`](config/default.js),
 * Image server host
 * Darwin XTF host
 
+However, note that in [deployment](#resources-in-deployment) these values are instead set via a corresponding set of 
+Puppet files (*.base.js) in [CUDL-Puppet](https://bitbucket.org/CUDL/cudl-puppet/src/HEAD/modules/cudl-services/files/cudl-node-services?at=master&fileviewer=file-view-default). 
+So to change them for the dev, staging or production servers you need to commit changes to the CUDL-Puppet repo, which 
+are pulled by the Puppet agents on these machines at a set interval.
+
 The external hosts responsible for returning transcription data for the Newton Project, Darwin Manuscripts Project 
 and Quranic Palimpsests are configured within the [`transcription.js`](routes/transcription.js) 
 route file.
 
 (NB: the instance of CUDL Services the Viewer uses is configured in CUDL-Viewer `cudl-global.properties` file.)
+
+## Running the App
+
+In deployment, the Services app is run using [Forever](https://github.com/foreverjs/forever) 
+via a [init.d script](https://bitbucket.org/CUDL/cudl-puppet/src/HEAD/modules/cudl-services/files/cudl-node-services?at=master&fileviewer=file-view-default) 
+that runs as a service called 'cudl-node-services'. Forever ensures that the app restarts even if it crashes.
+
+To check on the status of the app:
+
+`sudo service cudl-node-services status`
+
+To start the app:
+
+`sudo service cudl-node-services start`
+
+To stop the app:
+
+`sudo service cudl-node-services stop`
+
+To restart the app:
+
+`sudo service cudl-node-services restart`
+
+For instructions on running a local development version of Services see the Wiki: 
+[Setting up Local CUDL-Services Middleware](https://wiki.cam.ac.uk/cudl-docs/Setting_up_a_Local_Development_Environment_for_CUDL#Setting_up_Local_CUDL-Services_Middleware_.28Optional.29).
+
+## Logging
+
+Morgan logging format is configured in [`app.js`](app.js#app.js-65).
+
+The log file in deployment is found at `/usr/local/cudl-node-services/cudl-services.log`.
 
 ## Routes and Responses
 
