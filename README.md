@@ -30,8 +30,8 @@ The main configuration file is [`default.js`](config/default.js),
 * Image server host
 * Darwin XTF host
 
-However, note that in [deployment](#resources-in-deployment) these values are instead set via a corresponding set of 
-Puppet files (*.base.js) in [CUDL-Puppet](https://bitbucket.org/CUDL/cudl-puppet/src/HEAD/modules/cudl-services/files/cudl-node-services?at=master&fileviewer=file-view-default). 
+However, note that in deployment these values are instead set via a corresponding set of 
+Puppet files (*.base.js) in [CUDL-Puppet](https://bitbucket.org/CUDL/cudl-puppet/src/HEAD/modules/cudl-services/files/?at=master). 
 So to change them for the dev, staging or production servers you need to commit changes to the CUDL-Puppet repo, which 
 are pulled by the Puppet agents on these machines at a set interval.
 
