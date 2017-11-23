@@ -48,9 +48,8 @@ function detectEncoding(response) {
 router.get('/newton/:type/:location/:id/:from/:to', function(req, res) {
     cache.get('newton-'+req.params.type+'-'+req.params.id+'-'+req.params.from+'-'+req.params.to, function(callback) {
         var options = {
-            host: 'www.newtonproject.sussex.ac.uk',
-            path: '/get/text/' + req.params.id + '?mode=' + req.params.type +
-                '&format=minimal_html&skin=minimal&show_header=no&start=' +
+            host: 'www.newtonproject.ox.ac.uk',
+            path: '/view/texts/' + req.params.type + '/' + req.params.id + '?skin=minimal&show_header=no&start=' +
                 req.params.from + '&end=' + req.params.to
         };
 
@@ -325,14 +324,14 @@ router.get('/palimpsest/:type/:location/:id/:from/:to', function(req, res) {
     cache.get('palimpsest-'+req.params.type+'-'+req.params.id+'-'+req.params.from+'-'+req.params.to, function(callback) {
         var options = {
             host: 'cal-itsee.bham.ac.uk',
-            path: '/itseeweb/fedeli/' + req.params.id + '/' +req.params.from + '_' + req.params.id + '.html'                 
+            path: '/itseeweb/fedeli/' + req.params.id + '/' +req.params.from + '_' + req.params.id + '.html'
         };
 
         var request = http.get(options, function(responce) {
 
             var requestFailed = false;
             var detectedEncoding = detectEncoding(responce);
-             
+
             if(!detectedEncoding) {
                 request.abort();
                 responce.destroy();
@@ -341,7 +340,7 @@ router.get('/palimpsest/:type/:location/:id/:from/:to', function(req, res) {
                     error: { status: 500 }
                 });
                 requestFailed = true;
-            }            
+            }
 
             if (responce.statusCode != 200) {
                 res.status(500).render('error', {
