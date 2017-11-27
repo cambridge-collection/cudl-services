@@ -53,13 +53,13 @@ router.get('/newton/:type/:location/:id/:from/:to', function(req, res) {
                 req.params.from + '&end=' + req.params.to
         };
 
-        var request = http.get(options, function(responce) {
+        var request = http.get(options, function(response) {
 
             var requestFailed = false;
-            var detectedEncoding = detectEncoding(responce);
+            var detectedEncoding = detectEncoding(response);
             if(!detectedEncoding) {
                 request.abort();
-                responce.destroy();
+                response.destroy();
                 res.status(500).render('error', {
                     message: 'Unsupported external transcription provider encoding.',
                     error: { status: 500 }
@@ -67,17 +67,17 @@ router.get('/newton/:type/:location/:id/:from/:to', function(req, res) {
                 requestFailed = true;
             }
 
-            if (responce.statusCode != 200) {
+            if (response.statusCode != 200) {
                 res.status(500).render('error', {
                     message: 'Transcription not found at external provider',
-                    error: { status: responce.statusCode }
+                    error: { status: response.statusCode }
                 });
             }
             var body = '';
-            responce.on('data', function(chunk) {
+            response.on('data', function(chunk) {
                     body += chunk;
               });
-             responce.on('end', function() {
+             response.on('end', function() {
                 // Don't cache the result of failed responses
                 if(requestFailed) {
                     return;
