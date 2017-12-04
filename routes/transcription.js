@@ -3,7 +3,7 @@ var express = require('express');
 var fs = require("fs"), json;
 var http = require("http");
 var cache = require('Simple-Cache').SimpleCache(config.cacheDir+'/transcriptions', console.log);
-var tidy = require('htmltidy').tidy;
+var tidy = require('htmltidy2').tidy;
 var glob = require('glob');
 var iconv = require('iconv-lite');
 var parseHttpHeader = require('parse-http-header');
@@ -325,14 +325,14 @@ router.get('/palimpsest/:type/:location/:id/:from/:to', function(req, res) {
     cache.get('palimpsest-'+req.params.type+'-'+req.params.id+'-'+req.params.from+'-'+req.params.to, function(callback) {
         var options = {
             host: 'cal-itsee.bham.ac.uk',
-            path: '/itseeweb/fedeli/' + req.params.id + '/' +req.params.from + '_' + req.params.id + '.html'                 
+            path: '/itseeweb/fedeli/' + req.params.id + '/' +req.params.from + '_' + req.params.id + '.html'
         };
 
         var request = http.get(options, function(responce) {
 
             var requestFailed = false;
             var detectedEncoding = detectEncoding(responce);
-             
+
             if(!detectedEncoding) {
                 request.abort();
                 responce.destroy();
@@ -341,7 +341,7 @@ router.get('/palimpsest/:type/:location/:id/:from/:to', function(req, res) {
                     error: { status: 500 }
                 });
                 requestFailed = true;
-            }            
+            }
 
             if (responce.statusCode != 200) {
                 res.status(500).render('error', {
