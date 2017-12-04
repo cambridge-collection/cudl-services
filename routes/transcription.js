@@ -3,7 +3,7 @@ var express = require('express');
 var fs = require("fs"), json;
 var http = require("http");
 var cache = require('Simple-Cache').SimpleCache(config.cacheDir+'/transcriptions', console.log);
-var tidy = require('htmltidy').tidy;
+var tidy = require('htmltidy2').tidy;
 var glob = require('glob');
 var iconv = require('iconv-lite');
 var parseHttpHeader = require('parse-http-header');
@@ -334,7 +334,9 @@ router.get('/palimpsest/:type/:location/:id/:from/:to', function(req, res) {
         var request = http.get(options, function(response) {
 
             var requestFailed = false;
+
             var detectedEncoding = detectEncoding(response);
+
 
             if(!detectedEncoding) {
                 request.abort();
