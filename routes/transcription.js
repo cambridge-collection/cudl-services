@@ -83,9 +83,15 @@ router.get('/newton/:type/:location/:id/:from/:to', function(req, res) {
                     return;
                 }
 
-                //Newton assets are served from a relative URL that must be made absolute in order to load
-                var newtonServerUrl = encodeURI('http://www.newtonproject.ox.ac.uk/resources/');
-                body = body.replace(new RegExp('\/resources\/', 'g'), newtonServerUrl);
+                //Newton CSS and JS must be served by us over HTTPS not by Newton over HTTP to avoid browser blocking
+                var localCssPath = encodeURI('/newton/css');
+                body = body.replace(new RegExp('\/resources\/css', 'g'), localCssPath);
+                var localJsPath = encodeURI('/newton/js');
+                body = body.replace(new RegExp('\/resources\/js', 'g'), localJsPath);
+
+                // Newton images relative paths must be made absolute to point to Newton server
+                 var newtonServerUrl = encodeURI('http://www.newtonproject.ox.ac.uk/resources/images');
+                 body = body.replace(new RegExp('\/resources\/images', 'g'), newtonServerUrl);
 
                 var opts = {};
                 opts['output-xhtml'] = true;
