@@ -93,12 +93,7 @@ router.get('/newton/:type/:location/:id/:from/:to', function(req, res) {
                  var newtonServerUrl = encodeURI('http://www.newtonproject.ox.ac.uk/resources/images');
                  body = body.replace(new RegExp('\/resources\/images', 'g'), newtonServerUrl);
 
-                var opts = {};
-                opts['output-xhtml'] = true;
-                opts['char-encoding'] = 'utf8';
-                tidy(body, opts, function(err, html) {
-                      callback(html);
-                });
+                callback(body);
             });
 
         }).on('error', function(e) {
