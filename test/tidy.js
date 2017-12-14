@@ -1,4 +1,4 @@
-var tidy = require('htmltidy').tidy;
+var tidy = require('htmltidy2').tidy;
 var text = '<table><tr><td>badly formatted html</tr>';
 
 // setup options

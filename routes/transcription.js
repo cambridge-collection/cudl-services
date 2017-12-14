@@ -3,7 +3,7 @@ var express = require('express');
 var fs = require("fs"), json;
 var http = require("http");
 var cache = require('Simple-Cache').SimpleCache(config.cacheDir+'/transcriptions', console.log);
-var tidy = require('htmltidy').tidy;
+var tidy = require('htmltidy2').tidy;
 var glob = require('glob');
 var iconv = require('iconv-lite');
 var parseHttpHeader = require('parse-http-header');
@@ -48,19 +48,18 @@ function detectEncoding(response) {
 router.get('/newton/:type/:location/:id/:from/:to', function(req, res) {
     cache.get('newton-'+req.params.type+'-'+req.params.id+'-'+req.params.from+'-'+req.params.to, function(callback) {
         var options = {
-            host: 'www.newtonproject.sussex.ac.uk',
-            path: '/get/text/' + req.params.id + '?mode=' + req.params.type +
-                '&format=minimal_html&skin=minimal&show_header=no&start=' +
+            host: 'www.newtonproject.ox.ac.uk',
+            path: '/view/texts/' + req.params.type + '/' + req.params.id + '?skin=minimal&show_header=no&start=' +
                 req.params.from + '&end=' + req.params.to
         };
 
-        var request = http.get(options, function(responce) {
+        var request = http.get(options, function(response) {
 
             var requestFailed = false;
-            var detectedEncoding = detectEncoding(responce);
+            var detectedEncoding = detectEncoding(response);
             if(!detectedEncoding) {
                 request.abort();
-                responce.destroy();
+                response.destroy();
                 res.status(500).render('error', {
                     message: 'Unsupported external transcription provider encoding.',
                     error: { status: 500 }
@@ -68,28 +67,33 @@ router.get('/newton/:type/:location/:id/:from/:to', function(req, res) {
                 requestFailed = true;
             }
 
-            if (responce.statusCode != 200) {
+            if (response.statusCode != 200) {
                 res.status(500).render('error', {
                     message: 'Transcription not found at external provider',
-                    error: { status: responce.statusCode }
+                    error: { status: response.statusCode }
                 });
             }
             var body = '';
-            responce.on('data', function(chunk) {
+            response.on('data', function(chunk) {
                     body += chunk;
               });
-             responce.on('end', function() {
+             response.on('end', function() {
                 // Don't cache the result of failed responses
                 if(requestFailed) {
                     return;
                 }
 
-                var opts = {};
-                opts['output-xhtml'] = true;
-                opts['char-encoding'] = 'utf8';
-                tidy(body, opts, function(err, html) {
-                      callback(html);
-                });
+                //Newton CSS and JS must be served by us over HTTPS not by Newton over HTTP to avoid browser blocking
+                var localCssPath = encodeURI('/newton/css');
+                body = body.replace(new RegExp('\/resources\/css', 'g'), localCssPath);
+                var localJsPath = encodeURI('/newton/js');
+                body = body.replace(new RegExp('\/resources\/js', 'g'), localJsPath);
+
+                // Newton images relative paths must be made absolute to point to Newton server
+                 var newtonServerUrl = encodeURI('http://www.newtonproject.ox.ac.uk/resources/images');
+                 body = body.replace(new RegExp('\/resources\/images', 'g'), newtonServerUrl);
+
+                callback(body);
             });
 
         }).on('error', function(e) {
@@ -110,19 +114,19 @@ router.get('/dmp/:type/:location/:id/:from?/:to?', function(req, res) {
                         path: '/transcription-viewer.php?eid='+req.params.id
                 };
 
-                http.get(options, function(responce) {
-                        if (responce.statusCode != 200) {
+                http.get(options, function(response) {
+                        if (response.statusCode != 200) {
                                  res.status(500).render('error', {
                                         message: 'Transcription not found at external provider',
-                                        error: { status: responce.statusCode }
+                                        error: { status: response.statusCode }
                                 });
 
                         }
                         var body = '';
-                        responce.on('data', function(chunk) {
+                        response.on('data', function(chunk) {
                                 body += chunk;
                         });
-                        responce.on('end', function() {
+                        response.on('end', function() {
                                 var opts = {};
                                 opts['output-xhtml'] = true;
                                 opts['char-encoding'] = 'utf8';
@@ -325,35 +329,37 @@ router.get('/palimpsest/:type/:location/:id/:from/:to', function(req, res) {
     cache.get('palimpsest-'+req.params.type+'-'+req.params.id+'-'+req.params.from+'-'+req.params.to, function(callback) {
         var options = {
             host: 'cal-itsee.bham.ac.uk',
-            path: '/itseeweb/fedeli/' + req.params.id + '/' +req.params.from + '_' + req.params.id + '.html'                 
+            path: '/itseeweb/fedeli/' + req.params.id + '/' +req.params.from + '_' + req.params.id + '.html'
         };
 
-        var request = http.get(options, function(responce) {
+        var request = http.get(options, function(response) {
 
             var requestFailed = false;
-            var detectedEncoding = detectEncoding(responce);
-             
+
+            var detectedEncoding = detectEncoding(response);
+
+
             if(!detectedEncoding) {
                 request.abort();
-                responce.destroy();
+                response.destroy();
                 res.status(500).render('error', {
                     message: 'Unsupported external transcription provider encoding.',
                     error: { status: 500 }
                 });
                 requestFailed = true;
-            }            
+            }
 
-            if (responce.statusCode != 200) {
+            if (response.statusCode != 200) {
                 res.status(500).render('error', {
                     message: 'Transcription not found at external provider',
-                    error: { status: responce.statusCode }
+                    error: { status: response.statusCode }
                 });
             }
             var body = '';
-            responce.on('data', function(chunk) {
+            response.on('data', function(chunk) {
                     body += chunk;
               });
-             responce.on('end', function() {
+             response.on('end', function() {
                 // Don't cache the result of failed responses
                 if(requestFailed) {
                     return;
@@ -377,60 +383,5 @@ router.get('/palimpsest/:type/:location/:id/:from/:to', function(req, res) {
         res.send(data);
     });
 });
-
-/*router.get('/:format/:type/:location/:id/:from/:to', function(req, res) {
-    cache.get(req.params.format+'-'+req.params.type+'-'+req.params.id+'-'+req.params.from+'-'+req.params.to, function(callback) {
-        if (req.params.location === 'external') {
-             var options = {
-                            host: 'www.newtonproject.sussex.ac.uk',
-                            path: '/get/text/'+req.params.id+'?mode='+req.params.type
-                            +'&format=minimal_html&skin=minimal&show_header=no&start='
-                            +req.params.from+'&end='+req.params.to
-                    }
-
-                    http.get(options, function(responce) {
-                            if (responce.statusCode != 200) { res.render('error', { message: 'Transcription not found at external provider', error: { status: responce.statusCode } }); }
-            });
-                        var body = '';
-                        responce.on('data', function(chunk) { body += chunk; });
-                        responce.on('end', function() {
-                                callback(body);
-                        });
-
-                }).on('error', function(e) {
-                        res.render('error', {
-                                message: 'Could not contact external transcription provider',
-                                error: { status: 500 }
-                        });
-                });
-
-        } else {
-            var options = { xsltPath: '/home/cudl/node/metadata-api/transforms/transcriptions/pageExtract.xsl',
-                       result: String,
-                       params: {
-                        start: req.params.from,
-                                        end: req.params.to
-                       }
-             };
-            if (req.params.format === 'bezae') { options.sourcePath = '/home/cudl/node/metadata-api/public/data/transcription/'+req.params.id+'/'+req.params.location }
-            else if (req.params.format === 'tei') { options.sourcePath = '/home/cudl/node/metadata-api/public/data/transcription/'+req.params.id+'/'+req.params.location }
-            else { res.render('error', { message: Unrecognised transcription format, error: { status: 404 } }); }
-            transform(options, function(err, singlepage) {
-                            if (err) { res.render('error', { message: err, error: { status: 500 } }); }
-                else {
-                    var options = {  source: singlepage, result: String };
-                     if (req.params.format === 'bezae') { options.xsltPath = '/home/cudl/node/metadata-api/transforms/transcriptions/bezaeHTML.xsl' }
-                     if (req.params.format === 'tei') { options.xsltPath = '/home/cudl/node/metadata-api/transforms/transcriptions/msTeiTrans.xsl' }
-                     transform(options, function(err, html) {
-                                     if (err) { res.render('error', { message: err, error: { status: 500 } }); }
-                         else { callback(html); }
-                    });
-                     }
-            });
-        }
-    }).fulfilled(function(data) {
-           res.send(data);
-    });
-});*/
 
 module.exports = router;
