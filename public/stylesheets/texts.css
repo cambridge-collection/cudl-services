@@ -47,27 +47,27 @@ span.p {display: block;}
 .small { font-size:91.667%}
 .smaller { font-size: 83.333%; }
 .smallest { font-size: 75%; }
-.note { border-color: #48577C; border-width: 1px; border-style: dotted; cursor: pointer;}
-.note:hover { border-style: solid;cursor:help;}
+.note { border-color: #48577C; border-width: 1px; border-style: dotted; /*cursor: pointer;*/}
+/*.note:hover { border-style: solid;cursor:help;}*/
 sup, .sup {vertical-align:.25em;font-size: 89%;}
 sub, .sub {font-size: 89%;vertical-align:-.25em;}
-.cancel-n, .delover-n, .erased-n { text-decoration: inherit; background: #BBB; cursor: help; }
-.wordstrike-n { text-decoration: line-through; background: transparent; cursor: help;}
-.blockstrike-n { text-decoration: line-through; background: transparent; cursor:help;}
+.cancel-n, .delover-n, .erased-n { text-decoration: inherit; background: #BBB; /*cursor: help;*/ }
+.wordstrike-n { text-decoration: line-through; background: transparent; /*cursor: help;*/}
+.blockstrike-n { text-decoration: line-through; background: transparent; /*cursor:help;*/}
 /* Added Text */
-.supra-n { vertical-align: 0.35ex; cursor: help; font-size: 89%; }
-.infra-n { vertical-align:-.15ex;cursor: help; font-size: 89%; }
-.inline-n { vertical-align: .1ex; cursor: help; font-size: 89%; }
-.over-n { cursor: help; }
-.begin-n { vertical-align: .1ex; cursor: help; font-size: 89%; }
-.end-n { vertical-align: .1ex; cursor: help; font-size: 89%; }
-.add-n { color: #ff0000; cursor:help;}
+.supra-n { vertical-align: 0.35ex; /*cursor: help;*/ font-size: 89%; }
+.infra-n { vertical-align:-.15ex;/*cursor: help;*/ font-size: 89%; }
+.inline-n { vertical-align: .1ex; /*cursor: help;*/ font-size: 89%; }
+.over-n { /*cursor: help;*/ }
+.begin-n { vertical-align: .1ex; /*cursor: help;*/ font-size: 89%; }
+.end-n { vertical-align: .1ex; /*cursor: help;*/ font-size: 89%; }
+.add-n { color: #ff0000; /*cursor:help;*/}
 .hi-n { /* */ }
 .med-n { /* */ }
 .lo-n { /* */ }
 .innertext {/*color: f0f;*/}
-.hl-o { color: #C00; cursor: help; }
-.hl-t { color: #AAA79B ; cursor: help; }
+.hl-o { color: #C00; /*cursor: help;*/ }
+.hl-t { color: #AAA79B ; /*cursor: help;*/ }
 .hspac-n { /*background: transparent;*/ }
 .lemapp-n, .lem-n {border-bottom: black 1px dotted}
 .normal, .black {color: #000;}
@@ -118,24 +118,24 @@ display: block;
 #metadata.case p { /* margin-left: 120px; text-indent: -120px;*/ margin-bottom:0;}
 #switcher a, #switcher a:link {color:#111; border:1px solid #999; background:#e6e6e6}
 #switcher a:visited {color:#111;}
-#switcher a:hover {border: 1px solid #999999; background: #f7f7f7 url(images/ui-bg_glass_75_f7f7f7_1x400.png) 50% 50% repeat-x; font-weight: normal; color: #111111;}
+/*#switcher a:hover {border: 1px solid #999999; background: #f7f7f7 url(images/ui-bg_glass_75_f7f7f7_1x400.png) 50% 50% repeat-x; font-weight: normal; color: #111111;}*/
 #switcher a:active {border: 1px solid #aaaaaa; background: #ffffff url(images/ui-bg_glass_65_ffffff_1x400.png) 50% 50% repeat-x; font-weight: normal; color: #111111;}
 
 /*p#source {margin-bottom:0.5em;}*/
 
 table {margin-left:auto; margin-right: auto}
-.gloss {border: #48577C 1px none; border-bottom-style: dotted}
+.gloss {/*border: #48577C 1px none; border-bottom-style: dotted*/}
 
 /* New hover declarations */
-.hover {cursor:help;}
-.hover, .hover .color_fix, .hover .gap {color: #bebebe; cursor:help; }
-.hover .cb, .hover .color_fix .cb {color: #607CC8; cursor:help; }
-.focus, .focus .color_fix, .focus .gap, .focus .sic {color:#900;cursor:help;}
-.focus .cb, .focus.gap, .focus.sic {color:#607CC8;cursor:help;}
-.cancel-n.hover,.delover-n.hover, .hover .cancel-n, .hover .delover-n, .focus.gap {background:#D1D4C6; background: rgba(0,0,0,0.10);cursor:help;}
-.cancel-n {background: #e4e4e4; background: rgba(0,0,0,0.25);cursor:help; }
-.wordstrike-n.hover, .blockstrike-n.hover {color:#e4e4e4; color: rgba(0,0,0,0.25);cursor:help;}
-.cb.focus {color: #604F15;cursor:help;}
+.hover {/*cursor:help;*/}
+.hover, .hover .color_fix, .hover .gap {color: #bebebe; /*cursor:help;*/ }
+.hover .cb, .hover .color_fix .cb {color: #607CC8; /*cursor:help;*/ }
+.focus, .focus .color_fix, .focus .gap, .focus .sic {color:#900;/*cursor:help;*/}
+.focus .cb, .focus.gap, .focus.sic {color:#607CC8;/*cursor:help;*/}
+.cancel-n.hover,.delover-n.hover, .hover .cancel-n, .hover .delover-n, .focus.gap {background:#D1D4C6; background: rgba(0,0,0,0.10);/*cursor:help;*/}
+.cancel-n {background: #e4e4e4; background: rgba(0,0,0,0.25);/*cursor:help;*/ }
+.wordstrike-n.hover, .blockstrike-n.hover {color:#e4e4e4; color: rgba(0,0,0,0.25);/*cursor:help;*/}
+.cb.focus {color: #604F15;/*cursor:help;*/}
 
 #endnotes {/*display:none;*/}
 .label {
