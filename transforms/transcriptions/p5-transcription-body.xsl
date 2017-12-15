@@ -1110,9 +1110,9 @@
     <xsl:template match="tei:expan" mode="diplomatic"/>
 
     
-  <xsl:template match="tei:orig[parent::choice]" mode="normalised"/>
+  <xsl:template match="tei:orig[parent::tei:choice]" mode="normalised"/>
     
-  <xsl:template match="tei:orig[parent::choice]" mode="diplomatic">
+  <xsl:template match="tei:orig[parent::tei:choice]" mode="diplomatic">
         <xsl:variable name="gloss">
             <xsl:call-template name="gloss">
                 <xsl:with-param name="current_node" select="."/>
@@ -1131,7 +1131,7 @@
     </xsl:template>
     
 
-  <xsl:template match="tei:reg[not(@type='gloss')][parent::choice]" mode="normalised">
+  <xsl:template match="tei:reg[not(@type='gloss')][parent::tei:choice]" mode="normalised">
         <xsl:variable name="gloss">
             <xsl:call-template name="gloss">
                 <xsl:with-param name="current_node" select="."/>
@@ -1149,11 +1149,11 @@
         </xsl:choose>
     </xsl:template>
     
-  <xsl:template match="tei:reg[@type='gloss'][parent::choice][not(preceding-sibling::tei:reg)][not(following-sibling::tei:reg)]" mode="normalised">
+  <xsl:template match="tei:reg[@type='gloss'][parent::tei:choice][not(preceding-sibling::tei:reg)][not(following-sibling::tei:reg)]" mode="normalised">
         <xsl:apply-templates mode="#current"/>
     </xsl:template>
     
-  <xsl:template match="tei:reg[@type='gloss'][parent::choice][preceding-sibling::tei:reg or following-sibling::tei:reg]" mode="normalised"/>
+  <xsl:template match="tei:reg[@type='gloss'][parent::tei:choice][preceding-sibling::tei:reg or following-sibling::tei:reg]" mode="normalised"/>
   
   <xsl:template match="tei:subst" mode="#all">
     <span class="subst">
@@ -1173,7 +1173,7 @@
     </span>
   </xsl:template>
   
-  <xsl:template match="tei:reg[parent::choice]" mode="diplomatic"/>
+  <xsl:template match="tei:reg[parent::tei:choice]" mode="diplomatic"/>
 
     <xsl:template match="tei:sic[parent::tei:choice]" mode="normalised"/>
     
@@ -1240,13 +1240,13 @@
   </xsl:template>
 
   <!-- These templates should only fire in non-casebooks materials -->
-  <xsl:template match="tei:text//tei:corr[not(parent::choice)]|
-    tei:text//tei:orig[not(parent::choice)]|
-    tei:text//tei:reg[not(parent::choice)]" mode="#all">
+  <xsl:template match="tei:text//tei:corr[not(parent::tei:choice)]|
+    tei:text//tei:orig[not(parent::tei:choice)]|
+    tei:text//tei:reg[not(parent::tei:choice)]" mode="#all">
     <xsl:apply-templates mode="#current"/>
   </xsl:template>
   
-  <xsl:template match="tei:corr[parent::choice]" mode="tooltip">
+  <xsl:template match="tei:corr[parent::tei:choice]" mode="tooltip">
         <xsl:choose>
             <xsl:when test="tei:choice">
                 <xsl:call-template name="apply-mode-to-templates">
@@ -1263,11 +1263,11 @@
         </xsl:choose>
     </xsl:template>
 
-  <xsl:template match="tei:corr[parent::choice]" mode="normalised">
+  <xsl:template match="tei:corr[parent::tei:choice]" mode="normalised">
         <xsl:apply-templates mode="#current"/>
     </xsl:template>
     
-  <xsl:template match="tei:corr[parent::choice]" mode="diplomatic"/>
+  <xsl:template match="tei:corr[parent::tei:choice]" mode="diplomatic"/>
 
     <!-- Additions and deletions -->
     
