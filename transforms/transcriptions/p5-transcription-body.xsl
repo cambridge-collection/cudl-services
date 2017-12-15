@@ -928,6 +928,7 @@
 
   <xsl:template name="endnote">
     <div id="endnotes">
+      <p><strong>Notes:</strong></p>
       <xsl:apply-templates select="/tei:TEI/tei:text//tei:note[not(@target)]" mode="footer"/>
     </div>
   </xsl:template>
