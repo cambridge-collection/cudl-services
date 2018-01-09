@@ -23,12 +23,12 @@
             <!--default is transcription-->
             <xsl:when test="$type='transcription' or $type=''">
 
-                <xsl:value-of select="//tei:div[not(@type)]//tei:pb[@n=$start]/@xml:id"/>
+                <xsl:value-of select="(//tei:div[not(@type)]//tei:pb[@n=$start])[1]/@xml:id"/>
 
             </xsl:when>
             <xsl:when test="$type='translation'">
 
-                <xsl:value-of select="//tei:div[@type='translation']//tei:pb[@n=$start]/@xml:id"/>
+                <xsl:value-of select="(//tei:div[@type='translation']//tei:pb[@n=$start])[1]/@xml:id"/>
 
             </xsl:when>
 
@@ -45,12 +45,12 @@
             <!--default is transcription-->
             <xsl:when test="$type='transcription' or $type=''">
 
-                <xsl:value-of select="//tei:div[not(@type)]//tei:pb[@n=$end]/following::tei:pb[1]/@xml:id"/>
+                <xsl:value-of select="(//tei:div[not(@type)]//tei:pb[@n=$end]/following::tei:pb)[1]/@xml:id"/>
 
             </xsl:when>
             <xsl:when test="$type='translation'">
 
-                <xsl:value-of select="//tei:div[@type='translation']//tei:pb[@n=$end]/following::tei:pb[1]/@xml:id"/>
+                <xsl:value-of select="(//tei:div[@type='translation']//tei:pb[@n=$end]/following::tei:pb)[1]/@xml:id"/>
 
             </xsl:when>
 
@@ -65,6 +65,8 @@
 
     </xsl:variable>
 
+    <xsl:key name="pbs" match="//*[@xml:id]" use="@xml:id"/>
+    
     <xsl:template match="/">
 
         <xsl:choose>
@@ -113,12 +115,12 @@
         <xsl:copy-of select="."/>
     </xsl:template>
 
-    <xsl:template match="text()[preceding::*[@xml:id=$endPage]]" mode="page"/>
-    <xsl:template match="text()[following::*[@xml:id=$startPage]]" mode="page"/>
-    <xsl:template match="text()[following::*[@xml:id=$endPage] and preceding::*[@xml:id=$startPage]]" mode="page">
+    <xsl:template match="text()[. >> key('pbs',$endPage)[1] or . &lt;&lt; key('pbs', $startPage)[1]]" mode="page"/>
+    
+    <xsl:template match="text()[. &lt;&lt; key('pbs',$endPage)[1] and . >> key('pbs',$startPage)[1]]" mode="page">
         <xsl:copy-of select="."/>
     </xsl:template>
-
+    
     <xsl:template match="*[descendant::*[@xml:id=$startPage or @xml:id=$endPage]]" mode="page">
         <xsl:copy>
             <xsl:copy-of select="@*"/>
@@ -129,7 +131,7 @@
     <xsl:template match="*" mode="page">
         <xsl:choose>
             <xsl:when
-                test="preceding::*[@xml:id=$startPage] and(following::*[@xml:id=$endPage] or $endPage='')">
+                test=". >> key('pbs',$startPage)[1] and(. &lt;&lt; key('pbs',$endPage)[1] or $endPage='')">
                 <xsl:copy-of select="."/>
             </xsl:when>
         </xsl:choose>
