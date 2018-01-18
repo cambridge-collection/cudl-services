@@ -2,8 +2,7 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="2.0"
     xmlns:tei="http://www.tei-c.org/ns/1.0"
      exclude-result-prefixes="tei">
-    <xsl:output method="xml" encoding="UTF-8"/>
-
+    <xsl:output method="xml" version="1.0" encoding="UTF-8" indent="no"/>
 
     <!--largely stolen from Mike Hawkins, Newton Project-->
 
@@ -24,12 +23,12 @@
             <!--default is transcription-->
             <xsl:when test="$type='transcription' or $type=''">
 
-                <xsl:value-of select="//tei:div[not(@type)]//tei:pb[@n=$start]/@xml:id"/>
+                <xsl:value-of select="(//tei:div[not(@type)]//tei:pb[@n=$start])[1]/@xml:id"/>
 
             </xsl:when>
             <xsl:when test="$type='translation'">
 
-                <xsl:value-of select="//tei:div[@type='translation']//tei:pb[@n=$start]/@xml:id"/>
+                <xsl:value-of select="(//tei:div[@type='translation']//tei:pb[@n=$start])[1]/@xml:id"/>
 
             </xsl:when>
 
@@ -46,12 +45,12 @@
             <!--default is transcription-->
             <xsl:when test="$type='transcription' or $type=''">
 
-                <xsl:value-of select="//tei:div[not(@type)]//tei:pb[@n=$end]/following::tei:pb[1]/@xml:id"/>
+                <xsl:value-of select="(//tei:div[not(@type)]//tei:pb[@n=$end]/following::tei:pb)[1]/@xml:id"/>
 
             </xsl:when>
             <xsl:when test="$type='translation'">
 
-                <xsl:value-of select="//tei:div[@type='translation']//tei:pb[@n=$end]/following::tei:pb[1]/@xml:id"/>
+                <xsl:value-of select="(//tei:div[@type='translation']//tei:pb[@n=$end]/following::tei:pb)[1]/@xml:id"/>
 
             </xsl:when>
 
@@ -66,11 +65,8 @@
 
     </xsl:variable>
 
-
-
-    <xsl:output method="xml" version="1.0" encoding="UTF-8"/>
-
-
+    <xsl:key name="pbs" match="//*[@xml:id]" use="@xml:id"/>
+    
     <xsl:template match="/">
 
         <xsl:choose>
@@ -105,7 +101,9 @@
     <!--templates for extracting by page-->
     <!--if we start using for darwin correspondence, we may have to * the tei bits-->
     <xsl:template match="*[@xml:id=$startPage]" mode="page">
-
+        <xsl:if test="/tei:TEI/tei:teiHeader/tei:fileDesc/tei:publicationStmt/tei:publisher[matches(.,'Casebooks Project')]">
+            <xsl:copy-of select="/tei:TEI/tei:teiHeader/tei:fileDesc/tei:publicationStmt/tei:publisher"/>
+        </xsl:if>
         <xsl:if test="normalize-space($transcriber)">
             <transcriber>
                 <xsl:value-of select="$transcriber"/>
@@ -117,12 +115,12 @@
         <xsl:copy-of select="."/>
     </xsl:template>
 
-    <xsl:template match="text()[preceding::*[@xml:id=$endPage]]" mode="page"/>
-    <xsl:template match="text()[following::*[@xml:id=$startPage]]" mode="page"/>
-    <xsl:template match="text()[following::*[@xml:id=$endPage] and preceding::*[@xml:id=$startPage]]" mode="page">
+    <xsl:template match="text()[. >> key('pbs',$endPage)[1] or . &lt;&lt; key('pbs', $startPage)[1]]" mode="page"/>
+    
+    <xsl:template match="text()[. &lt;&lt; key('pbs',$endPage)[1] and . >> key('pbs',$startPage)[1]]" mode="page">
         <xsl:copy-of select="."/>
     </xsl:template>
-
+    
     <xsl:template match="*[descendant::*[@xml:id=$startPage or @xml:id=$endPage]]" mode="page">
         <xsl:copy>
             <xsl:copy-of select="@*"/>
@@ -133,7 +131,7 @@
     <xsl:template match="*" mode="page">
         <xsl:choose>
             <xsl:when
-                test="preceding::*[@xml:id=$startPage] and(following::*[@xml:id=$endPage] or $endPage='')">
+                test=". >> key('pbs',$startPage)[1] and(. &lt;&lt; key('pbs',$endPage)[1] or $endPage='')">
                 <xsl:copy-of select="."/>
             </xsl:when>
         </xsl:choose>

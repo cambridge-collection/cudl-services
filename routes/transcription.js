@@ -201,7 +201,7 @@ router.get('/tei/:type/:location/:id/:from/:to', function(req, res) {
                                 end: req.params.to
                         },
                         props: {
-                                indent: 'yes'
+                                indent: 'no'
                         }
                 };
 
