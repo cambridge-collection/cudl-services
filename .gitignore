@@ -5,5 +5,11 @@
 *.swp
 *.out
 *.svn
+
+# IntelliJ
 .idea
+*.iml
+
+# NodeJS
 /node_modules/
+package-lock.json
