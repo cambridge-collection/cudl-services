@@ -6,11 +6,11 @@ var util = require('util');
 var path = require('path');
 var fs = require('fs');
 
+var _ = require('lodash');
 var express = require('express');
+var Q = require('q');
 var router = express.Router();
 var xmldom = require('xmldom');
-var _ = require('lodash');
-var Q = require('q');
 
 var config = require('../config/base');
 var xtf = require('../lib/xtf');

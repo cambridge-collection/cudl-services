@@ -2,17 +2,16 @@
 config = require('./config/base.js');
 
 //Modules
+var bodyParser = require('body-parser');
+var cookieParser = require('cookie-parser');
 var debug = require('debug')('cudl-services');
 var express = require('express');
-var path = require('path');
 var favicon = require('static-favicon');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
-var passport = require('passport');
-var strategy = require('passport-accesstoken').Strategy;
 var fs = require('fs-extra');
-var pg = require('pg');
+var logger = require('morgan');
+var passport = require('passport');
+var path = require('path');
+var Strategy = require('passport-accesstoken').Strategy;
 
 //cache directories
 fs.ensureDir(config.cacheDir);
@@ -48,7 +47,7 @@ function findByApiKey(apikey, fn) {
 }
 
 debug(config.users);
-passport.use(new strategy(
+passport.use(new Strategy(
   function(token, done) {
     process.nextTick(function () {
       findByApiKey(token, function(err, user) {
@@ -75,7 +74,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Middleware to redirect trailing slashes to same URL without trailing slash
 app.use(function(req, res, next) {
-    if(req.url.substr(-1) == '/' && req.url.length > 1)
+    if(req.url.substr(-1) === '/' && req.url.length > 1)
         res.redirect(301, req.url.slice(0, -1));
     else
         next();

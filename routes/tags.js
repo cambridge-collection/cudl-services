@@ -1,13 +1,13 @@
 var assert = require('assert');
-var util = require('util');
 var fs = require('fs');
+var util = require('util');
 
-var Q = require('q');
 var _ = require('lodash');
-var express = require('express');
 var accepts = require('accepts');
-var o2x = require('object-to-xml');
 var csvstringify = require('csv-stringify');
+var express = require('express');
+var o2x = require('object-to-xml');
+var Q = require('q');
 
 var db = require('../lib/db');
 var NotFoundError = require('../lib/errors/NotFoundError');
@@ -39,7 +39,7 @@ _.assign(TagSet.prototype, {
         _.each(tags, function(tag, i) {
             var err =
                 !_.isArray(tag) ? 'tag must be an array, got: ' + tag :
-                tag.length != 2 ? 'tag must be of length 2, got: ' + tag.length :
+                tag.length !== 2 ? 'tag must be of length 2, got: ' + tag.length :
                 !_.isString(tag[0]) ? 'first element must be a string, got: ' + tag[0] :
                 !_.isNumber(tag[1]) ? 'second element must be a number, got: ' + tag[1] :
                 undefined;
@@ -377,7 +377,7 @@ function getNegotiatedResponse(req, res, fixedType) {
                 })
                 .then(function(csv) {
                     return {
-                        type: negotiatedType == 'csv' ? 'text/csv' : 'text/plain',
+                        type: negotiatedType === 'csv' ? 'text/csv' : 'text/plain',
                         body: csv
                     };
                 });
