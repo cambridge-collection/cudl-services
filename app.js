@@ -2,6 +2,7 @@
 config = require('./config/base.js');
 
 //Modules
+var debug = require('debug')('cudl-services');
 var express = require('express');
 var path = require('path');
 var favicon = require('static-favicon');
@@ -46,7 +47,7 @@ function findByApiKey(apikey, fn) {
     return fn(null, null);
 }
 
-console.log(config.users);
+debug(config.users);
 passport.use(new strategy(
   function(token, done) {
     process.nextTick(function () {
@@ -121,5 +122,4 @@ app.use(function(err, req, res, next) {
     });
 });
 
-console.log('hmmmi1');
 module.exports = app;
