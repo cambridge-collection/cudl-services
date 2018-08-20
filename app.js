@@ -2,6 +2,7 @@
 config = require('./config/base.js');
 
 //Modules
+var assert = require('assert');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var debug = require('debug')('cudl-services');
@@ -19,10 +20,11 @@ fs.ensureDir(config.cacheDir+'/transcriptions');
 fs.ensureDir(config.cacheDir+'/translations');
 
 if (process.getuid) {
+    // TODO: this shouldn't be necessary - service shouldn't run as route, directories should be managed by puppet
     var userid = require('userid');
-    fs.chown(config.cacheDir, userid.uid(config.user), userid.gid(config.group), function (err) { if (err) throw err; });
-    fs.chown(config.cacheDir+'/transcriptions', userid.uid(config.user), userid.gid(config.group), function (err) { if (err) throw err; });
-    fs.chown(config.cacheDir+'/translations', userid.uid(config.user), userid.gid(config.group), function (err) { if (err) throw err; });
+    fs.chown(config.cacheDir, userid.uid(config.user), userid.gid(config.group), assert.ifError);
+    fs.chown(config.cacheDir+'/transcriptions', userid.uid(config.user), userid.gid(config.group), assert.ifError);
+    fs.chown(config.cacheDir+'/translations', userid.uid(config.user), userid.gid(config.group), assert.ifError);
 }
 
 //Routes
