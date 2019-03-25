@@ -2,25 +2,30 @@
 config = require('./config/base.js');
 
 //Modules
-var express = require('express');
-var path = require('path');
-var favicon = require('static-favicon');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
+var assert = require('assert');
 var bodyParser = require('body-parser');
-var passport = require('passport');
-var strategy = require('passport-accesstoken').Strategy;
+var cookieParser = require('cookie-parser');
+var debug = require('debug')('cudl-services');
+var express = require('express');
+var favicon = require('static-favicon');
 var fs = require('fs-extra');
-var userid = require('userid');
-var pg = require('pg');
+var logger = require('morgan');
+var passport = require('passport');
+var path = require('path');
+var Strategy = require('passport-accesstoken').Strategy;
 
 //cache directories
 fs.ensureDir(config.cacheDir);
 fs.ensureDir(config.cacheDir+'/transcriptions');
 fs.ensureDir(config.cacheDir+'/translations');
-fs.chown(config.cacheDir, userid.uid(config.user), userid.gid(config.group), function (err) { if (err) throw err; });
-fs.chown(config.cacheDir+'/transcriptions', userid.uid(config.user), userid.gid(config.group), function (err) { if (err) throw err; });
-fs.chown(config.cacheDir+'/translations', userid.uid(config.user), userid.gid(config.group), function (err) { if (err) throw err; });
+
+if (process.getuid) {
+    // TODO: this shouldn't be necessary - service shouldn't run as route, directories should be managed by puppet
+    var userid = require('userid');
+    fs.chown(config.cacheDir, userid.uid(config.user), userid.gid(config.group), assert.ifError);
+    fs.chown(config.cacheDir+'/transcriptions', userid.uid(config.user), userid.gid(config.group), assert.ifError);
+    fs.chown(config.cacheDir+'/translations', userid.uid(config.user), userid.gid(config.group), assert.ifError);
+}
 
 //Routes
 //var routes = require('./routes/index.js');
@@ -43,8 +48,8 @@ function findByApiKey(apikey, fn) {
     return fn(null, null);
 }
 
-console.log(config.users);
-passport.use(new strategy(
+debug(config.users);
+passport.use(new Strategy(
   function(token, done) {
     process.nextTick(function () {
       findByApiKey(token, function(err, user) {
@@ -71,7 +76,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Middleware to redirect trailing slashes to same URL without trailing slash
 app.use(function(req, res, next) {
-    if(req.url.substr(-1) == '/' && req.url.length > 1)
+    if(req.url.substr(-1) === '/' && req.url.length > 1)
         res.redirect(301, req.url.slice(0, -1));
     else
         next();
@@ -118,5 +123,4 @@ app.use(function(err, req, res, next) {
     });
 });
 
-console.log('hmmmi1');
 module.exports = app;

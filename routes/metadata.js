@@ -1,6 +1,6 @@
 var express = require('express');
-var fs = require("fs");
-var util = require("util");
+var fs = require('fs');
+var util = require('util');
 
 var config = require('../config/base');
 var serviceUtil = require("../util.js");
@@ -39,7 +39,7 @@ router.get('/:format/:id',
 
         var path;
 
-        if (req.params.format == 'json') {
+        if (req.params.format === 'json') {
             path = config.dataDir + '/json/' + req.params.id + '.json';
             loadJsonMetadata(path, function(err, data) {
                 if(err) {
@@ -83,7 +83,7 @@ router.get('/:format/:id',
                     return;
                 }
                 
-                if (data.descriptiveMetadata[0].metadataRights && data.descriptiveMetadata[0].metadataRights.trim()!="")  {
+                if (data.descriptiveMetadata[0].metadataRights && data.descriptiveMetadata[0].metadataRights.trim()!=="")  {
                 	// Return metadata
                     path = config.dataDir+'/data/'+req.params.format+'/'+req.params.id+'/'+req.params.id+'.xml';
                     res.sendfile(path);
@@ -92,14 +92,8 @@ router.get('/:format/:id',
                         error: util.format(
                             "Access not allowed to requested metadata file.")
                     });
-                    return;                	
                 }
-
-                
             });
-        	
-        	
-
           }
     }
 );

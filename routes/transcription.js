@@ -1,15 +1,18 @@
-var xslt = require("xslt4node");
+var http = require('http');
+
+var debug = require('debug')('cudl:transcription');
 var express = require('express');
-var fs = require("fs"), json;
-var http = require("http");
-var cache = require('Simple-Cache').SimpleCache(config.cacheDir+'/transcriptions', console.log);
-var tidy = require('htmltidy2').tidy;
 var glob = require('glob');
 var iconv = require('iconv-lite');
 var parseHttpHeader = require('parse-http-header');
+var SimpleCache = require('Simple-Cache').SimpleCache;
+var tidy = require('htmltidy2').tidy;
+var xslt = require('xslt4node');
 
-var transform = xslt.transform;
+var config = require('../config/base');
+var cache = SimpleCache(config.cacheDir+'/transcriptions', debug);
 var router = express.Router();
+var transform = xslt.transform;
 
 // The newtonproject's responses are latin1 encoded, which node doesn't support
 // by default. iconv-lite provides extra encodings such as latin1.
@@ -67,7 +70,7 @@ router.get('/newton/:type/:location/:id/:from/:to', function(req, res) {
                 requestFailed = true;
             }
 
-            if (response.statusCode != 200) {
+            if (response.statusCode !== 200) {
                 res.status(500).render('error', {
                     message: 'Transcription not found at external provider',
                     error: { status: response.statusCode }
@@ -115,7 +118,7 @@ router.get('/dmp/:type/:location/:id/:from?/:to?', function(req, res) {
                 };
 
                 http.get(options, function(response) {
-                        if (response.statusCode != 200) {
+                        if (response.statusCode !== 200) {
                                  res.status(500).render('error', {
                                         message: 'Transcription not found at external provider',
                                         error: { status: response.statusCode }
@@ -349,7 +352,7 @@ router.get('/palimpsest/:type/:location/:id/:from/:to', function(req, res) {
                 requestFailed = true;
             }
 
-            if (response.statusCode != 200) {
+            if (response.statusCode !== 200) {
                 res.status(500).render('error', {
                     message: 'Transcription not found at external provider',
                     error: { status: response.statusCode }

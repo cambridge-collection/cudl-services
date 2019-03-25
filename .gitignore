@@ -5,5 +5,15 @@
 *.swp
 *.out
 *.svn
+*.log
+
+# IntelliJ
 .idea
+*.iml
+
+# NodeJS
 /node_modules/
+package-lock.json
+
+# Local configuration
+/config/*-dev.js

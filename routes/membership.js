@@ -20,7 +20,7 @@ router.get('/collections/:id', function(req, res) {
         	res.send(o2x({
             		'?xml version="1.0" encoding="utf-8"?': null,
             		collections: {
-                		collection: result['rows']
+                		collection: result.rows
             		}
         	}));
     	});

@@ -7,11 +7,11 @@ module.exports = function(passport) {
 
 	router.get('/*', passport.authenticate('token', { session: false }),
 		function(req, res) {
-			var url = config.darwinXTF + req.url + ";idx-ignore=dcpPublic";;
+			var url = config.darwinXTF + req.url + ";idx-ignore=dcpPublic";
 			console.log(url);
-			req.pipe(request(url)).pipe(res);	
+			req.pipe(request(url)).pipe(res);
 		}
 	);
-	
+
 	return router;
 };

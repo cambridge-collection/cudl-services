@@ -1,9 +1,11 @@
-var xslt = require("xslt4node");
-var transform = xslt.transform;
+var debug = require('debug')('cudl:translation');
 var express = require('express');
-var fs = require("fs"), json;
-var http = require("http");
-var cache = require('Simple-Cache').SimpleCache(config.cacheDir+'/translations', console.log);
+var SimpleCache = require('Simple-Cache').SimpleCache;
+var xslt = require("xslt4node");
+
+var config = require('../config/base');
+var transform = xslt.transform;
+var cache = SimpleCache(config.cacheDir+'/translations', debug);
 var router = express.Router();
 
 xslt.addLibrary(config.appDir+'/saxon/saxon9he.jar');
