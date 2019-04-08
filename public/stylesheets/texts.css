@@ -44,12 +44,14 @@ span.p {display: block;}
 .large { font-size: 116.67%; }
 .larger { font-size: 133.33%; }
 .largest { font-size: 150%; }
+.redInk { color: #B00; }
+.differentInk { color: #6b360f; }
 .small { font-size:91.667%}
 .smaller { font-size: 83.333%; }
 .smallest { font-size: 75%; }
 .note { border-color: #48577C; border-width: 1px; border-style: dotted; /*cursor: pointer;*/}
 /*.note:hover { border-style: solid;cursor:help;}*/
-sup, .sup {vertical-align:.25em;font-size: 89%;}
+sup, .sup, .supralinear {vertical-align:.25em;font-size: 89%;}
 sub, .sub {font-size: 89%;vertical-align:-.25em;}
 .cancel-n, .delover-n, .erased-n { text-decoration: inherit; background: #BBB; /*cursor: help;*/ }
 .wordstrike-n { text-decoration: line-through; background: transparent; /*cursor: help;*/}
@@ -73,7 +75,7 @@ sub, .sub {font-size: 89%;vertical-align:-.25em;}
 .normal, .black {color: #000;}
 i, .italic, .graphic {font-style:italic;}
 b, .bold {font-weight:bold;}
-u, .underline, .doubleunderline {text-decoration:underline;}
+u, .underline, .doubleunderline, .underlineDashed {text-decoration:underline;}
 .smallcaps {font-variant:small-caps;}
 .allcaps {text-transform:uppercase}
 .dropcap {margin-right: 0.05em;}
@@ -84,7 +86,7 @@ ol, ul, dl, .lg, .ul {
 margin: 0 0 1.5em 70px;
 }
 
-li, .li, #text .line { margin-bottom: 0;
+li, .li, .line { margin-bottom: 0;
 }
 
 .blockCentered {
@@ -122,8 +124,11 @@ display: block;
 #switcher a:active {border: 1px solid #aaaaaa; background: #ffffff url(images/ui-bg_glass_65_ffffff_1x400.png) 50% 50% repeat-x; font-weight: normal; color: #111111;}
 
 /*p#source {margin-bottom:0.5em;}*/
+table, .table, tr, .tr, td, .td { border:none; }
+table, .table { display:table; vertical-align: middle; margin-left:auto; margin-right: auto }
+tr, .tr { display: table-row; }
+td, .td { display: table-cell; }
 
-table {margin-left:auto; margin-right: auto}
 .gloss {/*border: #48577C 1px none; border-bottom-style: dotted*/}
 
 /* New hover declarations */
