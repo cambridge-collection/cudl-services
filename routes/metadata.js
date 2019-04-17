@@ -68,10 +68,10 @@ router.get('/:format/:id',
                 res.json(data);
             });
         } else {
-        	
+
         	// This returns the original metadata.  We only want to return the metadata if
-        	// the metadataRights field is present (and non-empty) in the JSON. 
-        	
+        	// the metadataRights field is present (and non-empty) in the JSON.
+
         	// Find the relevant JSON file
             path = config.dataDir + '/json/' + req.params.id + '.json';
             loadJsonMetadata(path, function(err, data) {
@@ -82,10 +82,11 @@ router.get('/:format/:id',
                     });
                     return;
                 }
-                
+
                 if (data.descriptiveMetadata[0].metadataRights && data.descriptiveMetadata[0].metadataRights.trim()!=="")  {
                 	// Return metadata
                     path = config.dataDir+'/data/'+req.params.format+'/'+req.params.id+'/'+req.params.id+'.xml';
+                    res.contentType('text/plain');
                     res.sendfile(path);
                 } else {
                     res.status(403).json({
