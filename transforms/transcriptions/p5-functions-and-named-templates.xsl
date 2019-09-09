@@ -89,19 +89,53 @@
     
   </xsl:function>
   
+  <xsl:function name="cudl:determine-project" as="xs:string">
+    <xsl:param name="node" />
+    
+    <xsl:choose>
+      <xsl:when test="exists($node//tei:publisher[matches(.,'Casebooks Project','i')])">
+        <xsl:text>casebooks project</xsl:text>
+      </xsl:when>
+      <xsl:when test="exists($node//tei:publisher[matches(.,'Newton Project','i')])">
+        <xsl:text>newton project</xsl:text>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:text>cudl</xsl:text>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:function>
+  
+  <xsl:function name="cudl:use-early-modern-fonts" as="xs:boolean">
+    <xsl:param name="project_name" />
+    
+    <xsl:value-of select="$project_name=('casebooks project','newton project')"/>
+  </xsl:function>
+  
+  <xsl:function name="cudl:use-legacy-character-and-font-processing" as="xs:boolean">
+    <xsl:param name="project_name" />
+    
+    <xsl:value-of select="$project_name=('cudl')"/>
+  </xsl:function>
+  
+  <xsl:function name="cudl:is-in-block" as="xs:boolean">
+    <xsl:param name="node" />
+    
+    <xsl:value-of select="exists($node[ancestor::tei:p | ancestor::tei:l | ancestor::tei:item | ancestor::tei:ab])"/>
+  </xsl:function>
+  
   <xsl:function name="cudl:determine-output-element-name">
     <xsl:param name="node"/>
     <xsl:param name="default"/>
     
     <xsl:choose>
-      <xsl:when test="$node[ancestor::tei:p | ancestor::tei:l | ancestor::tei:item]">
+      <xsl:when test="cudl:is-in-block($node)">
         <xsl:text>span</xsl:text>
       </xsl:when>
-      <xsl:when test="$node[not(ancestor::tei:p | ancestor::tei:l | ancestor::tei:item)]">
-        <xsl:text>div</xsl:text>
+      <xsl:when test="not(cudl:is-in-block($node))">
+        <xsl:value-of select="normalize-space(($default,'div')[normalize-space(.)!=''][1])"/>
       </xsl:when>
       <xsl:otherwise>
-        <xsl:value-of select="$default"/>
+        <xsl:value-of select="normalize-space($default)"/>
       </xsl:otherwise>
     </xsl:choose>
   </xsl:function>
@@ -556,7 +590,7 @@
     
     <xsl:variable name="hand_name" select="$hands[@pointer_to=$handShift_elems/@new]"/>
     <xsl:value-of select="$hand_name"/>
-    <xsl:if test="not(matches($hand_name,'hand','i'))"><xsl:text>&#x2019;s hand</xsl:text></xsl:if>
+    <xsl:if test="not(matches($hand_name,'(hand|mechanically printed text)','i'))"><xsl:text>&#x2019;s hand</xsl:text></xsl:if>
     <xsl:text> starts </xsl:text>
     <xsl:choose>
       <xsl:when test="$in_app_msg=false()">here</xsl:when>
