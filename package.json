@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "node ./bin/www",
+    "jshint": "node_modules/.bin/jshint *.js lib routes transforms config bin/www test"
   },
   "dependencies": {
     "Simple-Cache": "~1.0.0",
@@ -32,13 +33,9 @@
     "request": "~2.36.0",
     "static-favicon": "~1.0.0",
     "uri-template": "^1",
-    "xmldom": "^0.1.19",
-    "xpath": "0.0.9",
-    "xslt4node": "0.3.2"
+    "xmldom": "^0.1.19"
   },
   "devDependencies": {
-    "grunt": "^0.4",
-    "grunt-cli": "^1",
-    "grunt-contrib-jshint": "^0"
+    "jshint": "^2.10.3"
   }
 }
