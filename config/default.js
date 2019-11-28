@@ -5,8 +5,6 @@ config.appDir = '/home/cms93/cudl-services';
 config.dataDir = '/mnt/cudl-data';
 config.cacheDir = '/mnt/cache';
 config.dcpdataDir = '/mnt/dcp-data';
-config.user = 'chris';
-config.group = 'chris';
 
 //Postgres settings for cudl database services
 config.postHost = 'cudl-postgres.cmzjzpssbgnq.eu-west-1.rds.amazonaws.com';
