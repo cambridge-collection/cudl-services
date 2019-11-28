@@ -1,35 +1,35 @@
 //Config
-config = require('./config/base.js');
+const config = require('./config/base.js');
 
 //Modules
-var assert = require('assert');
-var bodyParser = require('body-parser');
-var cookieParser = require('cookie-parser');
-var debug = require('debug')('cudl-services');
-var express = require('express');
-var favicon = require('static-favicon');
-var fs = require('fs-extra');
-var logger = require('morgan');
-var passport = require('passport');
-var path = require('path');
-var Strategy = require('passport-accesstoken').Strategy;
+const assert = require('assert');
+const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
+const debug = require('debug')('cudl-services');
+const express = require('express');
+const favicon = require('serve-favicon');
+const fs = require('fs-extra');
+const logger = require('morgan');
+const passport = require('passport');
+const path = require('path');
+const Strategy = require('passport-accesstoken').Strategy;
 
 //cache directories
-fs.ensureDir(config.cacheDir);
-fs.ensureDir(config.cacheDir+'/transcriptions');
-fs.ensureDir(config.cacheDir+'/translations');
+fs.ensureDirSync(config.cacheDir);
+fs.ensureDirSync(config.cacheDir+'/transcriptions');
+fs.ensureDirSync(config.cacheDir+'/translations');
 
 //Routes
-//var routes = require('./routes/index.js');
-var metadata = require('./routes/metadata.js');
-var tags = require('./routes/tags');
-var transcription = require('./routes/transcription.js');
-var translation = require('./routes/translation.js');
-var membership = require('./routes/membership.js');
-var iiif = require('./routes/iiif.js');
-var similarity = require('./routes/similarity');
-var darwin	= (require('./routes/darwin.js')(passport));
-var app = express();
+//const routes = require('./routes/index.js');
+const metadata = require('./routes/metadata.js');
+const tags = require('./routes/tags');
+const transcription = require('./routes/transcription.js');
+const translation = require('./routes/translation.js');
+const membership = require('./routes/membership.js');
+const iiif = require('./routes/iiif.js');
+const similarity = require('./routes/similarity');
+const darwin = require('./routes/darwin.js')(passport);
+const app = express();
 
 
 function findByApiKey(apikey, fn) {
@@ -56,7 +56,7 @@ passport.use(new Strategy(
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
+app.set('view engine', 'pug');
 
 app.use(favicon(path.join(__dirname, '/public/images/brand/favicon.ico')));
 app.use(logger('dev'));
