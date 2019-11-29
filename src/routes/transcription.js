@@ -9,7 +9,7 @@ var SimpleCache = require('Simple-Cache').SimpleCache;
 var tidy = require('htmltidy2').tidy;
 var xslt = require('xslt4node');
 
-var config = require('../config/base');
+var config = require('../../config/base');
 var cache = SimpleCache(config.cacheDir+'/transcriptions', debug);
 var router = express.Router();
 var transform = xslt.transform;

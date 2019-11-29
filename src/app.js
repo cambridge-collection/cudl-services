@@ -1,5 +1,5 @@
 //Config
-const config = require('./config/base.js');
+const config = require('../config/base.js');
 
 //Modules
 const assert = require('assert');
@@ -55,16 +55,16 @@ passport.use(new Strategy(
 
 
 // view engine setup
-app.set('views', path.join(__dirname, 'views'));
+app.set('views', path.resolve(__dirname, '../views'));
 app.set('view engine', 'pug');
 
-app.use(favicon(path.join(__dirname, '/public/images/brand/favicon.ico')));
+app.use(favicon(path.resolve(__dirname, '../public/images/brand/favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded());
+app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieParser());
 app.use(passport.initialize());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.resolve(__dirname, '../public')));
 
 // Middleware to redirect trailing slashes to same URL without trailing slash
 app.use(function(req, res, next) {

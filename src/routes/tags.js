@@ -9,9 +9,9 @@ var express = require('express');
 var o2x = require('object-to-xml');
 var Q = require('q');
 
-var db = require('../lib/db');
-var NotFoundError = require('../lib/errors/NotFoundError');
-var ValueError = require('../lib/errors/ValueError');
+var db = require('../db');
+var NotFoundError = require('../errors/NotFoundError');
+var ValueError = require('../errors/ValueError');
 
 /**
  * A TagSet is an immutable set of unique tag names associated with numeric
@@ -209,7 +209,7 @@ function tagSetFromRows(queryResult, options) {
 }
 
 var REMOVED_TAG_FREQ_SQL = fs.readFileSync(
-    require.resolve('../sql/removed-tag-frequency-by-item.sql'), 'utf-8');
+    require.resolve('../../sql/removed-tag-frequency-by-item.sql'), 'utf-8');
 
 function removedTags(docId) {
     return db.query(REMOVED_TAG_FREQ_SQL, [docId])
@@ -217,7 +217,7 @@ function removedTags(docId) {
 }
 
 var TAG_FREQ_SQL = fs.readFileSync(
-    require.resolve('../sql/tag-frequency-by-item.sql'), 'utf-8');
+    require.resolve('../../sql/tag-frequency-by-item.sql'), 'utf-8');
 
 function thirdPartyTags(docId) {
     return db.query(TAG_FREQ_SQL, [docId])
@@ -225,7 +225,7 @@ function thirdPartyTags(docId) {
 }
 
 var ANNOTATION_FREQ_SQL = fs.readFileSync(
-    require.resolve('../sql/annotation-frequency-by-item.sql'), 'utf-8');
+    require.resolve('../../sql/annotation-frequency-by-item.sql'), 'utf-8');
 
 function annotationTags(docId) {
     return db.query(ANNOTATION_FREQ_SQL, [docId])

@@ -1,7 +1,7 @@
 const express = require('express');
 const o2x = require('object-to-xml');
 
-const {query} = require('../lib/db');
+const {query} = require('../db');
 
 const router = express.Router();
 module.exports = router;

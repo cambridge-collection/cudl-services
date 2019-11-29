@@ -12,8 +12,8 @@ var Q = require('q');
 var router = express.Router();
 var xmldom = require('xmldom');
 
-var config = require('../config/base');
-var xtf = require('../lib/xtf');
+var config = require('../../config/base');
+var xtf = require('../xtf');
 var serviceUtil = require('../util');
 var similarityTransform = require('../transforms/similarity');
 
