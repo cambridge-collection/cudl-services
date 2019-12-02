@@ -9,7 +9,7 @@ var assert = require('assert');
 var Q = require('q');
 var _ = require('lodash');
 
-var _config = require('../config/base');
+var _config = require('./config').default;
 
 function validateConfig(config) {
     if(!(_.isString(config.xtfBase) && config.xtfBase.length > 0)) {

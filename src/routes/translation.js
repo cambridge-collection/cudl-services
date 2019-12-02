@@ -3,7 +3,7 @@ var express = require('express');
 var SimpleCache = require('Simple-Cache').SimpleCache;
 var xslt = require("xslt4node");
 
-var config = require('../../config/base');
+var config = require('../config').default;
 var transform = xslt.transform;
 var cache = SimpleCache(config.cacheDir+'/translations', debug);
 var router = express.Router();

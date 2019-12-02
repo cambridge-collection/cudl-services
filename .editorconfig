@@ -1,19 +1,17 @@
-# http://EditorConfig.org
-
 # top-most EditorConfig file
 root = true
 
-# Unix-style newlines with a newline ending every file
 [*]
 end_of_line = lf
 insert_final_newline = true
+trim_trailing_whitespace = true
 charset = utf-8
 indent_size = 4
 indent_style = space
-trim_trailing_whitespace = true
 
-[transforms/**/*.xsl]
-indent_size = 3
+# Don't corrupt git patch edit files
+[.git/**/*.diff]
+trim_trailing_whitespace = false
 
-[{.jshintrc,package.json}]
-indent_size = 2
+[Makefile]
+indent_style = tab

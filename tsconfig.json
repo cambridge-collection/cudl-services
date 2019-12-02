@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": ".",
+    "esModuleInterop": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "noImplicitAny": true,
+    "outDir": "build/dist-root/lib",
+    "paths": {
+      "*": [
+        "node_modules/*",
+        "src/types/*"
+      ]
+    },
+    "rootDirs": ["src", "lib"],
+    "resolveJsonModule": true,
+    "sourceMap": true,
+    "sourceRoot": "../src",
+    "strictNullChecks": true,
+    "target": "es2017",
+    "lib": ["es2017"]
+  },
+  "include": [
+    "src/**/*",
+    "test/**/*"
+  ]
+}

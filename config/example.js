@@ -1,4 +1,5 @@
 var config = {};
+module.exports = config;
 
 //Application settings and paths
 config.appDir = '/home/cms93/cudl-services';
@@ -22,7 +23,7 @@ config.users["51ce1fb4-0d91-11e4-ad30-77b11da19985"] = { username: 'huw', passwo
 config.imageServer = 'http://172.22.83.199/iipsrv/iipsrv.fcgi?iiif=';
 config.darwinXTF = 'http://dcp-dev.lib.cam.ac.uk';
 
-module.exports = config;
+
 
 // Tagging
 config.defaultRemoveRatio = 1/5;

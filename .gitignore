@@ -16,3 +16,6 @@
 
 # Local configuration
 /config/*-dev.js
+
+# Build output
+/build/

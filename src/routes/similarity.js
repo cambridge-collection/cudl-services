@@ -1,6 +1,3 @@
-(function() {
-'use strict';
-
 var assert = require('assert');
 var util = require('util');
 var path = require('path');
@@ -12,7 +9,7 @@ var Q = require('q');
 var router = express.Router();
 var xmldom = require('xmldom');
 
-var config = require('../../config/base');
+var config = require('../config').default;
 var xtf = require('../xtf');
 var serviceUtil = require('../util');
 var similarityTransform = require('../transforms/similarity');
@@ -188,4 +185,3 @@ function parseXml(xmlText) {
 }
 
 module.exports = router;
-})();

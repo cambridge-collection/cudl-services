@@ -3,7 +3,7 @@
  */
 const {Pool} = require('pg');
 
-const config = require('../config/base.js');
+const config = require('./config').default;
 
 const pool = new Pool({
     host: config.postHost,
