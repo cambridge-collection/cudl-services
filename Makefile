@@ -55,7 +55,10 @@ build: compile-typescript copy-files build/dist-root \
        build/dist-root/src build/dist-root/package.json build/dist-root/README.md \
        normalise-permissions
 
-pack: ensure-clean-checkout build
+lint:
+	npm run check
+
+pack: ensure-clean-checkout check build
 	cd build && npm pack ./dist-root
 
 install: node_modules
@@ -66,4 +69,4 @@ node_modules: package-lock.json package.json
 clean:
 	rm -rf build
 
-.PHONY: clean build clean-java clean-build compile-typescript compile-java ensure-clean-checkout normalise-permissions
+.PHONY: check clean build clean-java clean-build compile-typescript compile-java ensure-clean-checkout normalise-permissions

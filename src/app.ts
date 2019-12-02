@@ -1,5 +1,5 @@
 //Modules
-import express, {NextFunction, Request, Response} from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import bodyParser from 'body-parser';
 import fs from 'fs-extra';
 import passport from 'passport';
@@ -10,7 +10,7 @@ const favicon = require('serve-favicon');
 const logger = require('morgan');
 const Strategy = require('passport-accesstoken').Strategy;
 
-import {Config, User, Users} from './config';
+import { Config, User, Users } from './config';
 
 const debug = Debugger('cudl-services');
 
@@ -32,58 +32,62 @@ const similarity = require('./routes/similarity');
 const darwin = require('./routes/darwin.js')(passport);
 
 export function getApp(config: Config) {
-    const app = express();
+  const app = express();
 
-    debug(config.users);
-    passport.use(new Strategy((token: string, done: (err: any, user: any) => void) => {
-        process.nextTick(() => {
-            const user = findByApiKey(config.users, token);
-            return done(null, user || false);
-        });
-    }));
+  debug(config.users);
+  passport.use(
+    new Strategy((token: string, done: (err: any, user: any) => void) => {
+      process.nextTick(() => {
+        const user = findByApiKey(config.users, token);
+        return done(null, user || false);
+      });
+    })
+  );
 
+  // view engine setup
+  app.set('views', path.resolve(__dirname, '../views'));
+  app.set('view engine', 'pug');
 
-    // view engine setup
-    app.set('views', path.resolve(__dirname, '../views'));
-    app.set('view engine', 'pug');
+  app.use(
+    favicon(path.resolve(__dirname, '../public/images/brand/favicon.ico'))
+  );
+  app.use(logger('dev'));
+  app.use(bodyParser.json());
+  app.use(bodyParser.urlencoded({ extended: false }));
+  app.use(cookieParser());
+  app.use(passport.initialize());
+  app.use(express.static(path.resolve(__dirname, '../public')));
 
-    app.use(favicon(path.resolve(__dirname, '../public/images/brand/favicon.ico')));
-    app.use(logger('dev'));
-    app.use(bodyParser.json());
-    app.use(bodyParser.urlencoded({extended: false}));
-    app.use(cookieParser());
-    app.use(passport.initialize());
-    app.use(express.static(path.resolve(__dirname, '../public')));
+  // Middleware to redirect trailing slashes to same URL without trailing slash
+  app.use((req, res, next) => {
+    if (req.url.substr(-1) === '/' && req.url.length > 1) {
+      res.redirect(301, req.url.slice(0, -1));
+    } else {
+      next();
+    }
+  });
 
-    // Middleware to redirect trailing slashes to same URL without trailing slash
-    app.use(function(req, res, next) {
-        if(req.url.substr(-1) === '/' && req.url.length > 1)
-            res.redirect(301, req.url.slice(0, -1));
-        else
-            next();
-    });
+  //app.use('/', routes);
+  app.use('/v1/metadata', metadata.getRoutes(config));
+  app.use('/v1/tags', tags.router);
+  // app.use('/v1/transcription',transcription);
+  // app.use('/v1/translation', translation);
+  app.use('/v1/rdb/membership', membership);
+  app.use('/v1/iiif', iiif);
+  app.use('/v1/xtf/similarity', similarity);
+  app.use('/v1/darwin', darwin);
 
-    //app.use('/', routes);
-    app.use('/v1/metadata', metadata.getRoutes(config));
-    app.use('/v1/tags', tags.router);
-    // app.use('/v1/transcription',transcription);
-    // app.use('/v1/translation', translation);
-    app.use('/v1/rdb/membership', membership);
-    app.use('/v1/iiif', iiif);
-    app.use('/v1/xtf/similarity', similarity);
-    app.use('/v1/darwin', darwin);
+  // 404 if no route matched
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    res.status(404).send('Not Found');
+  });
 
-    // 404 if no route matched
-    app.use(function(req: Request, res: Response, next: NextFunction) {
-        res.status(404).send('Not Found');
-    });
-
-    return app;
+  return app;
 }
 
 function findByApiKey(users: Users, apiKey: string): User | null {
-    if (apiKey in users) {
-        return users[apiKey];
-    }
-    return null;
+  if (apiKey in users) {
+    return users[apiKey];
+  }
+  return null;
 }
