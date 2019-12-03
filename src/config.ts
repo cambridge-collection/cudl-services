@@ -14,6 +14,7 @@ config module to load`);
 export interface Config {
   dataDir: string;
   users: Users;
+  darwinXTF: string;
   [index: string]: unknown;
 }
 

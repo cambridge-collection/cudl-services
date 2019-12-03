@@ -11,6 +11,7 @@ const logger = require('morgan');
 const Strategy = require('passport-accesstoken').Strategy;
 
 import { Config, User, Users } from './config';
+import { MetadataRepository } from './metadata';
 
 const debug = Debugger('cudl-services');
 
@@ -22,13 +23,13 @@ const debug = Debugger('cudl-services');
 
 //Routes
 //const routes = require('./routes/index.js');
+import * as darwin from './routes/darwin';
 import * as metadata from './routes/metadata';
-const tags = require('./routes/tags');
+// const tags = require('./routes/tags');
 // const transcription = require('./routes/transcription.js');
 // const translation = require('./routes/translation.js');
-const membership = require('./routes/membership.js');
-const similarity = require('./routes/similarity');
-const darwin = require('./routes/darwin.js')(passport);
+// const membership = require('./routes/membership');
+// const similarity = require('./routes/similarity');
 
 export function getApp(config: Config) {
   const app = express();
@@ -67,13 +68,23 @@ export function getApp(config: Config) {
   });
 
   //app.use('/', routes);
-  app.use('/v1/metadata', metadata.getRoutes(config));
-  app.use('/v1/tags', tags.router);
+  app.use(
+    '/v1/metadata',
+    metadata.getRoutes({
+      metadataRepository: new MetadataRepository(config.dataDir),
+    })
+  );
+  // app.use('/v1/tags', tags.router);
   // app.use('/v1/transcription',transcription);
   // app.use('/v1/translation', translation);
-  app.use('/v1/rdb/membership', membership);
-  app.use('/v1/xtf/similarity', similarity);
-  app.use('/v1/darwin', darwin);
+  // app.use('/v1/rdb/membership', membership);
+  // app.use('/v1/xtf/similarity', similarity);
+
+  app.use(
+    '/v1/darwin',
+    passport.authenticate('token', { session: false }),
+    darwin.getRoutes({ darwinXtfUrl: config.darwinXTF })
+  );
 
   // 404 if no route matched
   app.use((req: Request, res: Response, next: NextFunction) => {
