@@ -27,7 +27,6 @@ const tags = require('./routes/tags');
 // const transcription = require('./routes/transcription.js');
 // const translation = require('./routes/translation.js');
 const membership = require('./routes/membership.js');
-const iiif = require('./routes/iiif.js');
 const similarity = require('./routes/similarity');
 const darwin = require('./routes/darwin.js')(passport);
 
@@ -73,7 +72,6 @@ export function getApp(config: Config) {
   // app.use('/v1/transcription',transcription);
   // app.use('/v1/translation', translation);
   app.use('/v1/rdb/membership', membership);
-  app.use('/v1/iiif', iiif);
   app.use('/v1/xtf/similarity', similarity);
   app.use('/v1/darwin', darwin);
 
