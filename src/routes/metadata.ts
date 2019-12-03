@@ -6,12 +6,14 @@ import {
   FORBIDDEN,
   INTERNAL_SERVER_ERROR,
   NOT_FOUND,
+  UNAUTHORIZED,
 } from 'http-status-codes';
 import NestedError from 'nested-error-stacks';
 import { type } from 'os';
 import path from 'path';
 import util, { promisify } from 'util';
 import { Config } from '../config';
+import { ItemJSON, MetadataRepository } from '../metadata';
 
 import {
   CORS_HEADERS,
@@ -19,24 +21,23 @@ import {
   isSimplePathSegment,
 } from '../util';
 
-export type MetadataOptions = Pick<Config, 'dataDir'>;
-
-export function getRoutes(
-  options: { router?: express.Router } & MetadataOptions
-) {
+export function getRoutes(options: {
+  router?: express.Router;
+  metadataRepository: MetadataRepository;
+}) {
   const router = options.router || express.Router();
 
   /* GET home page. */
   router.get('/', (req, res) => {
-    res.status(401).send('Unathorised');
+    res.status(UNAUTHORIZED).send('Unathorised');
   });
 
-  router.get('/:format/:id', createMetadataHandler(options.dataDir));
+  router.get('/:format/:id', createMetadataHandler(options.metadataRepository));
 
   return router;
 }
 
-function createMetadataHandler(dataDir: string) {
+function createMetadataHandler(metadataRepository: MetadataRepository) {
   return expressAsyncHandler(
     async (req: express.Request, res: express.Response, next) => {
       // We always want to allow remote ajax access
@@ -58,10 +59,9 @@ function createMetadataHandler(dataDir: string) {
         }
       }
 
-      const jsonPath = path.join(dataDir, 'json', `${req.params.id}.json`);
-      let data: ItemJSON;
+      let item: ItemJSON;
       try {
-        data = await loadJsonMetadata(jsonPath);
+        item = await metadataRepository.getJSON(req.params.id);
       } catch (e) {
         if (e?.nested?.code === 'ENOENT') {
           res.status(NOT_FOUND).json({
@@ -82,8 +82,8 @@ function createMetadataHandler(dataDir: string) {
         // strips or fakes the origin header.
         if (
           isExternalCorsRequest(req) &&
-          typeof data.embeddable === 'boolean' &&
-          !data.embeddable
+          typeof item.embeddable === 'boolean' &&
+          !item.embeddable
         ) {
           res.status(FORBIDDEN).json({
             error: 'This item is only available from ' + 'cudl.lib.cam.ac.uk',
@@ -91,75 +91,22 @@ function createMetadataHandler(dataDir: string) {
           return;
         }
 
-        res.json(data);
+        res.json(item);
       } else {
         // This returns the original metadata.  We only want to return the metadata if
         // the metadataRights field is present (and non-empty) in the JSON.
-        if (data?.descriptiveMetadata?.[0]?.metadataRights?.trim()) {
+        if (item?.descriptiveMetadata?.[0]?.metadataRights?.trim()) {
           // Return metadata
           res.contentType('text/plain');
           res.sendFile(
-            path.join(
-              dataDir,
-              'data',
-              req.params.format,
-              req.params.id,
-              `${req.params.id}.xml`
-            )
+            metadataRepository.getPath(req.params.format, req.params.id)
           );
         } else {
           res.status(FORBIDDEN).json({
-            error: util.format(
-              'Access not allowed to requested metadata file.'
-            ),
+            error: util.format('Access not allowed to requested metadata'),
           });
         }
       }
     }
   );
-}
-
-interface UnknownObject {
-  [key: string]: unknown;
-}
-
-interface ItemJSON {
-  embeddable?: boolean;
-  descriptiveMetadata: [
-    {
-      metadataRights?: string;
-    }
-  ];
-}
-
-function isItemJSON(data: unknown): data is ItemJSON {
-  if (typeof data !== 'object') {
-    return false;
-  }
-  const itemJSON = data as UnknownObject;
-
-  return (
-    (itemJSON.embeddable === undefined ||
-      typeof itemJSON.embeddable === 'boolean') &&
-    (itemJSON.descriptiveMetadata === undefined ||
-      Array.isArray(itemJSON.descriptiveMetadata)) &&
-    (itemJSON.descriptiveMetadata || []).every(
-      dmd =>
-        (typeof dmd === 'object' && dmd.metadataRights === undefined) ||
-        typeof dmd.metadataRights === 'string'
-    )
-  );
-}
-
-async function loadJsonMetadata(path: string): Promise<ItemJSON> {
-  try {
-    const content = await promisify(fs.readFile)(path, 'utf-8');
-    const data = JSON.parse(content);
-    if (!isItemJSON(data)) {
-      throw new Error('unexpected JSON structure');
-    }
-    return data;
-  } catch (e) {
-    throw new NestedError(`Failed to load metadata from ${path}: ${e}`, e);
-  }
 }

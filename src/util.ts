@@ -1,3 +1,4 @@
+import NestedError from 'nested-error-stacks';
 import express from 'express';
 import url from 'url';
 import escapeStringRegexp from 'escape-string-regexp';
@@ -26,4 +27,14 @@ export function isExternalCorsRequest(req: express.Request) {
 
 export function isSimplePathSegment(value: string): boolean {
   return /^[\w-]+$/.test(value);
+}
+
+export class BaseError extends NestedError {
+  constructor(message: string, nested?: Error) {
+    super(message, nested);
+  }
+
+  get name(): string {
+    return this.constructor.name;
+  }
 }

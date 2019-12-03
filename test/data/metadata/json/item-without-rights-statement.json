@@ -1,0 +1,8 @@
+{
+  "embeddable": true,
+  "descriptiveMetadata": [
+    {
+      "foo": "bar"
+    }
+  ]
+}
