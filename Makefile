@@ -2,9 +2,18 @@ SHELL = /bin/bash
 .SHELLFLAGS=-o errexit -c
 NPM_BIN = $(shell npm bin)
 
+# When we're building in a CI environment, always re-install dependencies.
+# Otherwise we only do so if the package*.json files are newer than
+# node_modules.
+ifeq ($(CI), true)
+	NPM_CI_TARGET = npm-ci-unconditional
+else
+	NPM_CI_TARGET = npm-ci-conditional
+endif
+
 all: clean pack
 
-compile-typescript: install
+compile-typescript: npm-ci
 	$(NPM_BIN)/tsc --build tsconfig.build.json
 
 copy-javascript: build/dist-root/lib
@@ -61,12 +70,17 @@ lint:
 pack: ensure-clean-checkout check build
 	cd build && npm pack ./dist-root
 
-install: node_modules
+npm-ci: $(NPM_CI_TARGET)
+
+npm-ci-conditional: node_modules
 
 node_modules: package-lock.json package.json
+	npm ci
+
+npm-ci-unconditional:
 	npm ci
 
 clean:
 	rm -rf build
 
-.PHONY: check clean build clean-java clean-build compile-typescript compile-java ensure-clean-checkout normalise-permissions
+.PHONY: npm-ci-unconditional check clean build clean-java clean-build compile-typescript compile-java ensure-clean-checkout normalise-permissions

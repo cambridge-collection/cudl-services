@@ -1,0 +1,18 @@
+image: node:12
+pipelines:
+  default:
+    - parallel:
+      - step:
+          name: Test
+          script:
+            - npm ci
+            - npm run test
+          caches:
+            - node
+      - step:
+          name: Package
+          script:
+            - apt-get update && apt-get install --no-install-recommends --yes jq
+            - make pack
+          caches:
+            - node
