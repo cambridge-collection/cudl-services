@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "properties": {
+    "darwinXTF": {"type": "string"},
+    "dataDir": {"type": "string"},
+    "postDatabase": {"type": "string"},
+    "postHost": {"type": "string"},
+    "postPass": {"type": "string"},
+    "postUser": {"type": "string"},
+    "users": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "username": {"type": "string"},
+          "email": {"type": "string"}
+        },
+        "required": ["username", "email"]
+      }
+    }
+  },
+  "required": ["darwinXTF", "dataDir", "postDatabase", "postHost", "postPass", "postUser", "users"]
+}

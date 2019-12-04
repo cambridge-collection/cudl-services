@@ -3,6 +3,8 @@ import http from 'http';
 import { IM_A_TEAPOT } from 'http-status-codes';
 import { promisify } from 'util';
 
+import { Database, Collection } from '../src/db';
+
 /**
  * An HTTP server listening on a random port on the loopback interface which
  * responds to each request with HTTP 418. The requestHandler attribute is a
@@ -45,5 +47,21 @@ export class DummyHttpServer {
   handleRequest(req: http.IncomingMessage, res: http.ServerResponse) {
     res.writeHead(IM_A_TEAPOT);
     res.end('foobar');
+  }
+}
+
+interface ItemCollections {
+  [itemID: string]: Collection[];
+}
+
+export class MemoryDatabase implements Database {
+  private readonly itemCollections: ItemCollections;
+
+  constructor(options: { itemCollections: ItemCollections }) {
+    this.itemCollections = options.itemCollections;
+  }
+
+  async getItemCollections(itemID: string): Promise<Collection[]> {
+    return this.itemCollections[itemID] || [];
   }
 }

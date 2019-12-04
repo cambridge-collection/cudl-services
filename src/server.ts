@@ -2,21 +2,30 @@ import Debugger from 'debug';
 import util from 'util';
 const debug = Debugger('cudl-services');
 
-import { getApp } from './app';
-import { loadConfigFromEnvar } from './config';
+import { getAppForConfig } from './app';
+import {Config, loadConfigFromEnvar} from './config';
 
-const config = loadConfigFromEnvar();
+let config: Config;
+try {
+  config = loadConfigFromEnvar();
+}
+catch (e) {
+  console.error(`Error: ${e.message}`);
+  process.exit(1);
+}
 
 if ((config && 'user' in config) || 'group' in config) {
-  throw new Error(`\
-config.user and config.group are no longer supported. Remove them from the \
+  console.error(`\
+Error: config.user and config.group are no longer supported. Remove them from the \
 config and start this process with the desired user.`);
+  process.exit(1);
 }
 if (process.getuid && process.getuid() === 0) {
-  throw new Error(`Running as root is not permitted`);
+  console.error('Error: Running as root is not permitted');
+  process.exit(1);
 }
 
-const app = getApp(config);
+const app = getAppForConfig(config);
 app.set('port', process.env.PORT || 3000);
 
 const server = app.listen(app.get('port'), () => {

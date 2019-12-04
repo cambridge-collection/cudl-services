@@ -28,17 +28,35 @@ import * as metadata from './routes/metadata';
 // const tags = require('./routes/tags');
 // const transcription = require('./routes/transcription.js');
 // const translation = require('./routes/translation.js');
-// const membership = require('./routes/membership');
+import * as membership from './routes/membership';
 // const similarity = require('./routes/similarity');
 
-export function getApp(config: Config) {
+import { Database, PostgresDatabase } from './db';
+
+export function getAppForConfig(config: Config) {
+  return getApp({
+    metadataRepository: new MetadataRepository(config.dataDir),
+    database: PostgresDatabase.fromConfig(config),
+    users: config.users,
+    darwinXtfUrl: config.darwinXTF,
+  });
+}
+
+export interface AppOptions {
+  users: Users;
+  metadataRepository: MetadataRepository;
+  database: Database;
+  darwinXtfUrl: string;
+}
+
+export function getApp(options: AppOptions) {
   const app = express();
 
-  debug(config.users);
+  debug(options.users);
   passport.use(
     new Strategy((token: string, done: (err: any, user: any) => void) => {
       process.nextTick(() => {
-        const user = findByApiKey(config.users, token);
+        const user = findByApiKey(options.users, token);
         return done(null, user || false);
       });
     })
@@ -71,19 +89,29 @@ export function getApp(config: Config) {
   app.use(
     '/v1/metadata',
     metadata.getRoutes({
-      metadataRepository: new MetadataRepository(config.dataDir),
+      metadataRepository: options.metadataRepository,
     })
   );
+
+  app.use(
+    '/v1/rdb/membership',
+    membership.getRoutes({
+      getItemCollections: options.database.getItemCollections.bind(
+        options.database
+      ),
+    })
+  );
+
   // app.use('/v1/tags', tags.router);
   // app.use('/v1/transcription',transcription);
   // app.use('/v1/translation', translation);
-  // app.use('/v1/rdb/membership', membership);
+
   // app.use('/v1/xtf/similarity', similarity);
 
   app.use(
     '/v1/darwin',
     passport.authenticate('token', { session: false }),
-    darwin.getRoutes({ darwinXtfUrl: config.darwinXTF })
+    darwin.getRoutes({ darwinXtfUrl: options.darwinXtfUrl })
   );
 
   // 404 if no route matched

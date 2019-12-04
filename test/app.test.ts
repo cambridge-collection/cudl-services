@@ -1,15 +1,15 @@
 import express from 'express';
-import { FORBIDDEN, IM_A_TEAPOT, UNAUTHORIZED } from 'http-status-codes';
+import { IM_A_TEAPOT, OK, UNAUTHORIZED } from 'http-status-codes';
+import * as path from 'path';
 import request from 'supertest';
 
-import { getApp } from '../src/app';
-import { Config } from '../src/config';
+import { AppOptions, getApp } from '../src/app';
+import { MetadataRepository } from '../src/metadata';
 import { TEST_DATA_PATH } from './constants';
-import { DummyHttpServer } from './utils';
+import { DummyHttpServer, MemoryDatabase } from './utils';
 
 describe('app', () => {
   let mockDarwinUpstream: DummyHttpServer;
-  let config: Config;
   let app: express.Application;
 
   beforeAll(async () => {
@@ -23,20 +23,48 @@ describe('app', () => {
     }
   });
 
-  function defaultTestConfig(): Config {
+  function defaultAppOptions(): AppOptions {
     return {
-      darwinXTF: `http://localhost:${mockDarwinUpstream.getPort()}`,
-      dataDir: TEST_DATA_PATH,
+      darwinXtfUrl: `http://localhost:${mockDarwinUpstream.getPort()}`,
+      metadataRepository: new MetadataRepository(
+        path.resolve(TEST_DATA_PATH, 'metadata')
+      ),
       users: {
         supersecret: { username: 'foo', email: 'foo@example.com' },
       },
+      database: new MemoryDatabase({
+        itemCollections: {
+          'MS-ADD-03959': [
+            { title: 'Foo', collectionOrder: 42, collectionID: 'foo' },
+          ],
+        },
+      }),
     };
   }
 
   beforeEach(() => {
     mockDarwinUpstream.requestHandler.mockClear();
-    config = defaultTestConfig();
-    app = getApp(config);
+    app = getApp(defaultAppOptions());
+  });
+
+  describe('/v1/metadata', () => {
+    test('route is registered', async () => {
+      const response = await request(app).get('/v1/metadata/json/MS-ADD-03959');
+      expect(response.status).toBe(OK);
+      expect(response.get('content-type')).toMatch('application/json');
+    });
+  });
+
+  describe('/v1/rdb/membership', () => {
+    test('route is registered', async () => {
+      const response = await request(app).get(
+        '/v1/rdb/membership/collections/MS-ADD-03959'
+      );
+      expect(response.status).toBe(OK);
+      expect(response.text).toMatch(`<title>Foo</title>`);
+      expect(response.text).toMatch(`<collectionorder>42</collectionorder>`);
+      expect(response.text).toMatch(`<collectionid>foo</collectionid>`);
+    });
   });
 
   describe('/v1/darwin', () => {
