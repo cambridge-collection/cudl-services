@@ -7,7 +7,7 @@ import { Resource } from './resources';
 
 type DatabaseConfig = Pick<
   Config,
-  'postHost' | 'postUser' | 'postPass' | 'postDatabase'
+  'postHost' | 'postPort' | 'postUser' | 'postPass' | 'postDatabase'
 >;
 
 export interface Collection {
@@ -37,6 +37,7 @@ export class PostgresDatabasePool implements DatabasePool<PostgresDatabase> {
       new pg.Pool({
         host: config.postHost,
         user: config.postUser,
+        port: config.postPort,
         password: config.postPass,
         database: config.postDatabase,
       })
@@ -81,7 +82,7 @@ FROM collection_membership;`;
     return (await this.client.query(sql, [itemID])).rows.map(row => ({
       title: row.title,
       collectionID: row.collectionid,
-      collectionOrder: row.collectionorder,
+      collectionOrder: Number(row.collectionorder),
     }));
   }
 

@@ -44,6 +44,7 @@ export interface Config {
   users: Users;
   darwinXTF: string;
   postHost: string;
+  postPort?: number;
   postUser: string;
   postPass: string;
   postDatabase: string;

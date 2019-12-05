@@ -13,7 +13,7 @@ module.exports = {
     '^.+\\.(ts|tsx)$': 'ts-jest'
   },
   testMatch: [
-    '<rootDir>/test/**/*.test.(ts|js)'
+    '<rootDir>/(test|integration_test)/**/*.test.(ts|js)',
   ],
   testEnvironment: 'node',
   setupFilesAfterEnv: [

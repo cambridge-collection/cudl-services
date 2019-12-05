@@ -5,6 +5,7 @@
     "dataDir": {"type": "string"},
     "postDatabase": {"type": "string"},
     "postHost": {"type": "string"},
+    "postPort": {"type": "number"},
     "postPass": {"type": "string"},
     "postUser": {"type": "string"},
     "users": {

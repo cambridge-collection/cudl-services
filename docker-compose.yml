@@ -1,0 +1,30 @@
+version: "3"
+
+services:
+  db:
+    image: postgres:12
+    restart: always
+    environment:
+      POSTGRES_USER: cudlservices
+      POSTGRES_DB: cudlservices
+      POSTGRES_PASSWORD: ${TEST_DB_PASSWORD:-password}
+    ports:
+      - "${TEST_DB_PORT:-5432}:5432"
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "8080:8080"
+
+  flyway:
+    image: flyway/flyway:6.1.0
+    depends_on:
+      - db
+    volumes:
+      - ./integration_test/data/postgres-migration:/flyway/sql
+    environment:
+      FLYWAY_URL: jdbc:postgresql://db/cudlservices
+      FLYWAY_USER: cudlservices
+      FLYWAY_PASSWORD: ${TEST_DB_PASSWORD:-password}
+    command: migrate -connectRetries=60
