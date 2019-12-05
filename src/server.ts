@@ -6,7 +6,7 @@ import { using } from './resources';
 
 const debug = Debugger('cudl-services');
 
-async function run() {
+async function runAsync() {
   let config: Config;
   try {
     config = loadConfigFromEnvar();
@@ -60,7 +60,9 @@ async function run() {
   console.log(`server stopped.`);
 }
 
-run().catch(e => {
-  console.error(`Error: Server exited with an uncaught exception:\n\n`, e);
-  process.exit(1);
-});
+export function run() {
+  runAsync().catch(e => {
+    console.error(`Error: Server exited with an uncaught exception:\n\n`, e);
+    process.exit(1);
+  });
+}

@@ -3,6 +3,9 @@
   "version": "0.0.1",
   "private": true,
   "main": "./lib/server.js",
+  "bin": {
+    "cudl-services": "./bin/cudl-services.js"
+  },
   "scripts": {
     "build": "tsc --build tsconfig.build.json",
     "check": "gts check",
