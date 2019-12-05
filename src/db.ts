@@ -3,6 +3,7 @@
  */
 import pg from 'pg';
 import { Config } from './config';
+import { Resource } from './resources';
 
 type DatabaseConfig = Pick<
   Config,
@@ -16,11 +17,15 @@ export interface Collection {
 }
 export type GetItemCollections = (itemID: string) => Promise<Collection[]>;
 
-export interface Database {
+export interface DatabasePool<T extends Database = Database> extends Resource {
+  getDatabase(): Promise<T>;
+}
+
+export interface Database extends Resource {
   getItemCollections: GetItemCollections;
 }
 
-export class PostgresDatabase implements Database {
+export class PostgresDatabasePool implements DatabasePool<PostgresDatabase> {
   private readonly pool: pg.Pool;
 
   constructor(pool: pg.Pool) {
@@ -28,7 +33,7 @@ export class PostgresDatabase implements Database {
   }
 
   static fromConfig(config: DatabaseConfig) {
-    return new PostgresDatabase(
+    return new PostgresDatabasePool(
       new pg.Pool({
         host: config.postHost,
         user: config.postUser,
@@ -38,16 +43,24 @@ export class PostgresDatabase implements Database {
     );
   }
 
-  /**
-   * Obtain a db connection an execute a single query.
-   */
-  private async query(sql: string, bindParams: [any]) {
-    const client = await this.pool.connect();
-    try {
-      return await client.query(sql, bindParams || []);
-    } finally {
-      client.release();
-    }
+  close(): Promise<void> {
+    return this.pool.end();
+  }
+
+  async getDatabase(): Promise<PostgresDatabase> {
+    return new PostgresDatabase(await this.pool.connect());
+  }
+}
+
+export class PostgresDatabase implements Database {
+  private readonly client: pg.PoolClient;
+
+  constructor(client: pg.PoolClient) {
+    this.client = client;
+  }
+
+  getClient(): pg.ClientBase {
+    return this.client;
   }
 
   async getItemCollections(itemID: string): Promise<Collection[]> {
@@ -65,10 +78,14 @@ WITH RECURSIVE collection_membership(collectionid, title, collectionorder) AS (
 )
 SELECT *
 FROM collection_membership;`;
-    return (await this.query(sql, [itemID])).rows.map(row => ({
+    return (await this.client.query(sql, [itemID])).rows.map(row => ({
       title: row.title,
       collectionID: row.collectionid,
       collectionOrder: row.collectionorder,
     }));
+  }
+
+  async close(): Promise<void> {
+    this.client.release();
   }
 }

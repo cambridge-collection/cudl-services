@@ -1,4 +1,4 @@
-import {Config, loadConfigFromEnvar} from '../src/config';
+import { Config, loadConfigFromEnvar } from '../src/config';
 import ProcessEnv = NodeJS.ProcessEnv;
 
 const EXAMPLE_CONFIG: Config = {
@@ -33,7 +33,7 @@ describe('config', () => {
     test('reports failure due to missing config module', () => {
       global.process.env['CUDL_SERVICES_CONFIG'] = '/some/config.js';
       expect(loadConfigFromEnvar).toThrow(
-        'Failed to load config from \'/some/config.js\': Cannot find module \'/some/config.js\''
+        "Failed to load config from '/some/config.js': Cannot find module '/some/config.js'"
       );
     });
 

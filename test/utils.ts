@@ -3,7 +3,8 @@ import http from 'http';
 import { IM_A_TEAPOT } from 'http-status-codes';
 import { promisify } from 'util';
 
-import { Database, Collection } from '../src/db';
+import { Database, Collection, DatabasePool } from '../src/db';
+import { BaseResource } from '../src/resources';
 
 /**
  * An HTTP server listening on a random port on the loopback interface which
@@ -54,14 +55,31 @@ interface ItemCollections {
   [itemID: string]: Collection[];
 }
 
-export class MemoryDatabase implements Database {
-  private readonly itemCollections: ItemCollections;
+export class MemoryDatabasePool extends BaseResource
+  implements DatabasePool<MemoryDatabase> {
+  readonly itemCollections: ItemCollections;
 
   constructor(options: { itemCollections: ItemCollections }) {
+    super();
     this.itemCollections = options.itemCollections;
   }
 
+  async getDatabase(): Promise<MemoryDatabase> {
+    this.ensureNotClosed();
+    return new MemoryDatabase(this);
+  }
+}
+
+export class MemoryDatabase extends BaseResource implements Database {
+  private readonly pool: MemoryDatabasePool;
+
+  constructor(pool: MemoryDatabasePool) {
+    super();
+    this.pool = pool;
+  }
+
   async getItemCollections(itemID: string): Promise<Collection[]> {
-    return this.itemCollections[itemID] || [];
+    this.ensureNotClosed();
+    return this.pool.itemCollections[itemID] || [];
   }
 }

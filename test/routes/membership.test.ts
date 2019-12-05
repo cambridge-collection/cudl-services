@@ -4,9 +4,10 @@ import request from 'supertest';
 
 import xml2js from 'xml2js';
 import { Collection, GetItemCollections } from '../../src/db';
+import { using } from '../../src/resources';
 
 import { getRoutes } from '../../src/routes/membership';
-import { MemoryDatabase } from '../utils';
+import { MemoryDatabasePool } from '../utils';
 
 function getTestApp(getItemCollections: GetItemCollections) {
   const app = express();
@@ -37,14 +38,14 @@ describe('membership routes', () => {
       },
     ],
   };
-  const mockDatabase = new MemoryDatabase({ itemCollections });
+  const mockDatabase = new MemoryDatabasePool({ itemCollections });
 
   let getItemCollections: jest.Mock<Promise<Collection[]>, [string]>;
   let app: express.Application;
 
   beforeEach(() => {
-    getItemCollections = jest.fn(
-      mockDatabase.getItemCollections.bind(mockDatabase)
+    getItemCollections = jest.fn(async (itemID: string) =>
+      using(mockDatabase.getDatabase(), db => db.getItemCollections(itemID))
     );
     app = getTestApp(getItemCollections);
   });

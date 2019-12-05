@@ -1,7 +1,8 @@
 {
-  "name": "metadata-api",
+  "name": "cudl-services",
   "version": "0.0.1",
   "private": true,
+  "main": "./lib/server.js",
   "scripts": {
     "build": "tsc --build tsconfig.build.json",
     "check": "gts check",

@@ -12,6 +12,7 @@ const Strategy = require('passport-accesstoken').Strategy;
 
 import { Config, User, Users } from './config';
 import { MetadataRepository } from './metadata';
+import { BaseResource, using } from './resources';
 
 const debug = Debugger('cudl-services');
 
@@ -31,95 +32,116 @@ import * as metadata from './routes/metadata';
 import * as membership from './routes/membership';
 // const similarity = require('./routes/similarity');
 
-import { Database, PostgresDatabase } from './db';
-
-export function getAppForConfig(config: Config) {
-  return getApp({
-    metadataRepository: new MetadataRepository(config.dataDir),
-    database: PostgresDatabase.fromConfig(config),
-    users: config.users,
-    darwinXtfUrl: config.darwinXTF,
-  });
-}
+import {
+  Database,
+  DatabasePool,
+  PostgresDatabase,
+  PostgresDatabasePool,
+} from './db';
 
 export interface AppOptions {
   users: Users;
   metadataRepository: MetadataRepository;
-  database: Database;
+  databasePool: DatabasePool;
   darwinXtfUrl: string;
 }
 
-export function getApp(options: AppOptions) {
-  const app = express();
+export class App extends BaseResource {
+  readonly options: AppOptions;
+  readonly expressApp: express.Application;
 
-  debug(options.users);
-  passport.use(
-    new Strategy((token: string, done: (err: any, user: any) => void) => {
-      process.nextTick(() => {
-        const user = findByApiKey(options.users, token);
-        return done(null, user || false);
-      });
-    })
-  );
+  constructor(options: AppOptions) {
+    super();
+    this.options = Object.freeze({ ...options });
+    this.expressApp = this.createExpressApp();
+  }
 
-  // view engine setup
-  app.set('views', path.resolve(__dirname, '../views'));
-  app.set('view engine', 'pug');
+  static fromConfig(config: Config) {
+    return new App({
+      metadataRepository: new MetadataRepository(config.dataDir),
+      databasePool: PostgresDatabasePool.fromConfig(config),
+      users: config.users,
+      darwinXtfUrl: config.darwinXTF,
+    });
+  }
 
-  app.use(
-    favicon(path.resolve(__dirname, '../public/images/brand/favicon.ico'))
-  );
-  app.use(logger('dev'));
-  app.use(bodyParser.json());
-  app.use(bodyParser.urlencoded({ extended: false }));
-  app.use(cookieParser());
-  app.use(passport.initialize());
-  app.use(express.static(path.resolve(__dirname, '../public')));
+  private createExpressApp(): express.Application {
+    const app = express();
 
-  // Middleware to redirect trailing slashes to same URL without trailing slash
-  app.use((req, res, next) => {
-    if (req.url.substr(-1) === '/' && req.url.length > 1) {
-      res.redirect(301, req.url.slice(0, -1));
-    } else {
-      next();
-    }
-  });
+    passport.use(
+      new Strategy((token: string, done: (err: any, user: any) => void) => {
+        process.nextTick(() => {
+          const user = findByApiKey(this.options.users, token);
+          return done(null, user || false);
+        });
+      })
+    );
 
-  //app.use('/', routes);
-  app.use(
-    '/v1/metadata',
-    metadata.getRoutes({
-      metadataRepository: options.metadataRepository,
-    })
-  );
+    // view engine setup
+    app.set('views', path.resolve(__dirname, '../views'));
+    app.set('view engine', 'pug');
 
-  app.use(
-    '/v1/rdb/membership',
-    membership.getRoutes({
-      getItemCollections: options.database.getItemCollections.bind(
-        options.database
-      ),
-    })
-  );
+    app.use(
+      favicon(path.resolve(__dirname, '../public/images/brand/favicon.ico'))
+    );
+    app.use(logger('dev'));
+    app.use(bodyParser.json());
+    app.use(bodyParser.urlencoded({ extended: false }));
+    app.use(cookieParser());
+    app.use(passport.initialize());
+    app.use(express.static(path.resolve(__dirname, '../public')));
 
-  // app.use('/v1/tags', tags.router);
-  // app.use('/v1/transcription',transcription);
-  // app.use('/v1/translation', translation);
+    // Middleware to redirect trailing slashes to same URL without trailing slash
+    app.use((req, res, next) => {
+      if (req.url.substr(-1) === '/' && req.url.length > 1) {
+        res.redirect(301, req.url.slice(0, -1));
+      } else {
+        next();
+      }
+    });
 
-  // app.use('/v1/xtf/similarity', similarity);
+    //app.use('/', routes);
+    app.use(
+      '/v1/metadata',
+      metadata.getRoutes({
+        metadataRepository: this.options.metadataRepository,
+      })
+    );
 
-  app.use(
-    '/v1/darwin',
-    passport.authenticate('token', { session: false }),
-    darwin.getRoutes({ darwinXtfUrl: options.darwinXtfUrl })
-  );
+    app.use(
+      '/v1/rdb/membership',
+      membership.getRoutes({
+        getItemCollections: async (itemID: string) =>
+          using(this.options.databasePool.getDatabase(), db =>
+            db.getItemCollections(itemID)
+          ),
+      })
+    );
 
-  // 404 if no route matched
-  app.use((req: Request, res: Response, next: NextFunction) => {
-    res.status(404).send('Not Found');
-  });
+    // app.use('/v1/tags', tags.router);
+    // app.use('/v1/transcription',transcription);
+    // app.use('/v1/translation', translation);
 
-  return app;
+    // app.use('/v1/xtf/similarity', similarity);
+
+    app.use(
+      '/v1/darwin',
+      passport.authenticate('token', { session: false }),
+      darwin.getRoutes({ darwinXtfUrl: this.options.darwinXtfUrl })
+    );
+
+    // 404 if no route matched
+    app.use((req: Request, res: Response, next: NextFunction) => {
+      res.status(404).send('Not Found');
+    });
+
+    return app;
+  }
+
+  async close(): Promise<void> {
+    super.close();
+    await this.options.databasePool.close();
+  }
 }
 
 function findByApiKey(users: Users, apiKey: string): User | null {

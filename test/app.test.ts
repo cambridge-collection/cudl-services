@@ -3,13 +3,14 @@ import { IM_A_TEAPOT, OK, UNAUTHORIZED } from 'http-status-codes';
 import * as path from 'path';
 import request from 'supertest';
 
-import { AppOptions, getApp } from '../src/app';
+import { AppOptions, App } from '../src/app';
 import { MetadataRepository } from '../src/metadata';
 import { TEST_DATA_PATH } from './constants';
-import { DummyHttpServer, MemoryDatabase } from './utils';
+import { DummyHttpServer, MemoryDatabasePool } from './utils';
 
 describe('app', () => {
   let mockDarwinUpstream: DummyHttpServer;
+  let application: App;
   let app: express.Application;
 
   beforeAll(async () => {
@@ -32,7 +33,7 @@ describe('app', () => {
       users: {
         supersecret: { username: 'foo', email: 'foo@example.com' },
       },
-      database: new MemoryDatabase({
+      databasePool: new MemoryDatabasePool({
         itemCollections: {
           'MS-ADD-03959': [
             { title: 'Foo', collectionOrder: 42, collectionID: 'foo' },
@@ -44,7 +45,8 @@ describe('app', () => {
 
   beforeEach(() => {
     mockDarwinUpstream.requestHandler.mockClear();
-    app = getApp(defaultAppOptions());
+    application = new App(defaultAppOptions());
+    app = application.expressApp;
   });
 
   describe('/v1/metadata', () => {
