@@ -1,11 +1,17 @@
 import express from 'express';
+import * as fs from 'fs';
 import { IM_A_TEAPOT, OK, UNAUTHORIZED } from 'http-status-codes';
 import * as path from 'path';
 import request from 'supertest';
+import { promisify } from 'util';
 
-import { AppOptions, App } from '../src/app';
+import { App, AppOptions } from '../src/app';
 import { MetadataRepository } from '../src/metadata';
-import { TEST_DATA_PATH } from './constants';
+import {
+  STATIC_FILES,
+  EXAMPLE_STATIC_FILES,
+  TEST_DATA_PATH,
+} from './constants';
 import { DummyHttpServer, MemoryDatabasePool } from './utils';
 
 describe('app', () => {
@@ -89,5 +95,23 @@ describe('app', () => {
       expect(response.status).toBe(IM_A_TEAPOT);
       expect(response.text).toBe('foobar');
     });
+  });
+
+  describe('static files', () => {
+    test.each(Object.values(EXAMPLE_STATIC_FILES).map(sf => [sf]))(
+      'static file %o is served',
+      async (resource: { path: string; type: string }) => {
+        const response = await request(app)
+          .get(`/${resource.path}`)
+          .responseType('blob');
+        expect(response.status).toBe(OK);
+        expect(response.type).toBe(resource.type);
+        expect(response.body).toEqual(
+          await promisify(fs.readFile)(
+            path.resolve(STATIC_FILES, resource.path)
+          )
+        );
+      }
+    );
   });
 });

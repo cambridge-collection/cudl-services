@@ -15,9 +15,7 @@ import { MetadataRepository } from '../../src/metadata';
 import { getRoutes } from '../../src/routes/metadata';
 import { TEST_DATA_PATH } from '../constants';
 
-function getTestDataMetadataRepository(): MetadataRepository {
-  return new MetadataRepository(path.resolve(TEST_DATA_PATH, 'metadata'));
-}
+import { getTestDataMetadataRepository } from '../utils';
 
 function getTestApp(metadataRepository: MetadataRepository) {
   const app = express();

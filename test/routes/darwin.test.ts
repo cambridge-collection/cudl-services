@@ -18,7 +18,7 @@ function getTestApp(routePrefix: string, darwinXtfUrl: string) {
 // /v1/darwin/view?docId=letters/DCP-LETT-10362F.xml;query=Linnean%20Society;brand=default;hit.rank=4
 // /v1/darwin/search?keyword=Linnean%20Society;foo=bar
 
-describe(`metadata routes /:format/:id`, () => {
+describe(`darwin proxy /*`, () => {
   // We test the proxy by setting up a temporary HTTP server to act as the
   // upstream.
   let dummyUpstream: DummyHttpServer;

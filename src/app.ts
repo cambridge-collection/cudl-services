@@ -1,4 +1,5 @@
 //Modules
+import { XSLTExecutor } from '@lib.cam/xslt-nailgun';
 import express, { NextFunction, Request, Response } from 'express';
 import bodyParser from 'body-parser';
 import fs from 'fs-extra';
@@ -28,7 +29,7 @@ import * as darwin from './routes/darwin';
 import * as metadata from './routes/metadata';
 // const tags = require('./routes/tags');
 // const transcription = require('./routes/transcription.js');
-// const translation = require('./routes/translation.js');
+import * as translation from './routes/translation';
 import * as membership from './routes/membership';
 // const similarity = require('./routes/similarity');
 
@@ -49,10 +50,12 @@ export interface AppOptions {
 export class App extends BaseResource {
   readonly options: AppOptions;
   readonly expressApp: express.Application;
+  protected readonly xsltExecutor: XSLTExecutor;
 
   constructor(options: AppOptions) {
     super();
     this.options = Object.freeze({ ...options });
+    this.xsltExecutor = XSLTExecutor.getInstance();
     this.expressApp = this.createExpressApp();
   }
 
@@ -120,7 +123,13 @@ export class App extends BaseResource {
 
     // app.use('/v1/tags', tags.router);
     // app.use('/v1/transcription',transcription);
-    // app.use('/v1/translation', translation);
+    app.use(
+      '/v1/translation',
+      translation.getRoutes({
+        metadataRepository: this.options.metadataRepository,
+        xsltExecutor: this.xsltExecutor,
+      })
+    );
 
     // app.use('/v1/xtf/similarity', similarity);
 
@@ -139,8 +148,11 @@ export class App extends BaseResource {
   }
 
   async close(): Promise<void> {
-    super.close();
-    await this.options.databasePool.close();
+    await Promise.all([
+      super.close(),
+      this.options.databasePool.close(),
+      this.xsltExecutor.close(),
+    ]);
   }
 }
 

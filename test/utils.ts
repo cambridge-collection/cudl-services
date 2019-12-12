@@ -1,9 +1,11 @@
 import { AssertionError } from 'assert';
 import http from 'http';
 import { IM_A_TEAPOT } from 'http-status-codes';
+import * as path from 'path';
 import { promisify } from 'util';
 
 import { Database, Collection, DatabasePool } from '../src/db';
+import { MetadataRepository } from '../src/metadata';
 import { BaseResource } from '../src/resources';
 
 /**
@@ -82,4 +84,10 @@ export class MemoryDatabase extends BaseResource implements Database {
     this.ensureNotClosed();
     return this.pool.itemCollections[itemID] || [];
   }
+}
+
+import { TEST_DATA_PATH } from './constants';
+
+export function getTestDataMetadataRepository(): MetadataRepository {
+  return new MetadataRepository(path.resolve(TEST_DATA_PATH, 'metadata'));
 }

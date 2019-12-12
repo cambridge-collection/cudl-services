@@ -26,7 +26,7 @@ export function isExternalCorsRequest(req: express.Request) {
 }
 
 export function isSimplePathSegment(value: string): boolean {
-  return /^[\w-]+$/.test(value);
+  return /^[\w -]+$/.test(value);
 }
 
 export class BaseError extends NestedError {
