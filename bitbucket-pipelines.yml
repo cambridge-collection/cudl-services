@@ -1,18 +1,16 @@
-image: node:12
+image: camdl/docker-compose-pipelines:0.0.0
+
 pipelines:
   default:
-    - parallel:
-      - step:
-          name: Test
-          script:
-            - npm ci
-            - npm run test
-          caches:
-            - node
-      - step:
-          name: Package
-          script:
-            - apt-get update && apt-get install --no-install-recommends --yes jq
-            - make pack
-          caches:
-            - node
+    - step:
+        name: Test
+        script:
+          - docker-compose run -T test
+        services:
+          - docker
+        caches:
+          - docker
+definitions:
+  services:
+    docker:
+      memory: 3072

@@ -12,11 +12,12 @@ module.exports = {
   transform: {
     '^.+\\.(ts|tsx)$': 'ts-jest'
   },
-  testMatch: [
-    '<rootDir>/(test|integration_test)/**/*.test.(ts|js)',
-  ],
   testEnvironment: 'node',
-  setupFilesAfterEnv: [
-    // '<rootDir>/test/setup.ts'
-  ]
+  roots: [
+    "<rootDir>/src/",
+    "<rootDir>/test/",
+    "<rootDir>/integration_test/"
+  ],
+  // The 5 second default is often not enough in slow CI environments
+  testTimeout: 1000 * 30
 };

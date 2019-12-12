@@ -1,6 +1,16 @@
 version: "3"
 
 services:
+  test:
+    build: .
+    environment:
+      TEST_DB_HOST: db
+      CI: 'true'
+    command: npm test --runInBand
+    depends_on:
+      - db
+      - flyway
+
   db:
     image: postgres:12
     restart: always
@@ -10,12 +20,6 @@ services:
       POSTGRES_PASSWORD: ${TEST_DB_PASSWORD:-password}
     ports:
       - "${TEST_DB_PORT:-5432}:5432"
-
-  adminer:
-    image: adminer
-    restart: always
-    ports:
-      - "8080:8080"
 
   flyway:
     image: flyway/flyway:6.1.0

@@ -106,6 +106,7 @@ describe('app', () => {
           .responseType('blob');
         expect(response.status).toBe(OK);
         expect(response.type).toBe(resource.type);
+
         expect(response.body).toEqual(
           await promisify(fs.readFile)(
             path.resolve(STATIC_FILES, resource.path)

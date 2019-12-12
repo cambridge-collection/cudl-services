@@ -1,0 +1,10 @@
+version: "3"
+
+# This extends the main compose file with an additional database administration
+# webapp, to manipulate/inspect with the postgres database.
+services:
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "8080:8080"

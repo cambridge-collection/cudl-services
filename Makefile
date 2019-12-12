@@ -67,8 +67,10 @@ build: compile-typescript copy-files build/dist-root \
 lint:
 	npm run check
 
-pack: ensure-clean-checkout check build
+pack: check build
 	cd build && npm pack ./dist-root
+
+pack-release: ensure-clean-checkout pack
 
 npm-ci: $(NPM_CI_TARGET)
 
