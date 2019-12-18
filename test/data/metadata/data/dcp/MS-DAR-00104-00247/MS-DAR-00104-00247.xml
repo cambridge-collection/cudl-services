@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<data>
+  <calendarnum>818</calendarnum>
+  <lognum>4070</lognum>
+  <calfile>../data/temp_split/calendars_818_4070.xml</calfile>
+  <letfile>../data/temp_split/letters_818_4070.xml</letfile>
+  <transfile/>
+  <associateddata>
+      <addmats>
+         <addmat>
+            <type>document-thumbnail</type>
+            <orientation>landscape</orientation>
+            <url>http://cudl.lib.cam.ac.uk/content/images/MS-DAR-00104-000-00499_files/8/0_0.jpg</url>
+            <label>thumbnail</label>
+            <sequence/>
+            <id>thumbnail</id>
+         </addmat>
+         <addmat height="2434px" width="4836px">
+            <type>download</type>
+            <url>http://cudl.lib.cam.ac.uk/content/images/MS-DAR-00104-000-00499.jpg</url>
+            <label>247r</label>
+            <sequence>1</sequence>
+            <id>cudl_mss_1</id>
+         </addmat>
+         <addmat>
+            <type>thumbnail</type>
+            <url>http://cudl.lib.cam.ac.uk/content/images/MS-DAR-00104-000-00499_files/8/0_0.jpg</url>
+            <orientation>landscape</orientation>
+            <label>247r</label>
+            <sequence>1</sequence>
+            <id>cudl_mss_1</id>
+         </addmat>
+         <addmat height="2434px" width="4836px">
+            <type>download</type>
+            <url>http://cudl.lib.cam.ac.uk/content/images/MS-DAR-00104-000-00500.jpg</url>
+            <label>247v</label>
+            <sequence>2</sequence>
+            <id>cudl_mss_2</id>
+         </addmat>
+         <addmat>
+            <type>thumbnail</type>
+            <url>http://cudl.lib.cam.ac.uk/content/images/MS-DAR-00104-000-00500_files/8/0_0.jpg</url>
+            <orientation>landscape</orientation>
+            <label>247v</label>
+            <sequence>2</sequence>
+            <id>cudl_mss_2</id>
+         </addmat>
+         <addmat height="2910px" width="5016px">
+            <type>download</type>
+            <url>http://cudl.lib.cam.ac.uk/content/images/MS-DAR-00104-000-00501.jpg</url>
+            <label>248r</label>
+            <sequence>3</sequence>
+            <id>cudl_mss_3</id>
+         </addmat>
+         <addmat>
+            <type>thumbnail</type>
+            <url>http://cudl.lib.cam.ac.uk/content/images/MS-DAR-00104-000-00501_files/8/0_0.jpg</url>
+            <orientation>landscape</orientation>
+            <label>248r</label>
+            <sequence>3</sequence>
+            <id>cudl_mss_3</id>
+         </addmat>
+         <addmat height="2910px" width="5016px">
+            <type>download</type>
+            <url>http://cudl.lib.cam.ac.uk/content/images/MS-DAR-00104-000-00502.jpg</url>
+            <label>248v</label>
+            <sequence>4</sequence>
+            <id>cudl_mss_4</id>
+         </addmat>
+         <addmat>
+            <type>thumbnail</type>
+            <url>http://cudl.lib.cam.ac.uk/content/images/MS-DAR-00104-000-00502_files/8/0_0.jpg</url>
+            <orientation>landscape</orientation>
+            <label>248v</label>
+            <sequence>4</sequence>
+            <id>cudl_mss_4</id>
+         </addmat>
+      </addmats>
+  </associateddata>
+  <caldata>
+      <entry>
+         <calendarnum>818</calendarnum>
+         <lognum>4070</lognum>
+         <volume>3</volume>
+         <stati>
+            <status type="web" code="live">
+
+               <transcription_view hide="false"/>
+               <footnotes_view hide="false"/>
+               <translation_view hide="false"/>
+               <reason/>
+            </status>
+            <status type="print" code="unknown">
+               <reason/>
+            </status>
+         </stati>
+         <author>
+            <names>
+               <name>
+                  <origForm id="2357" synonym="" status="">Hooker, J. D.</origForm>
+                  <authForms>
+                     <authForm authority="viaf" id="17306215">Hooker, Joseph Dalton, Sir,
+                    1817-1911</authForm>
+                  </authForms>
+               </name>
+            </names>
+            <address>
+               <origForm>unstated</origForm>
+            </address>
+         </author>
+         <addressee>
+            <names>
+               <name>
+                  <origForm id="1" synonym="" status="">Darwin, C. R.</origForm>
+                  <authForms>
+                     <authForm authority="viaf" id="27063124">Darwin, Charles,
+                    1809-1882</authForm>
+                  </authForms>
+               </name>
+            </names>
+         </addressee>
+         <summary>
+            <segment>
+               <subjects>
+                  <subject class="scientific">
+                     <origForm id="">flora</origForm>
+                     <authForms>
+                        <authForm authority="lcsh" id="sh85102839">Plants</authForm>
+                     </authForms>
+                  </subject>
+                  <subject class="scientific">
+                     <origForm id="">isolation, islands</origForm>
+                  </subject>
+                  <subject class="scientific">
+                     <origForm id=""> information, data, scientific description </origForm>
+                  </subject>
+                  <subject class="place">
+                     <origForm id="">Society Islands</origForm>
+                     <authForms>
+                        <authForm authority="getty" id="7006218">Society Islands</authForm>
+                     </authForms>
+                  </subject>
+                  <subject class="place">
+                     <origForm id="">Sandwich Islands</origForm>
+                     <authForms>
+                        <authForm authority="getty" id="1010312">Sandwich Islands</authForm>
+                     </authForms>
+                  </subject>
+               </subjects>
+               <summaries>
+                  <summaryitem>
+                     <p> Sends comparison of the floras of Society and Sandwich Islands. </p>
+                  </summaryitem>
+               </summaries>
+            </segment>
+         </summary>
+         <dates>[22–30 Jan 1845]</dates>
+         <convertedDates>
+            <conversion source="[22–30 Jan 1845]">
+               <date source="other">
+                  <year>1845</year>
+                  <month>1</month>
+                  <date_range>
+                     <date_start>
+                        <day>22</day>
+                     </date_start>
+                     <date_end>
+                        <day>30</day>
+                     </date_end>
+                  </date_range>
+               </date>
+               <expansion from="1845-01-22" to="1845-01-30">
+                  <interval>1845-01-22/P9D</interval>
+               </expansion>
+            </conversion>
+         </convertedDates>
+         <dimensions/>
+         <physdescs>
+            <physdesc id="inc"> †, <physref>Darwin note</physref> 2pp </physdesc>
+         </physdescs>
+         <location>
+            <repository>CUL</repository>
+            <collection>DAR</collection>
+            <idno>104: 247–8</idno>
+         </location>
+         <repositories>
+         </repositories>
+         <repository_suffix/>
+         <cul-copy/>
+      </entry>
+      <origfilecalendars>../../../../../dcp_xml_2/calendars/calendar_entries_00001-00999.xml</origfilecalendars>
+  </caldata>
+  <letdata>
+      <letter>
+         <lognum>4070</lognum>
+         <calendarnum>818</calendarnum>
+         <text>
+            <header benn="undefined"
+                    year="undefined"
+                    date="undefined"
+                    month="undefined">
+               <p>From J. D. Hooker  [22–30 January 1845]<mark id="818.f1"/>
+               </p>
+               <haddress/>
+               <hdate/>
+               <hsendname/>
+               <hsal/>
+            </header>
+            <transcription>
+               <p align="right">–</p>
+               <p align="right">–</p>
+               <p>– is versed enough in Nat. Hist. even for that. I send the comp. Flora of
+            Sandwich &amp; Society: it is very imperfect, I could not send it before, as I had
+            some things to add to it. as it is I think <mark id="818.a1"/>it shews positively
+            no relation between the two groups. Even the <it>canaille</it> are not the same in the
+            two. I have had to drop the Pacific Flora, from want of time<mark id="818.a2"/>
+            &lt; &gt;</p>
+               <p>&lt; &gt; <mark id="818.a3" fixme="1"/>from the context he<mark id="818.f2"/> cannot mean, without he compares the
+            M<super>ts</super>
+                  <abbrev-mark/> to the plains below: Certainly the genera
+            remind one of Europe, especially Wicken (vetches <it>Vicia</it>.) &amp;c. I can
+            however hardly see how so <it>very</it> few Proteaceae as there are, can much remind him
+            of New Holland a place I suppose he never saw &amp; singular fruited Legum. grow all
+            over the world &amp; &lt; &gt; Holld. that I remember..
+              Gnapha&lt;lium&gt;<mark id="818.a4"/>
+               </p>
+            </transcription>
+         </text>
+         <enclosure>
+            <otherenc>
+               <transcription/>
+            </otherenc>
+         </enclosure>
+         <endorsement/>
+         <description/>
+         <postmark>
+            <origForm/>
+         </postmark>
+         <provenance/>
+         <annotations>
+            <annotation>
+               <fixme>
+                  <note> 1.1 is versed … that.] <it>crossed pencil</it>
+                  </note>
+               </fixme>
+            </annotation>
+            <annotation>
+               <start_mark>818.a1</start_mark>
+               <end_mark>818.a2</end_mark>
+               <note>
+                  <it>scored pencil</it>
+               </note>
+            </annotation>
+            <annotation>
+               <start_mark>818.a3</start_mark>
+               <end_mark>818.a4</end_mark>
+               <note>
+                  <it>crossed pencil</it>
+               </note>
+            </annotation>
+         </annotations>
+         <comments>
+            <comment>Personal names added from VIAF.</comment>
+            <comment>Organisation names added from VIAF.</comment>
+            <comment>Concepts added from LCSH.</comment>
+            <comment>Place ids added from Getty.</comment>
+            <comment>Fixed backslash quotes</comment>
+            <comment>Fixed double quotes</comment>
+            <comment>Fixed double backticks</comment>
+            <comment>Fixed single backticks</comment>
+            <comment>Altered instances of CD to Darwin</comment>
+            <comment>Altered instances of JDH to Hooker</comment>
+            <comment>Inserted image filenames and pagination</comment>
+         </comments>
+         <footnotes>
+            <footnote>
+               <mark>818.f1</mark>
+               <note>This fragment of a letter was pinned to the following note, in ink, by Darwin:
+              <quotation> Feb. 1845. Hookers list of Society Is<super>d</super> includes about
+              250 Phænerog excluding grasses, &amp; 270 from
+              Sandwich group. out of these there are only 32 species in common, including
+              no doubt (one by name Convolvulus) Scævola &amp;c) some
+              coral-plants.— At the Soc Is<super>d</super> there
+              25 gramineæ &amp; at Sandwich 24. &amp; 6 [<it>over</it>
+              ‘5’] in common.— Of Lycopodiæ Soc &amp;
+              Sandwich have each 12 with 5 in common.— (DAR 104:
+            248).</quotation> On the verso of Darwin's note is a table of numbers as summarised
+            above. The date of Hooker's letter must follow that of the letter from Darwin to
+            Hooker, 22 [January 1845], and is probably before Hooker's departure on his
+            European tour (see Huxley ed. 1918, 1: 177–8).</note>
+            </footnote>
+            <footnote>
+               <mark>818.f2</mark>
+               <note>Eduard Pöppig in Pöppig 1835, 1: 367.</note>
+            </footnote>
+         </footnotes>
+      </letter>
+      <origfileletters>../../../../../dcp_xml_2/letters/letters.xml</origfileletters>
+  </letdata>
+</data>

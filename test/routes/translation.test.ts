@@ -3,10 +3,10 @@ import express, { Application } from 'express';
 import { BAD_REQUEST, NOT_FOUND, OK } from 'http-status-codes';
 import { JSDOM } from 'jsdom';
 import request from 'supertest';
-import { MetadataRepository } from '../../src/metadata';
+import { CUDLMetadataRepository } from '../../src/metadata';
 import { getRoutes } from '../../src/routes/translation';
 
-import { getTestDataMetadataRepository } from '../utils';
+import { getTestDataMetadataRepository, getTestXSLTExecutor } from '../utils';
 
 import { EXAMPLE_STATIC_FILES } from '../constants';
 
@@ -15,7 +15,7 @@ import { EXAMPLE_STATIC_FILES } from '../constants';
 // /v1/translation/tei/EN/MS-LC-II-00077/viii%20recto/viii%20recto
 
 function getTestApp(
-  metadataRepository: MetadataRepository,
+  metadataRepository: CUDLMetadataRepository,
   xsltExecutor: XSLTExecutor
 ) {
   const app = express();
@@ -24,12 +24,12 @@ function getTestApp(
 }
 
 describe(`translation routes /tei/EN/:id/:from/:to`, () => {
-  let metadataRepository: MetadataRepository;
+  let metadataRepository: CUDLMetadataRepository;
   let xsltExecutor: XSLTExecutor;
   let app: Application;
 
   beforeAll(() => {
-    xsltExecutor = XSLTExecutor.getInstance();
+    xsltExecutor = getTestXSLTExecutor();
     metadataRepository = getTestDataMetadataRepository();
     app = getTestApp(metadataRepository, xsltExecutor);
   });

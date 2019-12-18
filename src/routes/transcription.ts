@@ -1,390 +1,538 @@
-var http = require('http');
+import { XSLTExecutor } from '@lib.cam/xslt-nailgun';
+import { ExecuteOptions } from '@lib.cam/xslt-nailgun/lib/_internals';
+import express, { Request } from 'express';
 
-var debug = require('debug')('cudl:transcription');
-var express = require('express');
-var glob = require('glob');
-var iconv = require('iconv-lite');
-var parseHttpHeader = require('parse-http-header');
-var SimpleCache = require('Simple-Cache').SimpleCache;
-var tidy = require('htmltidy2').tidy;
-var xslt = require('xslt4node');
+import {
+  BAD_GATEWAY,
+  BAD_REQUEST,
+  INTERNAL_SERVER_ERROR,
+  NOT_FOUND,
+} from 'http-status-codes';
 
-var config = require('../config').default;
-var cache = SimpleCache(config.cacheDir+'/transcriptions', debug);
-var router = express.Router();
-var transform = xslt.transform;
+import { JSDOM } from 'jsdom';
+import path from 'path';
+import superagent from 'superagent';
+import * as URI from 'uri-js';
+import * as util from 'util';
+import {
+  CUDLFormat,
+  CUDLMetadataRepository,
+  LegacyDarwinFormat,
+  LegacyDarwinMetadataRepository,
+  MetadataRepository,
+} from '../metadata';
+import { NotFoundError, UpstreamError } from '../util';
+import expressAsyncHandler = require('express-async-handler');
 
-// The newtonproject's responses are latin1 encoded, which node doesn't support
-// by default. iconv-lite provides extra encodings such as latin1.
-iconv.extendNodeEncodings();
-
-xslt.addLibrary(config.appDir+'/saxon/saxon9he.jar');
-
-/* GET home page. */
-router.get('/', function(req, res) {
-  res.render('index', { title: 'Metadata' });
-});
-
-/**
- * Automatically set the encoding of an HTTP response according to the
- * Content-Type header's charset field.
- *
- * @returns true if successful, false otherwise
- */
-function detectEncoding(response) {
-    if(typeof response === 'object' && response.headers) {
-        var charset = parseHttpHeader(response.headers['content-type']).charset;
-        if(charset !== undefined) {
-            try {
-                response.setEncoding(charset);
-                return true;
-            }
-            catch(e) {
-                // unsupported encoding
-            }
-        }
-    }
-
-    return false;
+interface TranscriptionEndpoint<T> {
+  path: string;
+  service: TranscriptionService<T>;
+  options: (req: Request) => T;
 }
 
-router.get('/newton/:type/:location/:id/:from/:to', function(req, res) {
-    cache.get('newton-'+req.params.type+'-'+req.params.id+'-'+req.params.from+'-'+req.params.to, function(callback) {
-        var options = {
-            host: 'www.newtonproject.ox.ac.uk',
-            path: '/view/texts/' + req.params.type + '/' + req.params.id + '?skin=minimal&show_header=no&start=' +
-                req.params.from + '&end=' + req.params.to
-        };
+type XSLTOptions<T, F> = T & { id: string; format: F };
 
-        var request = http.get(options, function(response) {
+function xsltTranscriptionEndpoint<Fmt extends string, Opt>(options: {
+  path: string;
+  metadataRepository: MetadataRepository<Fmt>;
+  xsltExecutor: XSLTExecutor;
+  transforms: Array<TransformStage<XSLTOptions<Opt, Fmt>>>;
+  options: (req: Request) => XSLTOptions<Opt, Fmt>;
+}): TranscriptionEndpoint<XSLTOptions<Opt, Fmt>> {
+  return {
+    options: options.options,
+    path: options.path,
+    service: new XSLTTranscriptionService<XSLTOptions<Opt, Fmt>>({
+      metadataRepository: options.metadataRepository,
+      transforms: options.transforms,
+      xsltExecutor: options.xsltExecutor,
+    }),
+  };
+}
 
-            var requestFailed = false;
-            var detectedEncoding = detectEncoding(response);
-            if(!detectedEncoding) {
-                request.abort();
-                response.destroy();
-                res.status(500).render('error', {
-                    message: 'Unsupported external transcription provider encoding.',
-                    error: { status: 500 }
-                });
-                requestFailed = true;
-            }
+export function getRoutes(options: {
+  router?: express.Router;
+  metadataRepository: CUDLMetadataRepository;
+  legacyDarwinMetadataRepository: LegacyDarwinMetadataRepository;
+  xsltExecutor: XSLTExecutor;
+}) {
+  const router = options.router || express.Router();
 
-            if (response.statusCode !== 200) {
-                res.status(500).render('error', {
-                    message: 'Transcription not found at external provider',
-                    error: { status: response.statusCode }
-                });
-            }
-            var body = '';
-            response.on('data', function(chunk) {
-                    body += chunk;
-              });
-             response.on('end', function() {
-                // Don't cache the result of failed responses
-                if(requestFailed) {
-                    return;
-                }
+  const tei = xsltTranscriptionEndpoint<
+    CUDLFormat,
+    IDPagesTranscriptionOptions
+  >({
+    path: '/tei/diplomatic/internal/:id/:start/:end',
+    xsltExecutor: options.xsltExecutor,
+    metadataRepository: options.metadataRepository,
+    transforms: [
+      {
+        xsltPath: PAGE_EXTRACT_XSLT,
+        params: options => ({ start: options.start, end: options.end }),
+      },
+      { xsltPath: MS_TEI_TRANS_XSLT },
+    ],
+    options: req => ({
+      ...extractIDPagesTranscriptionOptions(req),
+      format: CUDLFormat.TEI,
+    }),
+  });
 
-                //Newton CSS and JS must be served by us over HTTPS not by Newton over HTTP to avoid browser blocking
-                var localCssPath = encodeURI('/newton/css');
-                body = body.replace(new RegExp('\/resources\/css', 'g'), localCssPath);
-                var localJsPath = encodeURI('/newton/js');
-                body = body.replace(new RegExp('\/resources\/js', 'g'), localJsPath);
+  const bezae = xsltTranscriptionEndpoint<
+    CUDLFormat,
+    IDPagesTranscriptionOptions
+  >({
+    path: '/bezae/diplomatic/:idB/:idA/:start/:end',
+    xsltExecutor: options.xsltExecutor,
+    metadataRepository: options.metadataRepository,
+    transforms: [
+      {
+        xsltPath: PAGE_EXTRACT_XSLT,
+        params: options => ({ start: options.start, end: options.end }),
+      },
+      { xsltPath: BEZAE_TRANS_XSLT },
+    ],
+    options: req => {
+      return {
+        id: `${requireRequestParam(req, 'idA')}/${requireRequestParam(
+          req,
+          'idB'
+        )}`,
+        ...requireRequestParams(req, 'start', 'end'),
+        format: CUDLFormat.TRANSCRIPTION,
+      };
+    },
+  });
 
-                // Newton images relative paths must be made absolute to point to Newton server
-                 var newtonServerUrl = encodeURI('http://www.newtonproject.ox.ac.uk/resources/images');
-                 body = body.replace(new RegExp('\/resources\/images', 'g'), newtonServerUrl);
+  const dcp = xsltTranscriptionEndpoint({
+    path: '/dcp/diplomatic/internal/:id',
+    xsltExecutor: options.xsltExecutor,
+    metadataRepository: options.metadataRepository,
+    transforms: [{ xsltPath: LEGACY_DCP_XSLT }],
+    options: req => ({
+      ...extractIDTranscriptionOptions(req),
+      format: CUDLFormat.DCP,
+    }),
+  });
 
-                callback(body);
-            });
+  const dcpfull = xsltTranscriptionEndpoint({
+    path: '/dcpfull/diplomatic/internal/:id',
+    metadataRepository: options.legacyDarwinMetadataRepository,
+    xsltExecutor: options.xsltExecutor,
+    transforms: [{ xsltPath: LEGACY_DCP_XSLT }],
+    options: req => ({
+      ...extractIDTranscriptionOptions(req),
+      format: LegacyDarwinFormat.DEFAULT,
+    }),
+  });
 
-        }).on('error', function(e) {
-            res.status(500).render('error', {
-                message: 'Could not contact external transcription provider',
-                error: { status: 500 }
-            });
-        });
-    }).fulfilled(function(data) {
-        res.send(data);
+  const newton = {
+    path: '/newton/:type/external/:id/:start/:end',
+    service: new NewtonProjectTranscriptionService({
+      baseUrl: 'http://www.newtonproject.ox.ac.uk/',
+      baseResourceUrl: '/v1/resources/www.newtonproject.ox.ac.uk/',
+    }),
+    options: extractTranscriptionOptions,
+  };
+
+  const darwinManuscripts = {
+    path: '/dmp/diplomatic/external/:id',
+    service: new DarwinManuscriptsTranscriptionService({
+      baseUrl: 'http://darwin.amnh.org/',
+    }),
+    options: extractIDTranscriptionOptions,
+  };
+
+  const itseet: TranscriptionEndpoint<IDPageTranscriptionOptions> = {
+    path: '/palimpsest/normalised/external/:id/:start/:end',
+    service: new ITSEETranscriptionService({
+      baseUrl: 'http://cal-itsee.bham.ac.uk/',
+    }),
+    options: req => {
+      const opts = extractIDPagesTranscriptionOptions(req);
+      if (opts.start !== opts.end) {
+        throw new InvalidTranscriptionOptionsError(
+          'Only single-page requests are supported'
+        );
+      }
+      return { id: opts.id, page: opts.start };
+    },
+  };
+
+  const transcriptions: Array<TranscriptionEndpoint<unknown>> = [
+    tei,
+    bezae,
+    dcp,
+    dcpfull,
+    newton,
+    darwinManuscripts,
+    itseet,
+  ];
+
+  for (const trans of transcriptions) {
+    attachTranscriptionHandler(
+      router,
+      trans.service,
+      trans.path,
+      trans.options
+    );
+  }
+
+  return router;
+}
+
+function attachTranscriptionHandler<T>(
+  router: express.Router,
+  transcriptionService: TranscriptionService<T>,
+  path: string,
+  extractOptions: (req: Request) => T
+) {
+  router.get(
+    path,
+    createTranscriptionHandler(transcriptionService, extractOptions)
+  );
+}
+
+class InvalidTranscriptionOptionsError extends Error {}
+
+function createTranscriptionHandler<T>(
+  transcriptionService: TranscriptionService<T>,
+  extractOptions: (req: Request) => T
+) {
+  return expressAsyncHandler(async (req, res) => {
+    let options: T;
+    try {
+      options = extractOptions(req);
+    } catch (e) {
+      if (e instanceof InvalidTranscriptionOptionsError) {
+        res.status(BAD_REQUEST).json({ error: e.message });
+      }
+      throw e;
+    }
+
+    try {
+      const html = await transcriptionService.getTranscription(options);
+      res.type('html').end(html);
+      return;
+    } catch (e) {
+      let status, msg;
+      if (e instanceof NotFoundError) {
+        status = NOT_FOUND;
+        msg = 'Transcription not found';
+      } else if (e instanceof UpstreamError) {
+        status = BAD_GATEWAY;
+        msg = 'The external transcription provider is temporarily unavailable';
+      } else {
+        status = INTERNAL_SERVER_ERROR;
+        msg = 'Something went wrong';
+      }
+
+      res.status(status).json({ error: msg });
+      return;
+    }
+  });
+}
+
+function requireRequestParam(req: Request, param: string): string {
+  const value = req.params[param] as typeof req.params[string] | undefined;
+  if (typeof value !== 'string') {
+    throw new Error(`Request has no value for param ${util.inspect(param)}`);
+  }
+  return value;
+}
+
+function requireRequestParams<T extends string>(
+  req: Request,
+  ...params: T[]
+): { [key in T]: string } {
+  const obj = {} as { [key in T]: string };
+  for (const param of params) {
+    obj[param] = requireRequestParam(req, param);
+  }
+  return obj;
+}
+
+interface IDTranscriptionOptions {
+  id: string;
+}
+
+function extractIDTranscriptionOptions(req: Request): IDTranscriptionOptions {
+  return requireRequestParams(req, 'id');
+}
+
+interface IDPageTranscriptionOptions extends IDTranscriptionOptions {
+  id: string;
+  page: string;
+}
+
+interface IDPagesTranscriptionOptions extends IDTranscriptionOptions {
+  start: string;
+  end: string;
+}
+
+function extractIDPagesTranscriptionOptions(
+  req: Request
+): IDPagesTranscriptionOptions {
+  return requireRequestParams(req, 'id', 'start', 'end');
+}
+
+interface TranscriptionOptions extends IDPagesTranscriptionOptions {
+  type: string;
+}
+
+function extractTranscriptionOptions(req: Request): TranscriptionOptions {
+  return requireRequestParams(req, 'id', 'start', 'end', 'type');
+}
+
+interface TranscriptionService<Params> {
+  getTranscription(options: Params): Promise<string>;
+}
+
+interface HTML {
+  html: string;
+  baseUrl: string;
+}
+
+export type HttpGet = typeof superagent.get;
+
+export abstract class HttpTranscriptionService<Params>
+  implements TranscriptionService<Params> {
+  protected readonly baseUrl: URI.URIComponents;
+  protected readonly httpGet: HttpGet;
+
+  constructor(options: { baseUrl: string; httpGet?: HttpGet }) {
+    this.baseUrl = URI.parse(options.baseUrl);
+    this.httpGet = options.httpGet || superagent.get;
+  }
+
+  protected getUrl(options: Params) {
+    return URI.serialize(
+      URI.resolveComponents(this.baseUrl, this.getRelativeUrl(options))
+    );
+  }
+
+  protected abstract getRelativeUrl(options: Params): URI.URIComponents;
+
+  protected async getExternalTranscription(options: Params): Promise<HTML> {
+    const url = this.getUrl(options);
+    const resp = await this.httpGet(url);
+
+    if (resp.ok) {
+      return { html: resp.text, baseUrl: url };
+    }
+    const msg = `External transcription provider responded with HTTP ${resp.status}: ${url}`;
+    const errClass =
+      resp.status === 404
+        ? NotFoundError
+        : resp.serverError
+        ? UpstreamError
+        : Error;
+    throw new errClass(msg);
+  }
+
+  protected filterTranscriptionHtml(html: HTML): string {
+    return html.html;
+  }
+
+  async getTranscription(options: Params) {
+    const html = await this.getExternalTranscription(options);
+    return this.filterTranscriptionHtml(html);
+  }
+}
+
+export class NewtonProjectTranscriptionService extends HttpTranscriptionService<
+  TranscriptionOptions
+> {
+  private readonly baseResourceUrl: URI.URIComponents;
+
+  constructor(options: {
+    baseUrl: string;
+    baseResourceUrl: string;
+    httpGet?: HttpGet;
+  }) {
+    super(options);
+    this.baseResourceUrl = URI.parse(options.baseResourceUrl);
+  }
+
+  protected getRelativeUrl(options: TranscriptionOptions) {
+    return {
+      path: `/view/texts/${options.type}/${encodeURIComponent(options.id)}`,
+      query: `skin=minimal&show_header=no&start=${encodeURIComponent(
+        options.start
+      )}&end=${encodeURIComponent(options.end)}`,
+    };
+  }
+
+  protected filterTranscriptionHtml(html: HTML) {
+    return rewriteHtmlResourceUrls({
+      ...html,
+      rewrite: options => {
+        const resource = URI.parse(options.url);
+        if (
+          URI.equal(httpOrigin(this.baseUrl), httpOrigin(resource)) &&
+          resource.path?.startsWith('/resources/')
+        ) {
+          return URI.serialize(
+            URI.resolveComponents(this.baseResourceUrl, {
+              path: resource.path?.substr('/resources/'.length),
+            })
+          );
+        }
+      },
     });
-});
+  }
+}
 
-router.get('/dmp/:type/:location/:id/:from?/:to?', function(req, res) {
-        cache.get('dmp-'+req.params.type+'-'+req.params.id+'-'+req.params.from+'-'+req.params.to, function(callback) {
-                var options = {
-                        host: 'darwin.amnh.org',
-                        path: '/transcription-viewer.php?eid='+req.params.id
-                };
+export class DarwinManuscriptsTranscriptionService extends HttpTranscriptionService<
+  IDTranscriptionOptions
+> {
+  protected getRelativeUrl(options: TranscriptionOptions): URI.URIComponents {
+    return {
+      path: 'transcription-viewer.php',
+      query: `eid=${encodeURIComponent(options.id)}`,
+    };
+  }
+}
 
-                http.get(options, function(response) {
-                        if (response.statusCode !== 200) {
-                                 res.status(500).render('error', {
-                                        message: 'Transcription not found at external provider',
-                                        error: { status: response.statusCode }
-                                });
+export class ITSEETranscriptionService extends HttpTranscriptionService<
+  IDPageTranscriptionOptions
+> {
+  protected getRelativeUrl(
+    options: IDPageTranscriptionOptions
+  ): URI.URIComponents {
+    const id = encodeURIComponent(options.id);
+    const page = encodeURIComponent(options.page);
+    return {
+      path: `/itseeweb/fedeli/${id}/${page}_${id}.html`,
+    };
+  }
+}
 
-                        }
-                        var body = '';
-                        response.on('data', function(chunk) {
-                                body += chunk;
-                        });
-                        response.on('end', function() {
-                                var opts = {};
-                                opts['output-xhtml'] = true;
-                                opts['char-encoding'] = 'utf8';
-                                tidy(body, opts, function(err, html) {
-                                        callback(html);
-                                });
-                        });
+function httpOrigin(url: URI.URIComponents) {
+  return URI.serialize({
+    ...url,
+    path: undefined,
+    query: undefined,
+    fragment: undefined,
+  });
+}
 
-                }).on('error', function(e) {
-                        res.status(500).render('error', {
-                                message: 'Could not contact external transcription provider',
-                                error: { status: 500 }
-                        });
-                });
-        }).fulfilled(function(data) {
-                res.send(data);
-        });
-});
+type ElementWithHref = Element & { href: string };
+type ElementWithSrc = Element & { src: string };
 
-router.get('/bezae/:type/:location/:id/:from/:to', function(req, res) {
-    cache.get('bezae-'+req.params.type+'-'+req.params.id+'-'+req.params.from+'-'+req.params.to, function(callback) {
-        var tconfig = {
-                xsltPath: config.appDir+'/transforms/transcriptions/pageExtract.xsl',
-                sourcePath: config.dataDir+'/data/transcription/'+req.params.id+'/'+req.params.location,
-                result: String,
-            params: {
-                    start: req.params.from,
-                end: req.params.to
-                },
-            props: {
-                    indent: 'yes'
-                }
-        };
+function isElementWithHref(el: Element): el is ElementWithHref {
+  const maybeElementWithHref = el as Partial<ElementWithHref>;
+  return typeof maybeElementWithHref.href === 'string';
+}
 
-        transform(tconfig, function(err, singlepage) {
-            if (err) {
-                    res.status(500).render('error', {
-                    message: err,
-                    error: { status: 500 }
-                });
-                } else {
-                var tconfig = {
-                                xsltPath: config.appDir+'/transforms/transcriptions/bezaeHTML.xsl',
-                                source: singlepage,
-                                result: String,
-                };
-                transform(tconfig, function(err, html) {
-                    if (err) {
-                                        res.status(500).render('error', {
-                                                message: err,
-                                                error: { status: 500 }
-                        });
-                    } else {
-                        callback(html);
-                    }
-                });
-            }
-        });
-    }).fulfilled(function(data) {
-        res.send(data);
+function isElementWithSrc(el: Element): el is ElementWithSrc {
+  const maybeElementWithSrc = el as Partial<ElementWithSrc>;
+  return typeof maybeElementWithSrc.src === 'string';
+}
+
+type UrlRewriterOptions = { url: string } & (
+  | { srcEl: ElementWithSrc }
+  | { hrefEl: ElementWithHref }
+);
+export type UrlRewriter = (options: UrlRewriterOptions) => string | undefined;
+
+export function rewriteHtmlResourceUrls(options: {
+  html: string;
+  baseUrl: string | URL;
+  rewrite: UrlRewriter | UrlRewriter[];
+}): string {
+  const dom = new JSDOM(options.html, { url: String(options.baseUrl) });
+  const doc = dom.window.document;
+  const urlRewriters = Array.isArray(options.rewrite)
+    ? options.rewrite
+    : [options.rewrite];
+
+  doc.querySelectorAll('*[href], *[src]').forEach(el => {
+    let rwOptions: UrlRewriterOptions | undefined = undefined;
+
+    if (isElementWithHref(el)) {
+      rwOptions = { url: el.href, hrefEl: el };
+    } else if (isElementWithSrc(el)) {
+      rwOptions = { url: el.src, srcEl: el };
+    }
+
+    if (!rwOptions) {
+      return;
+    }
+
+    const _rwOptions = rwOptions;
+    urlRewriters.forEach(rewriter => {
+      const url = rewriter(_rwOptions);
+      if (url === undefined) {
+        return;
+      }
+
+      if (isElementWithHref(el)) {
+        el.href = url;
+      } else if (isElementWithSrc(el)) {
+        el.src = url;
+      }
     });
-});
+  });
 
-router.get('/tei/:type/:location/:id/:from/:to', function(req, res) {
-        cache.get('tei-'+req.params.type+'-'+req.params.id+'-'+req.params.from+'-'+req.params.to, function(callback) {
-                var tconfig = {
-                        xsltPath: config.appDir+'/transforms/transcriptions/pageExtract.xsl',
-                        sourcePath: config.dataDir+'/data/tei/'+req.params.id+'/'+req.params.id+'.xml',
-                        result: String,
-                        params: {
-                                start: req.params.from,
-                                end: req.params.to
-                        },
-                        props: {
-                                indent: 'no'
-                        }
-                };
+  return dom.serialize();
+}
 
-                transform(tconfig, function(err, singlepage) {
-                        if (err) {
-                                res.status(500).render('error', {
-                                        message: err,
-                                        error: { status: 500 }
-                                });
-                        } else {
-                                var tconfig = {
-                                        xsltPath: config.appDir+'/transforms/transcriptions/msTeiTrans.xsl',
-                                        source: singlepage,
-                                        result: String,
-                                };
-                                transform(tconfig, function(err, html) {
-                                        if (err) {
-                                                res.status(500).render('error', {
-                                                        message: err,
-                                                        error: { status: 500 }
-                                                });
-                                        } else {
-                                                callback(html);
-                                        }
-                                });
-                        }
-                });
-        }).fulfilled(function(data) {
-                res.send(data);
-        });
-});
+const TRANSFORMS_DIR = path.resolve(__dirname, '../../transforms');
+const PAGE_EXTRACT_XSLT = path.resolve(
+  TRANSFORMS_DIR,
+  'transcriptions/pageExtract.xsl'
+);
+const MS_TEI_TRANS_XSLT = path.resolve(
+  TRANSFORMS_DIR,
+  'transcriptions/msTeiTrans.xsl'
+);
+const BEZAE_TRANS_XSLT = path.resolve(
+  TRANSFORMS_DIR,
+  'transcriptions/bezaeHTML.xsl'
+);
+const LEGACY_DCP_XSLT = path.resolve(
+  TRANSFORMS_DIR,
+  'transcriptions/dcpTrans.xsl'
+);
 
-router.get('/dcp/:type/:location/:id/:from?/:to?', function(req, res) {
-        cache.get('tei-'+req.params.type+'-'+req.params.id+'-'+req.params.from+'-'+req.params.to, function(callback) {
-                var tconfig = {
-                        xsltPath: config.appDir+'/transforms/transcriptions/pageExtract.xsl',
-                        sourcePath: config.dataDir+'/data/dcp/'+req.params.id+'/'+req.params.id+'.xml',
-                        result: String,
-                        params: {
-                                start: req.params.from,
-                                end: req.params.to
-                        },
-                        props: {
-                                indent: 'yes'
-                        }
-                };
+interface TransformStage<Opt> {
+  xsltPath: string;
+  params?: (options: Opt) => ExecuteOptions['parameters'];
+}
 
-                transform(tconfig, function(err, singlepage) {
-                        if (err) {
-                                res.status(500).render('error', {
-                                        message: err,
-                                        error: { status: 500 }
-                                });
-                        } else {
-                                var tconfig = {
-                                        xsltPath: config.appDir+'/transforms/transcriptions/dcpTrans.xsl',
-                                        source: singlepage,
-                                        result: String,
-                                };
-                                transform(tconfig, function(err, html) {
-                                        if (err) {
-                                                res.status(500).render('error', {
-                                                        message: err,
-                                                        error: { status: 500 }
-                                                });
-                                        } else {
-                                                callback(html);
-                                        }
-                                });
-                        }
-                });
-        }).fulfilled(function(data) {
-                res.send(data);
-        });
-});
+class XSLTTranscriptionService<
+  Opt extends { id: string; format: Fmt },
+  Fmt extends string = string
+> implements TranscriptionService<Opt> {
+  protected readonly metadataRepository: MetadataRepository<Fmt>;
+  protected readonly xsltExecutor: XSLTExecutor;
+  protected readonly transforms: Array<TransformStage<Opt>>;
 
-router.get('/dcpfull/:type/:location/:id/:from?/:to?', function(req, res) {
-        cache.get('tei-'+req.params.type+'-'+req.params.id+'-'+req.params.from+'-'+req.params.to, function(callback) {
-        glob(config.dcpdataDir+'/'+req.params.id+'_*.xml', function(err, files) {
-            var tconfig = {
-                            xsltPath: config.appDir+'/transforms/transcriptions/pageExtract.xsl',
-                            sourcePath: files[0],
-                            result: String,
-                            params: {
-                                    start: req.params.from,
-                                    end: req.params.to
-                            },
-                            props: {
-                                    indent: 'yes'
-                            }
-                    };
+  constructor(options: {
+    metadataRepository: MetadataRepository<Fmt>;
+    xsltExecutor: XSLTExecutor;
+    transforms: Array<TransformStage<Opt>>;
+  }) {
+    this.metadataRepository = options.metadataRepository;
+    this.xsltExecutor = options.xsltExecutor;
+    this.transforms = options.transforms;
+  }
 
-                    transform(tconfig, function(err, singlepage) {
-                            if (err) {
-                                    res.status(500).render('error', {
-                                            message: err,
-                                            error: { status: 500 }
-                                    });
-                            } else {
-                                    var tconfig = {
-                                            xsltPath: config.appDir+'/transforms/transcriptions/dcpTrans.xsl',
-                                            source: singlepage,
-                                            result: String,
-                                    };
-                                    transform(tconfig, function(err, html) {
-                                            if (err) {
-                                                    res.status(500).render('error', {
-                                                            message: err,
-                                                            error: { status: 500 }
-                                                    });
-                                            } else {
-                                                    callback(html);
-                                            }
-                                    });
-                            }
-                    });
-        });
-        }).fulfilled(function(data) {
-                res.send(data);
-        });
-});
+  async getTranscription(options: Opt): Promise<string> {
+    let xml = await this.metadataRepository.getBytes(
+      options.format,
+      options.id
+    );
 
-/* Adding a new catch for Quranic palimpsests - 05/01/16 JF */
-router.get('/palimpsest/:type/:location/:id/:from/:to', function(req, res) {
-    cache.get('palimpsest-'+req.params.type+'-'+req.params.id+'-'+req.params.from+'-'+req.params.to, function(callback) {
-        var options = {
-            host: 'cal-itsee.bham.ac.uk',
-            path: '/itseeweb/fedeli/' + req.params.id + '/' +req.params.from + '_' + req.params.id + '.html'
-        };
+    for (const tx of this.transforms) {
+      xml = await this.xsltExecutor.execute({
+        xsltPath: tx.xsltPath,
+        xml,
+        parameters: tx.params === undefined ? undefined : tx.params(options),
+      });
+    }
 
-        var request = http.get(options, function(response) {
-
-            var requestFailed = false;
-
-            var detectedEncoding = detectEncoding(response);
-
-
-            if(!detectedEncoding) {
-                request.abort();
-                response.destroy();
-                res.status(500).render('error', {
-                    message: 'Unsupported external transcription provider encoding.',
-                    error: { status: 500 }
-                });
-                requestFailed = true;
-            }
-
-            if (response.statusCode !== 200) {
-                res.status(500).render('error', {
-                    message: 'Transcription not found at external provider',
-                    error: { status: response.statusCode }
-                });
-            }
-            var body = '';
-            response.on('data', function(chunk) {
-                    body += chunk;
-              });
-             response.on('end', function() {
-                // Don't cache the result of failed responses
-                if(requestFailed) {
-                    return;
-                }
-
-                var opts = {};
-                opts['output-xhtml'] = true;
-                opts['char-encoding'] = 'utf8';
-                tidy(body, opts, function(err, html) {
-                      callback(html);
-                });
-            });
-
-        }).on('error', function(e) {
-            res.status(500).render('error', {
-                message: 'Could not contact external transcription provider',
-                error: { status: 500 }
-            });
-        });
-    }).fulfilled(function(data) {
-        res.send(data);
-    });
-});
-
-module.exports = router;
+    return xml.toString('utf-8');
+  }
+}

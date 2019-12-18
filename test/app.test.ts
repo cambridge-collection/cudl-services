@@ -3,16 +3,42 @@ import * as fs from 'fs';
 import { IM_A_TEAPOT, OK, UNAUTHORIZED } from 'http-status-codes';
 import * as path from 'path';
 import request from 'supertest';
+import superagent from 'superagent';
 import { promisify } from 'util';
 
 import { App, AppOptions } from '../src/app';
-import { MetadataRepository } from '../src/metadata';
+import { CUDLMetadataRepository } from '../src/metadata';
 import {
   STATIC_FILES,
   EXAMPLE_STATIC_FILES,
   TEST_DATA_PATH,
 } from './constants';
-import { DummyHttpServer, MemoryDatabasePool } from './utils';
+import {
+  DummyHttpServer,
+  getTestDataMetadataRepository,
+  getTestDataLegacyDarwinMetadataRepository,
+  MemoryDatabasePool,
+} from './utils';
+
+import { get } from 'superagent';
+
+type PartialResponse = Pick<
+  superagent.Response,
+  'status' | 'text' | 'ok' | 'serverError'
+>;
+let getMockGetResponse: (() => Promise<PartialResponse>) | undefined;
+
+jest.mock('superagent', () => ({
+  get: jest.fn(
+    async (url: string): Promise<PartialResponse> => {
+      if (getMockGetResponse === undefined) {
+        throw new Error('mockGetResponse is undefined');
+      }
+      return getMockGetResponse();
+    }
+  ),
+}));
+const mockGet = get as jest.MockedFunction<typeof get>;
 
 describe('app', () => {
   let mockDarwinUpstream: DummyHttpServer;
@@ -33,9 +59,8 @@ describe('app', () => {
   function defaultAppOptions(): AppOptions {
     return {
       darwinXtfUrl: `http://localhost:${mockDarwinUpstream.getPort()}`,
-      metadataRepository: new MetadataRepository(
-        path.resolve(TEST_DATA_PATH, 'metadata')
-      ),
+      metadataRepository: getTestDataMetadataRepository(),
+      legacyDarwinMetadataRepository: getTestDataLegacyDarwinMetadataRepository(),
       users: {
         supersecret: { username: 'foo', email: 'foo@example.com' },
       },
@@ -114,5 +139,29 @@ describe('app', () => {
         );
       }
     );
+  });
+
+  describe('/v1/transcription', () => {
+    afterEach(() => {
+      getMockGetResponse = undefined;
+      mockGet.mockClear();
+    });
+
+    test('route is registered', async () => {
+      const html =
+        '<!DOCTYPE html><html><head><title>foo</title></head><body></body></html>';
+      getMockGetResponse = async () => ({
+        status: 200,
+        text: html,
+        ok: true,
+        serverError: false,
+      });
+
+      const response = await request(app).get(
+        '/v1/transcription/newton/normalized/external/foo/bar/baz'
+      );
+      expect(response.ok).toBeTruthy();
+      expect(response.text).toBe(html);
+    });
   });
 });

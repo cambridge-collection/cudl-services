@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="http://schemas.darwinproject.ac.uk/relaxng/v2/darwin-letter.rnc" type="application/relax-ng-compact-syntax"?>
+<data>
+   <calendarnum>1</calendarnum>
+   <lognum>5078</lognum>
+   <workflow>
+      <web_publish destination="darwinproject.ac.uk" status="yes">
+         <updateSite>no</updateSite>
+         <transcription>yes</transcription>
+         <translation>yes</translation>
+         <footnotes>yes</footnotes>
+      </web_publish>
+      <print_publish destination="dcp" status="yes">
+         <volume>1</volume>
+         <pagenum>
+            <transcription/>
+            <translation/>
+         </pagenum>
+      </print_publish>
+   </workflow>
+   <letdata>
+      <letter>
+         <lognum>5078</lognum>
+         <calendarnum>1</calendarnum>
+         <text>
+            <header benn="9999" year="1821" date="1821.10.27" month="October">
+               <p>From Mary Congreve  <super>1</super> 27 October [1821]<super>2</super>
+               </p>
+               <haddress/>
+               <hdate/>
+               <hsendname/>
+               <hsal>My dear M<super>r</super>. Charles</hsal>
+            </header>
+            <transcription>
+               <p>I find I have only just time to thank you for your entertaining letter, as if I take time to write what I intended I shall not be able to get it franked<mark id="1.f3"/> &amp; I’m sure it will not be worth the postage, I should have liked to have seen the good Gentleman <i>Grin</i> that you mention there is no doubt but those that were out of the Scrape were much amused, I assure you I wish’d much you had been of our party on thursday night at the play, I think you would have been highly entertained both with the Coronation,<mark id="1.f4"/> and the entertainment of Monsieur Tonson,<mark id="1.f5"/> I never laugh’d so much at a play I think, I dare say you have been much amused with M<super>r</super>. Alexander<mark id="1.f6"/> &amp; I hope I shall hear some specimenes of his art from you when I return, as I dare say it is practiced in School Lane, so god bless you as I am obliged to conclude this ever believe me | Yours truly M Congreve <br height="half"/>
+                  <br height="none"/>
+               </p>
+               <p align="left">Saturday 27<super>th</super> Oct</p>
+               <p>I think you will not be able with all your Greek knowledge to read this precious Scrawl</p>
+            </transcription>
+         </text>
+         <enclosure>
+            <otherenc>
+               <transcription/>
+            </otherenc>
+         </enclosure>
+         <endorsement/>
+         <description/>
+         <postmark/>
+         <provenance>DAR 204.16</provenance>
+         <annotations>
+            <annotation/>
+         </annotations>
+         <comments>
+            <comment/>
+         </comments>
+         <footnotes>
+            <footnote>
+               <mark>1.f1</mark>
+               <note>The writer is referred to in an obituary notice in the <i>Salopian Journal</i>, 5 February 1823, as ‘eldest sister to the late General Sir William Congreve, Bart and aunt to the present.’ See also the letter from E. A. Darwin, 5 [March 1823].</note>
+            </footnote>
+            <footnote>
+               <mark>1.f2</mark>
+               <note>The letter is dated from the reference to Mr Alexander (see n. 6, below).</note>
+            </footnote>
+            <footnote>
+               <mark>1.f3</mark>
+               <note>Peers, Members of Parliament, and Officers of State had the privilege of free mail. ‘Franks’ (covers addressed, dated, and signed by the holder of the privilege) were distributed freely among constituents and friends. In 1821 Miss Congreve’s nephew, Sir William Congreve, was M.P. for Plymouth.</note>
+            </footnote>
+            <footnote>
+               <mark>1.f4</mark>
+               <note>A pageant representation of the coronation of George IV, produced by Robert William Elliston at the Drury Lane Theatre (Genest 1832, 9: 96–7).</note>
+            </footnote>
+            <footnote>
+               <mark>1.f5</mark>
+               <note>A farce by William Thommas Moncrieff, based on a dramatic poem by John Taylor, that was read, but not performed, at Drury Lane on 20 September 1821 (<i>DNB</i>, Genest 1832, 9: 96).</note>
+            </footnote>
+            <footnote>
+               <mark>1.f6</mark>
+               <note>The <i>Salopian Journal</i> of 17 October 1821 records the performance of Monsieur Alexandre, a ventriloquist, at the Royal Free Grammar School of Shrewsbury on 12 October. School Lane, now called School Gardens, was immediately adjacent to the school.</note>
+            </footnote>
+         </footnotes>
+      </letter>
+      <origfileletters>../../../../../dcp_xml_2/letters/v01_letters.xml</origfileletters>
+  </letdata>
+   <caldata>
+      <entry void="no">
+         <calendarnum>1</calendarnum>
+         <lognum>5078</lognum>
+         <volume>1</volume>
+         
+         <author>
+            <names>
+               <name id="1037" synonym="" status="confident">Congreve, Mary</name>
+            </names>
+            <address>unstated</address>
+         </author>
+         <addressee>
+            <names>
+               <name id="1" synonym="" status="confident">Darwin, C. R.</name>
+            </names>
+         </addressee>
+         <summary>
+            <segment>
+               <subjects>
+                  <subject class="" id="">Darwin himself, domestic life</subject>
+                  <subject class="place" id="">London</subject>
+                  <subject class="name" id="1">Darwin, C. R.</subject>
+                  <subject class="" id="">party</subject>
+                  <subject class="" id="">party</subject>
+               </subjects>
+               <summaries>
+                  <summaryitem>
+                     <p>Writes about London plays; wishes CD had been of the party.</p>
+                  </summaryitem>
+               </summaries>
+            </segment>
+         </summary>
+         <dates>27 Oct [1821]</dates>
+         <convertedDates>
+            <conversion source="27 Oct [1821]">
+               <date source="1.0">
+                  <year source="other" unknown="no">1821</year>
+                  <month unknown="no">10</month>
+                  <day unknown="no">27</day>
+               </date>
+               <expansion from="1821-10-27" to="1821-10-27">
+                  <interval>1821-10-27/P1D</interval>
+               </expansion>
+            </conversion>
+         </convertedDates>
+         <tags>
+            <tag id=""/>
+         </tags>
+         <dimensions>
+            <dimension>
+               <type/>
+               <unit/>
+               <width/>
+               <height/>
+            </dimension>
+         </dimensions>
+         <physdescs>
+            <physdesc id="ALS"> 2pp </physdesc>
+         </physdescs>
+         <location>
+            <repository>CUL</repository>
+            <collection>DAR</collection>
+            <idno>204: 186</idno>
+         </location>
+         <repositories>
+            <repository/>
+         </repositories>
+         <repository_suffix/>
+         <cul-copy/>
+         <publications>
+            <publication>
+               <i>Correspondence</i> 1: 1</publication>
+         </publications>
+      </entry>
+      <origfilecalendars>../../../../../dcp_xml_2/calendars/calendar_entries_00001-00999.xml</origfilecalendars>
+  </caldata>
+   <calfile>../data/temp_split/calendars_1_5078.xml</calfile>
+   <letfile>../data/temp_split/letters_1_99999.xml</letfile>
+   <transfile/>
+</data>

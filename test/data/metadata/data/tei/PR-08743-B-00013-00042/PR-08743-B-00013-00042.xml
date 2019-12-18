@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0">
+   <teiHeader>
+      <fileDesc>
+         <titleStmt>
+            <title>Item no. 42 in volume 8743.b.13.</title>
+         </titleStmt>
+         <publicationStmt>
+            <date calendar="Gregorian">2018-08-15</date>
+            <publisher>Cambridge University Library</publisher>
+            <availability xml:id="displayImageRights" status="restricted">
+               <p>Zooming image © Cambridge University Library, All rights reserved.</p>
+            </availability>
+            <availability xml:id="downloadImageRights" status="restricted">
+               <licence>Images made available for download are licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License (CC-BY-NC 3.0)</licence>
+            </availability>
+            <availability xml:id="metadataRights" status="restricted">
+               <licence>This metadata is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License.</licence>
+            </availability>
+         </publicationStmt>
+         <sourceDesc>
+            <msDesc xml:id="n1" xml:lang="eng">
+               <msIdentifier>
+                  <repository>Cambridge University Library</repository>
+                  <idno>Item no. 42 in volume 8743.b.13.</idno>
+               </msIdentifier>
+               <msContents>
+                  <msItem>
+                     <title>Glorioso levantamiento de la nacion española iniciado en Cadiz el dia 18 de setiembre de 1868 por el general Prim, brigadier Topete y los generales Serrano, Caballero de Rodas y otros : y secundado en el término de diez dias por toda la nacion al grito de Viva la voluntad nacional, Cortes constituyentes, sufragio universal y abajo los Borbones.</title>
+                     <textLang mainLang="">In Spanish and Catalan.</textLang>
+                     <respStmt>
+                        <resp/>
+                        <name type="person" role="dnr">
+                           <persName type="standard">Wilson, Edward M. (Edward Meryon), 1906-1977.</persName>
+                           <persName type="display">Wilson, Edward M. (Edward Meryon), 1906-1977.</persName>
+                        </name>
+                        <name type="corporation" role="pbl">
+                           <persName type="standard">Véndese en casa Llorens, calle de la Palma de Sta. Catalina</persName>
+                           <persName type="display">Véndese en casa Llorens, calle de la Palma de Sta. Catalina</persName>
+                        </name>
+                     </respStmt>
+                     <note>Text printed in three columns. Illustration at head of title. In verse. Caption title. Imprint from colophon. 'Imne patriotich pera cantarse ab la popular música del imne de Riego': p. [2].</note>
+                  </msItem>
+               </msContents>
+               <physDesc>
+                  <objectDesc>
+                     <supportDesc material="paper">
+                        <support>Paper</support>
+                        <extent>[2] p. : 1 ill. ; 32 cm.</extent>
+                        <condition/>
+                     </supportDesc>
+                  </objectDesc>
+               </physDesc>
+               <history>
+                  <origin>
+                     <origDate calendar="Gregorian" notBefore="1800" notAfter="1800">between 1842 and 1898?</origDate>
+                     <origPlace ref="1000095 7007426">Spain; Barcelona</origPlace>
+                  </origin>
+                  <provenance>Bequeathed by Edward Meryon Wilson.</provenance>
+               </history>
+               <additional>
+                  <adminInfo/>
+               </additional>
+            </msDesc>
+         </sourceDesc>
+      </fileDesc>
+      <encodingDesc>
+         <classDecl>
+            <taxonomy xml:id="LCSH">
+               <bibl>
+                  <ref target="http://id.loc.gov/authorities/about.html#lcsh">Library
+                                    of Congress Subject Headings</ref>
+               </bibl>
+            </taxonomy>
+         </classDecl>
+      </encodingDesc>
+      <profileDesc>
+         <textClass>
+            <keywords scheme="#LCSH">
+               <list>
+                  <item>
+                     <ref target="http://id.loc.gov/authorities/subjects/sh85098765">Patriotism</ref>
+                  </item>
+                  <item>
+                     <ref>Patriotismo</ref>
+                  </item>
+                  <item>
+                     <ref>Spain</ref>
+                  </item>
+                  <item>
+                     <ref>Spain</ref>
+                  </item>
+               </list>
+            </keywords>
+         </textClass>
+      </profileDesc>
+   </teiHeader>
+   <facsimile>
+      <graphic decls="#document-thumbnail"
+               rend="portrait"
+               url="http://cudl.lib.cam.ac.uk/content/images/PR-08743-B-00013-00042-000-00001_files/8/0_0.jpg"/>
+      <surface n="1" xml:id="i1">
+         <graphic decls="#downloadImageRights #download"
+                  height="4013px"
+                  width="2839px"
+                  url="http://cudl.lib.cam.ac.uk/content/images/PR-08743-B-00013-00042-000-00001.jpg"/>
+         <graphic decls="#thumbnail"
+                  url="http://cudl.lib.cam.ac.uk/content/images/PR-08743-B-00013-00042-000-00001_files/8/0_0.jpg"
+                  rend="portrait"/>
+      </surface>
+      <surface n="2" xml:id="i2">
+         <graphic decls="#downloadImageRights #download"
+                  height="4014px"
+                  width="2839px"
+                  url="http://cudl.lib.cam.ac.uk/content/images/PR-08743-B-00013-00042-000-00002.jpg"/>
+         <graphic decls="#thumbnail"
+                  url="http://cudl.lib.cam.ac.uk/content/images/PR-08743-B-00013-00042-000-00002_files/8/0_0.jpg"
+                  rend="portrait"/>
+      </surface>
+   </facsimile>
+   <text>
+      <body>
+         <div>
+            <pb n="1" xml:id="Lg-1" facs="#i1"/>
+            <p>L¡m ф. </p>
+            <p>S5'\; </p>
+            <p>GLORIOSO DE LA </p>
+            <p>LEVANTAMIENTO </p>
+            <p>NACION ESPAÑOLA - .U--·. - — — v - »«M! g f -**«*►· - .·'·'- v ’ V </p>
+            <p>iniciado en Cadiz el dia 18 de Setiembre de 1868 por el general Prim, brigadier Topete; y los generales Serrano, Caballero [ de Rodas y otros; y secundado en el término de diez dias por toda s la Nación al grito de Viva la voluntad Nacional, Cortes constituyentes, su¬ fragio Universal y abajo los Borbones. </p>
+            <p>Llegó por fin el momento que la Española Nación levantó el libre Pendón é hizo su pronunciamiento. A tan fuerte movimiento se ensanchan los corazones y el Pueblo y los batallones y la armada Nacional, gritan con voz general que ya no quieren Borbones. Treinta y cinco años hacia, que Fernando reventó, y su esposa union formó con el libre en aquel dia. Ella y la hija que tenia les apoyó el libre bando, y en el solio de Fernando colocó, contra el carlismo; mostrando asi su heroísmo y su sangre derramando. Ya la madre de Isabel con ingratitud pagó mas el libre no olvidó, å su hija siendo fiel. Pero ¡ desengaño cruel 1 cuando ella logró reinar, no se acordó de pagar </p>
+            <p>tanta deuda contraida y antes mal agradecida al libre pensó arreojar. Protegiendo al servilismo que se habia disfrazado con lema de moderado se entronizó el despotismo. De un abismo en otro abismo la ingrata Isabel cual fiera se enfada y se desespera si no ve cruda matanza, y en el despotismo abanza y es mas servil que Cabrera. La Constitución del doce dice que la compromete, forman otra el treinta y siete y también la desconoce. Con libres no quiere roce, y sí con aduladores que les llena de favores de placas, cintas y empleos, mientras que se llamen Neos y al Pueblo sean traidores. El palacio es convertido en ediondo lupanar, y aquel que quiere comprar un título, concedido. </p>
+            <p>No es el mérito atendido sino llenar el tesoro; ya sea judio ó moro, mientras que traiga metal lleva empleo principal que el mérito es el oro. Con capa de Religion y malicia consumada, la prensa queda cerrada y el pueblo sin instrucción. Viene el fraile marmitón y el infame Jesuitismo, que rastrero como éllmismo se posesiona de España y con ardides y maña entroniza el despotismo. Sufrir tanta tirania no puede el pueblo leal y por remediar su mal, busca medios cada dia. Pero la vil policia siempre al liberal asecha, de su honradez se aprovecha, y en prisiones y destierros, cargan al libre de hierros y asi le cierran.la brecha. </p>
+            <pb n="2" xml:id="Lg-2" facs="#i2"/>
+            <p>Se alza Madrid potente con la brava Artilleria ue dá pruevas aquel dia e liberal y valiente. Pierrat , que en su pecho siente de libertad la esperanza ; en el combate se lanza , y el fusil con el cañón, hacen horrísono son y causan cruda matanza. Vence el despotismo atroz al liberal otra vez, y muestra mas su altivez y se muestra mas feróz. La que pudo con su voz calmar la matanza cruel la que llaman Isabel y le apodan Bondadosa en ver fusilar se goza á su pueblo que le es fiel. Levanta Prim, la bandera de libertad siempre osado, y entonces no es secundado... ¡Oh desgracia dura y fiera! Isabel, digo, pantera, que no es madre ni muger, en vez de al Pueblo atender y de darle libertad mas le hace esclavizar, mas le hace padecer. Viendo ya tanta ruina Prim y otros generales, para acabar tantos males se unen con la Marina. </p>
+            <p>Hácia Cádiz se encamina con la escuadra acorazada, y ante sus muros formada alzan la Revolución, y es Isabel de Borbon para siempre destronada. El valeroso Topete honra y prez de la Marina á la hija de Cristina echó su primer arríete. Desde el marino al grumete le secundan con lealtad, su valor y voluntad á todos causa alegria ues nos ha dado en su dia onor, patria y libertad. En diez dias solamente toda la Ispana Nación con ardorosa pasión se pronuncia diligente. El pueblo se ve potente * mas no pierde la razón, y olvido clama y perdón sin pensar en lo pasado, y solo de España ha lanzado la familia de Borbon. Tan solo un hombre obsecado en el puente de Alcolea lanzó fiero á la pelea al obediente soldado. Allí Serrano esforzado le invita á conciliación, pero él sin compasión , hace reñir inhumano </p>
+            <p>el hermano contra hermano por Isabel de Borbon. Contra el ejército libre furioso y cruel se lanza, ¡ ay, seis horas de matanza por salvar un imposible! De combate tan terrible salió el pueblo vencedor, pues con denuedo y valor paisanos y generales, los soldados y oficiales, cubriéronse allí de honor. Olvidemos lo pasado seamos libres y humanos que todos somos hermanos el paisano y el soldado. Guerra tan solo aljmalvado que nos quiera deshunir, siendo esclavo no es vivir, y antes de volverlo á ser primero nos han de ver mil y mil veces morir. La voluntad nacional ¡ viva mil veces y mil! ¡abajo el déspota vil! ¡viva el pueblo liberal! Sea el ciudadano igual ante la Constitución, ¡ viva la paz y la union ! ¡ Abajo la dinastia! y la falsa, ingrata, impía, Isabela de Borbon. </p>
+            <p>mm patrio™ pera cantarse ab la popular música del imne de Riego. </p>
+            <p>z —.· </p>
+            <p>CORO. 1 Abaix la Ciutadela! abaix y tot seguii , que per Borbons fou feta no bo posem en olvit. Los catalans un dia de libres blasonaren y sa saneh derramaren per lení llibertat. Mes un Borbon infame pera ser rey de España , ple de rabiosa saña al poblé ha encadena!.—C oro. etc. Castellans y francesos á Catalunya pasan, furiosos tot arrasan poblé, vila y ciutat. Mes Catalunya tota contra del tira abansa, y entre foch y matansa mort per la llibertat.—C oro. etc. Lo gabaix ais acossa y la gent de Castella , mata, roba atropella ľ infant , la niña, al vell- Mes lo catalã jura morir en la palestra y ha destruil se apresta ó deixari la peli.— Coro. etc. Barcelona esforsada resisteix ab porfia un dia y altre dia sa terra pam à pam. </p>
+            <p>No li fa po lo siti, bombarda ni metralla ni tem á vil canalla; la pesta, ni la fam.— Coro. etc. La rendició demana lo exercit que sitia , y per resposta envia lo poblé calala: Que si voi Barcelona que la vingia á guanyarla, que ell sabrá guardarla y á la muralla está.—C oro. etc. Asaltan las murallas, la batalla comensa, Barcelona has defensa com rabiós lleó. Cada pam de terreno que guanya temerari , y deixa lo atversari del exercit la fló.—C oro. etc. Los joves, veils y denas, lo rich, lo proletari, ł tolhom hi voi anari ningu fa falla alli. La llibertat defensan, la llibertat que ’s vida, si perdan la partida mes se estiman morí.— C oro. etc. La forsa bruta guanya, y es Catalunya esclava: ¡ Catalunya la Braba esclava de un Borból Per padró de ignominia la Ciutadela alsa </p>
+            <p>per si voi revelarse ferse fe la rahó.—C oro. etc. Mitxa ciutat aterra de la part mes poblada, y forma una esplanada y un grandios castell. ¥ allí per forsa шава lo Borbó estrafalari, que hi vaxia á treballari lo jőve y tambe Ί vell.— Coro. [etc. Mes ja n’ arribat 1’ hora que de un cop vagia à terra, que no es bo per la guerra y es contra la ciutat. Ja la rassa Borbònica de Espanya es desterrada, ja naix nova alborada ja tenim llibertat.— Coro. etc. Los catalans la feren per forsa allá en son dia, que voluntari sia tothom ha treballà. ! Abaix la Ciutadela! ¡ abaix lo poblé crida 1 abaix tot deseguida y abaix ne te de aná.—C oro. etc. Per un Borbon fou feta, ja los Borbons son fora; ni un dia, ni un hora, ni un cuart, ni un minut. Mes nos te de afrontarnos llansemia en lo abisme, ¡abaix lo despotisme! ¡ abaix la esclavitut !—Coro. etc. </p>
+            <p>Barcelona: Véndese en casa Llorens, calle de la Palma de Sta. Catalina. </p>
+         </div>
+      </body>
+   </text>
+</TEI>

@@ -1,6 +1,5 @@
-import { type } from 'os';
-import * as util from 'util';
 import Ajv from 'ajv';
+import * as util from 'util';
 
 import configSchema from './config.schema.json';
 
@@ -41,6 +40,7 @@ function validateObjectIsConfig(config: any): asserts config is Config {
 
 export interface Config {
   dataDir: string;
+  legacyDcpDataDir: string;
   users: Users;
   darwinXTF: string;
   postHost: string;

@@ -1,3 +1,11 @@
+import {
+  execute,
+  Closable,
+  CreateOptions,
+  ExecuteOptions,
+  XSLTExecutor,
+} from '@lib.cam/xslt-nailgun';
+import collapseWhitespace from 'collapse-whitespace';
 import { AssertionError } from 'assert';
 import http from 'http';
 import { IM_A_TEAPOT } from 'http-status-codes';
@@ -5,7 +13,10 @@ import * as path from 'path';
 import { promisify } from 'util';
 
 import { Database, Collection, DatabasePool } from '../src/db';
-import { MetadataRepository } from '../src/metadata';
+import {
+  LegacyDarwinMetadataRepository,
+  CUDLMetadataRepository,
+} from '../src/metadata';
 import { BaseResource } from '../src/resources';
 
 /**
@@ -88,6 +99,46 @@ export class MemoryDatabase extends BaseResource implements Database {
 
 import { TEST_DATA_PATH } from './constants';
 
-export function getTestDataMetadataRepository(): MetadataRepository {
-  return new MetadataRepository(path.resolve(TEST_DATA_PATH, 'metadata'));
+export function getTestDataMetadataRepository(): CUDLMetadataRepository {
+  return new CUDLMetadataRepository(path.resolve(TEST_DATA_PATH, 'metadata'));
+}
+
+export function getTestDataLegacyDarwinMetadataRepository(): LegacyDarwinMetadataRepository {
+  return new LegacyDarwinMetadataRepository(
+    path.resolve(TEST_DATA_PATH, 'legacy-darwin')
+  );
+}
+
+export function normaliseSpace(value?: Node | null): string {
+  if (!value) {
+    return '';
+  }
+  value = value.cloneNode(true);
+  collapseWhitespace(value);
+  return value.textContent || '';
+}
+
+/**
+ * An XSLTExecutor implementation that doesn't need to be closed() after use.
+ * It doesn't actually hold open a JVM process.
+ */
+class TestXSLTExecutor implements Closable {
+  private readonly options: CreateOptions;
+
+  constructor(options?: CreateOptions) {
+    this.options = options || {};
+  }
+
+  async execute(options: ExecuteOptions): Promise<Buffer> {
+    return execute({ ...options, ...this.options });
+  }
+
+  close() {}
+}
+
+/**
+ * Get an XSLTExecutor that doesn't need to be close()d to avoid leaking.
+ */
+export function getTestXSLTExecutor(options?: CreateOptions): XSLTExecutor {
+  return (new TestXSLTExecutor(options) as unknown) as XSLTExecutor;
 }

@@ -13,17 +13,18 @@ import { type } from 'os';
 import path from 'path';
 import util, { promisify } from 'util';
 import { Config } from '../config';
-import { ItemJSON, MetadataRepository } from '../metadata';
+import { ItemJSON, CUDLMetadataRepository, CUDLFormat } from '../metadata';
 
 import {
   CORS_HEADERS,
+  isEnumMember,
   isExternalCorsRequest,
   isSimplePathSegment,
 } from '../util';
 
 export function getRoutes(options: {
   router?: express.Router;
-  metadataRepository: MetadataRepository;
+  metadataRepository: CUDLMetadataRepository;
 }) {
   const router = options.router || express.Router();
 
@@ -37,7 +38,7 @@ export function getRoutes(options: {
   return router;
 }
 
-function createMetadataHandler(metadataRepository: MetadataRepository) {
+function createMetadataHandler(metadataRepository: CUDLMetadataRepository) {
   return expressAsyncHandler(
     async (req: express.Request, res: express.Response, next) => {
       // We always want to allow remote ajax access
@@ -50,22 +51,29 @@ function createMetadataHandler(metadataRepository: MetadataRepository) {
       res.set('Vary', 'Origin');
 
       // Ensure our path vars are safe to build FS paths from
-      for (const prop of ['id', 'format']) {
-        if (!isSimplePathSegment(req.params[prop])) {
-          res.status(BAD_REQUEST).json({
-            error: util.format(`Bad ${prop}: ${req.params[prop]}`),
-          });
-          return;
-        }
+      const id = req.params.id;
+      const format = req.params.format;
+      if (!isSimplePathSegment(id)) {
+        res.status(BAD_REQUEST).json({
+          error: util.format(`Bad id: ${id}`),
+        });
+        return;
+      }
+
+      if (!isEnumMember(CUDLFormat, format)) {
+        res.status(BAD_REQUEST).json({
+          error: util.format(`Bad format: ${format}`),
+        });
+        return;
       }
 
       let item: ItemJSON;
       try {
-        item = await metadataRepository.getJSON(req.params.id);
+        item = await metadataRepository.getJSON(id);
       } catch (e) {
         if (e?.nested?.code === 'ENOENT') {
           res.status(NOT_FOUND).json({
-            error: `ID does not exist: ${req.params.id}`,
+            error: `ID does not exist: ${id}`,
           });
         } else {
           next(e);
@@ -98,9 +106,7 @@ function createMetadataHandler(metadataRepository: MetadataRepository) {
         if (item?.descriptiveMetadata?.[0]?.metadataRights?.trim()) {
           // Return metadata
           res.contentType('text/plain');
-          res.sendFile(
-            metadataRepository.getPath(req.params.format, req.params.id)
-          );
+          res.sendFile(await metadataRepository.getPath(format, id));
         } else {
           res.status(FORBIDDEN).json({
             error: util.format('Access not allowed to requested metadata'),

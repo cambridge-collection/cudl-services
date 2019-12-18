@@ -1,0 +1,187 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE TEI [
+<!ENTITY ντ "ντ"><!-- nt digraph-->
+<!ENTITY om "⸆"><!-- omission (blank first hand reading)-->
+]>
+<?xml-stylesheet type="text/xsl" href="bezae.xsl"?><TEI xmlns="http://www.tei-c.org/ns/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:id="Bezae-Greek" xsi:schemaLocation="http://www.tei-c.org/ns/1.0 TEI-NTMSS.xsd"><teiHeader>
+    <fileDesc>
+      <titleStmt>
+ <title>A Transcription of Codex Bezae (Greek side)</title>
+        <title type="document" n="05" key="20005">GA 05</title>
+        <title type="collection" level="s" xml:lang="en">The New Testament</title>
+       <respStmt><resp>Created by</resp><name>the International Greek New Testament Project (IGNTP)</name></respStmt>
+       <respStmt><resp>Initial transcriptions of Matthew, Mark, Luke, Acts and the supplement to John produced by</resp><name>the Institut für neutestamentliche Textforschung, Münster (INTF)</name>
+</respStmt>
+<funder>Cambridge University Library</funder>
+<sponsor><name type="org">The Institute for Textual Scholarship and Electronic Editing</name></sponsor>
+</titleStmt>
+      <editionStmt>
+        <edition n="1.0">Version 1.0, released on <date>30.7.2012</date></edition>
+      </editionStmt>
+<publicationStmt>
+<publisher>
+ <name type="org">The International Greek New Testament Project (IGNTP)</name></publisher>
+ <date>30.7.2012</date>
+<availability><p>Available for noncommercial re-use provided attribution is made to the original creators and funder and the subsequent derivative is licensed as ShareAlike (Creative Commons by-nc-sa)</p></availability></publicationStmt>
+
+
+<sourceDesc>
+<msDesc>
+ <msIdentifier>
+ <country>United Kingdom</country>
+ <settlement>Cambridge</settlement>
+ <repository>University Library</repository>
+ <idno>Nn.2.41</idno>
+ <msName xml:lang="la">Codex Bezae</msName>
+ <altIdentifier type="VetusLatina"><idno>5</idno></altIdentifier>
+ <altIdentifier type="Liste"><idno>20005</idno></altIdentifier>
+ <altIdentifier type="Tischendorf"><idno>d</idno></altIdentifier>
+ <altIdentifier type="TM"><idno>61777</idno></altIdentifier>
+ <altIdentifier type="LDAB"><idno>2929</idno></altIdentifier>
+ </msIdentifier>
+</msDesc>
+</sourceDesc>
+</fileDesc>
+
+<encodingDesc>
+<projectDesc><p>This transcription was prepared by the International Greek New Testament Project in collaboration with Cambridge University Library. For the Synoptic Gospels, Acts and the supplement of John the original plain text transcription was made by INTF and subsequently converted to XML and upgraded by the IGNTP. This included the addition of paratextual information, the addition of diaereses, the encoding of abbreviations and the comparison of all supplied and unclear text against the new images. For the main part of John the IGNTP transcription made by the Principio Project was converted and upgraded. The XML was produced according to the subset of the TEI guidelines set out at <ptr target="http://epapers.bham.ac.uk/1656/"/>.</p>
+<p>A base text was altered to correspond to the reading of the manuscript, and details of layout and paratext added. The INTF used the editorial text of Nestle Aland 27th edition, while the IGNTP used the Textus Receptus. For the identification of scribal hands in corrections and paratext, Scrivener's 1864 transcription was followed (Adnotationes editoris), as amended in Parker's 1992 monograph (Appendix 2). The source of corrections not recorded in either of these sources was identified by Parker.</p>
+<p>This transcription has been deposited on the University of Birmingham Institutional Research Archive, at <ptr target="http://epapers.bham.ac.uk/1663/"/></p>
+</projectDesc>
+      <variantEncoding method="parallel-segmentation" location="internal"/>
+</encodingDesc>
+
+<revisionDesc>
+<change n="1" when="2012-07-30">Revised transcriptions of each book combined to produce a single file (version 1.0).</change>
+<change n="0" when="2012-06-20">Greek files combined to produce an initial single file (version 0.1).</change>
+</revisionDesc>
+</teiHeader>
+<text><body><div>
+<pb n="cover(inside)" facs="http://cudl.lib.cam.ac.uk/view/MS-NN-00002-00041/2/" />
+<note type="editorial">Inside front cover of volume 1</note>
+<pb n="flyleaf" facs="http://cudl.lib.cam.ac.uk/view/MS-NN-00002-00041/4/" />
+<note type="editorial">Flyleaf 1 verso</note>
+<pb n="flyleaf" facs="http://cudl.lib.cam.ac.uk/view/MS-NN-00002-00041/6/" />
+<note type="editorial">Flyleaf 2 verso</note>
+<pb xml:id="P3v-05" n="3v" type="Quire_1-3v" subtype="hair" facs="http://cudl.lib.cam.ac.uk/view/MS-NN-00002-00041/8/" />
+<note type="editorial">The first two pages of the original manuscript, containing Mt 1,1-20a are missing</note>
+<ab><seg type="margin" subtype="pagetop"><fw type="runTitle" place="center"><w n="2">κατα</w><w n="4">μαθθαιον</w></fw></seg></ab>
+<cb xml:id="P3vC1-05" n="1"/>
+<lb xml:id="P3vC1L1-05" n="1"/><div xml:id="grc01" n="Matthew" type="book"><div n="B01K1" type="chapter"><ab n="B01K1V20" xml:lang="grc"><w n="2">παραλαβειν</w><w n="4">μαριαμ</w><w n="6">την</w><w n="8">γυναικα</w><w n="10">σου</w>
+<lb xml:id="P3vC1L2-05" n="2"/><w n="12">το</w><w n="14">γαρ</w><w n="16">εν</w><w n="18">αυτη</w><w n="20">γεννηθεν</w><w n="22">εκ</w><w n="24"><abbr type="nomSac"><hi rend="ol">πνς</hi></abbr></w><w n="26">αγιου</w><w n="28">εστιν</w>
+<lb xml:id="P3vC1L3-05" n="3"/></ab><ab n="B01K1V21" xml:lang="grc"><w n="2">τεξεται</w><w n="4">δε</w><w n="6">ϋιον</w>
+<lb xml:id="P3vC1L4-05" n="4"/><w n="8">και</w><w n="10">καλεσεις</w><w n="12">το</w><w n="14">ονομα</w><w n="16">αυτου</w><w n="18"><abbr type="nomSac"><hi rend="ol">ιην</hi></abbr></w>
+<lb xml:id="P3vC1L5-05" n="5"/><w n="20">αυτος</w><w n="22">γαρ</w><w n="24">σωσει</w><w n="26">τον</w><w n="28">λαον</w><w n="30">αυτου</w>
+<lb xml:id="P3vC1L6-05" n="6"/><w n="32">απο</w><w n="34">των</w><w n="36">αμαρτιων</w><w n="38">αυτων</w>
+<lb xml:id="P3vC1L7-05" rend="hang" n="7"/></ab><ab n="B01K1V22" xml:lang="grc"><w n="2">τουτο</w><w n="4">δε</w><w n="6">ολον</w><w n="8">γεγονεν</w>
+<lb xml:id="P3vC1L8-05" n="8"/><w n="10">ϊνα</w><w n="12">πληρωθη</w><w n="14">το</w><w n="16">ρηθεν</w><w n="18">ϋπο</w><w n="20"><abbr type="nomSac"><hi rend="ol">κυ</hi></abbr></w>
+<lb xml:id="P3vC1L9-05" n="9"/><w n="22">δια</w><w n="24">ησαϊου</w><w n="26">του</w><w n="28">προφητου</w><w n="30">λεγοντος</w>
+<lb xml:id="P3vC1L10-05" n="10"/></ab><ab n="B01K1V23" xml:lang="grc"><w n="2">ϊδου</w><w n="4">η</w><w n="6">παρθενος</w><w n="8">εν</w><w n="10">γαστρι</w><w n="12">εξει</w>
+<lb xml:id="P3vC1L11-05" n="11"/><w n="14">και</w><w n="16">τεξετε</w><w n="18">ϋιον</w><pc>·</pc><w n="20">και</w><w n="22">καλεσεις</w><w n="24">το</w><w n="26">ονομα</w><w n="28">αυτου</w>
+<lb xml:id="P3vC1L12-05" n="12"/><w n="30">ενμανουηλ</w>
+<lb xml:id="P3vC1L13-05" n="13"/><w n="32">ο</w><w n="34">εστιν</w><w n="36">μεθερμηνευομενον</w><w n="38">μεθ</w><w n="40">ημων</w><w n="42">ο</w><w n="44"><abbr type="nomSac"><hi rend="ol">θς</hi></abbr></w>
+<lb xml:id="P3vC1L14-05" rend="hang" n="14"/></ab><ab n="B01K1V24" xml:lang="grc"><w n="2">διεγερθεις</w><w n="4">δε</w><w n="6">ο</w><app><rdg type="orig" hand="p.m."><w n="8">ιωσηφ</w></rdg><rdg type="corr" hand="s.m."><w n="8">ϊωσηφ</w></rdg></app><w n="10">απο</w><w n="12">του</w><w n="14">ϋπνου</w><w n="16">εποιησεν</w>
+<lb xml:id="P3vC1L15-05" n="15"/><w n="18">ως</w><w n="20">προσεταξεν</w><w n="22">αυτω</w><w n="24">ο</w><w n="26">αγγελος</w><w n="28"><abbr type="nomSac"><hi rend="ol">κυ</hi></abbr></w>
+<lb xml:id="P3vC1L16-05" n="16"/><w n="30">και</w><w n="32">παρελαβεν</w><w n="34">την</w><w n="36">γυναικα</w><w n="38">αυτου</w>
+<lb xml:id="P3vC1L17-05" n="17"/></ab><ab n="B01K1V25" xml:lang="grc"><w n="2">και</w><w n="4">ουκ</w><w n="6">εγνω</w><w n="8">αυτην</w>
+<lb xml:id="P3vC1L18-05" n="18"/><w n="10">εως</w><w n="12">ου</w><w n="14">ετεκεν</w><w n="16">τον</w><w n="18">ϋιον</w><app><rdg type="orig" hand="p.m."><w n="20">αυτης</w></rdg><rdg type="corr" hand="s.m."><w n="20">&om;</w></rdg></app>
+<lb xml:id="P3vC1L19-05" n="19"/><w n="22">τον</w><w n="24">πρωτοτοκον</w>
+<lb xml:id="P3vC1L20-05" n="20"/><w n="26">και</w><w n="28">εκαλεσεν</w><w n="30">το</w><w n="32">ονομα</w><w n="34">αυτου</w><w n="36"><abbr type="nomSac"><hi rend="ol">ιην</hi></abbr></w>
+<lb xml:id="P3vC1L21-05" rend="hang" n="21"/></ab></div><div n="B01K2" type="chapter"><ab n="B01K2V1" xml:lang="grc"><seg type="margin" subtype="lineleft"><num type="chapNum">Cap.</num></seg><w n="2">του</w><w n="4">δε</w><w n="6"><abbr type="nomSac"><hi rend="ol">ιηυ</hi></abbr></w><w n="8">γεννηθεντος</w>
+<lb xml:id="P3vC1L22-05" n="22"/><seg type="margin" subtype="lineleft"><fw type="lectTitle" rend="M"><hi rend="ol">χυ</hi> γε<lb break="no"/>νις</fw></seg><w n="10">εν</w><w n="12">βηθλεεμ</w><w n="14">της</w><w n="16">ϊουδαιας</w>
+<lb xml:id="P3vC1L23-05" n="23"/><w n="18">εν</w><w n="20">ημεραις</w><w n="22">ηρωδους</w><w n="24">του</w><w n="26">βασιλεως</w>
+<lb xml:id="P3vC1L24-05" n="24"/><w n="28">ειδου</w><w n="30">μαγοι</w><w n="32">απο</w><w n="34">ανατολων</w><w n="36">παρεγενοντο</w>
+<lb xml:id="P3vC1L25-05" n="25"/><w n="38">εις</w><w n="40">ϊεροσολυμα</w></ab><ab n="B01K2V2" xml:lang="grc"><w n="2">λεγοντες</w>
+<lb xml:id="P3vC1L26-05" n="26"/><w n="4">που</w><w n="6">εστιν</w><w n="8">ο</w><w n="10">τεχθεις</w><w n="12">βασιλευς</w><w n="14">των</w><w n="16">ϊουδαιω<ex>ν</ex></w>
+<lb xml:id="P3vC1L27-05" n="27"/><w n="18">ειδομεν</w><w n="20">γαρ</w><w n="22">αυτου</w><w n="24">τον</w><w n="26">αστερα</w><w n="28">εν</w><w n="30">τη</w><w n="32">ανατολη</w>
+<lb xml:id="P3vC1L28-05" n="28"/><w n="34">και</w><w n="36">ηλθομεν</w><w n="38">προσκυνησαι</w><w n="40">αυτω</w>
+<lb xml:id="P3vC1L29-05" rend="hang" n="29"/></ab><ab n="B01K2V3" xml:lang="grc"><w n="2">ακουσας</w><w n="4">δε</w><w n="6">ο</w><w n="8">βασιλευς</w><w n="10">ηρωδης</w><w n="12">εταραχθη</w>
+<lb xml:id="P3vC1L30-05" n="30"/><app><rdg type="orig" hand="p.m."><w n="14">κα</w></rdg><rdg type="corr" hand="p.m."><w n="14">και</w></rdg></app><w n="16">ϊεροσολυμα</w><w n="18">μετ</w><w n="20">αυτου</w>
+<lb xml:id="P3vC1L31-05" n="31"/></ab><ab n="B01K2V4" xml:lang="grc"><w n="2">και</w><w n="4">συναγαγων</w><w n="6">παντας</w>
+<lb xml:id="P3vC1L32-05" n="32"/><w n="8">τους</w><w n="10">αρχιερεις</w>
+<lb xml:id="P3vC1L33-05" n="33"/><note type="editorial">This line has been retraced by a later hand</note><w n="12">και</w><w n="14">γραμματεις</w><w n="16">του</w><w n="18">λαου</w><w n="20">επυνθανετο</w>
+<pb xml:id="P4v-05" n="4v" type="Quire_1-4v" subtype="flesh" facs="http://cudl.lib.cam.ac.uk/view/MS-NN-00002-00041/10/" />
+<seg type="margin" subtype="pagetop"><fw type="runTitle" place="center"><w n="2">κατ<ex>α</ex></w><w n="4">μαθθαιον</w></fw><lb/>
+<fw type="lectTitle" place="center">αρχ<ex>η</ex></fw></seg>
+<cb xml:id="P4vC1-05" n="1"/>
+<lb xml:id="P4vC1L1-05" n="1"/><w n="22">που</w><w n="24">ο</w><w n="26"><abbr type="nomSac"><hi rend="ol">χρς</hi></abbr></w><w n="28">γενναται</w><pc>·</pc></ab><ab n="B01K2V5" xml:lang="grc"><seg type="margin" subtype="lineleft"><num type="AmmSec" n="5"><hi rend="ol">ε</hi></num></seg><w n="2">οι</w><w n="4">δε</w><w n="6">ειπον</w><w n="8">αυτω</w>
+<lb xml:id="P4vC1L2-05" n="2"/><w n="10">εν</w><w n="12">βηθλεεμ</w><w n="14">της</w><w n="16">ϊουδαιας</w>
+<lb xml:id="P4vC1L3-05" n="3"/><w n="18">ουτως</w><w n="20">γαρ</w><w n="22">γεγραπται</w><w n="24">δια</w><w n="26">του</w><w n="28">προφητου</w>
+<lb xml:id="P4vC1L4-05" n="4"/></ab><ab n="B01K2V6" xml:lang="grc"><w n="2">και</w><w n="4">συ</w><w n="6">βηθλεεμ</w><w n="8">της</w><w n="10">ϊουδαιας</w><pc>·</pc><w n="12">μη</w><w n="14">ελαχιστη</w><w n="16">ει</w>
+<lb xml:id="P4vC1L5-05" n="5"/><w n="18">εν</w><w n="20">τοις</w><w n="22">ηγεμοσιν</w><w n="24">ϊουδα</w>
+<lb xml:id="P4vC1L6-05" n="6"/><app><rdg type="orig" hand="p.m."><w n="26">ε<unclear>ξ</unclear></w></rdg><rdg type="corr" hand="s.m."><w n="26">εκ</w></rdg></app><w n="28">ου</w><w n="30">γαρ</w><w n="32">εξελευσεται</w><w n="34">ηγουμενος</w>
+<lb xml:id="P4vC1L7-05" n="7"/><w n="36">οστις</w><w n="38">ποιμενει</w><w n="40">τον</w><w n="42">λαον</w><w n="44">μου</w><w n="46">τον</w><w n="48">ϊσραηλ</w>
+<lb xml:id="P4vC1L8-05" rend="hang" n="8"/></ab><ab n="B01K2V7" xml:lang="grc"><seg type="margin" subtype="lineleft"><num type="AmmSec" n="6"><hi rend="ol">ϛ</hi></num></seg><w n="2">τοτε</w><w n="4">ηρωδης</w><w n="6">λαθρα</w><pc>·</pc><w n="8">καλεσας</w><w n="10">τους</w><w n="12">μαγους</w>
+<lb xml:id="P4vC1L9-05" n="9"/><w n="14">ηκρειβασεν</w><w n="16">παρ</w><w n="18">αυτων</w><w n="20">τον</w><w n="22">χρονον</w>
+<lb xml:id="P4vC1L10-05" n="10"/><w n="24">του</w><w n="26">φαινομενου</w><w n="28">αστερος</w>
+<lb xml:id="P4vC1L11-05" n="11"/></ab><ab n="B01K2V8" xml:lang="grc"><w n="2">και</w><w n="4">πεμψας</w><w n="6">αυτους</w><w n="8">εις</w><w n="10">βηθλεεμ</w><pc>’</pc><w n="12">ειπεν</w><w n="14">αυτοις</w>
+<lb xml:id="P4vC1L12-05" n="12"/><w n="16">πορευθεντες</w><w n="18">εξετασαται</w><w n="20">ακρειβως</w>
+<lb xml:id="P4vC1L13-05" n="13"/><w n="22">περι</w><w n="24">του</w><w n="26">παιδιου</w><pc>·</pc><w n="28">οταν</w><w n="30">δε</w><w n="32">ευρητε</w>
+<lb xml:id="P4vC1L14-05" n="14"/><app><rdg type="orig" hand="p.m."><w n="34">επαγγειλαται</w></rdg><rdg type="corr" hand="B"><w n="34">απαγγειλαται</w></rdg></app><w n="36">μοι</w>
+<lb xml:id="P4vC1L15-05" n="15"/><w n="38">οπως</w><w n="40">καγω</w><w n="42">ελθων</w><w n="44">προσκυνησω</w><w n="46">αυτω</w>
+<lb xml:id="P4vC1L16-05" n="16"/></ab><ab n="B01K2V9" xml:lang="grc"><w n="2">οι</w><w n="4">δε</w><app><rdg type="orig" hand="p.m."><w n="6">ακουσαν</w></rdg><rdg type="corr" hand="C"><w n="6">ακουσαντες</w></rdg></app><w n="8">του</w><w n="10">βασιλεως</w><w n="12">επορευθησαν</w>
+<lb xml:id="P4vC1L17-05" n="17"/><w n="14">και</w><w n="16">ϊδου</w><w n="18">ο</w><w n="20">αστηρ</w><pc>’</pc><w n="22">ον</w><w n="24">ειδον</w><w n="26">εν</w><w n="28">τη</w><w n="30">ανατολη</w>
+<lb xml:id="P4vC1L18-05" n="18"/><w n="32">προηγεν</w><w n="34">αυτους</w><pc>·</pc><w n="36">εως</w><w n="38">ελθων</w><w n="40">εσταθη</w>
+<lb xml:id="P4vC1L19-05" n="19"/><w n="42">επανω</w><w n="44">του</w><w n="46">παιδιου</w>
+ <lb xml:id="P4vC1L20-05" rend="hang" n="20"/></ab><ab n="B01K2V10" xml:lang="grc"><w n="2">ϊδοντες</w><w n="4">δε</w><w n="6">τον</w><w n="8">αστερα</w><w n="10">εχαρησαν</w>
+<lb xml:id="P4vC1L21-05" n="21"/><w n="12">χαραν</w><w n="14">μεγαλην</w><w n="16">σφοδρα</w>
+<lb xml:id="P4vC1L22-05" n="22"/></ab><ab n="B01K2V11" xml:lang="grc"><w n="2">και</w><w n="4">ελθοντες</w><w n="6">εις</w><w n="8">την</w><w n="10">οικειαν</w>
+<lb xml:id="P4vC1L23-05" n="23"/><w n="12">ειδον</w><w n="14">τον</w><w n="16">παιδα</w>
+<lb xml:id="P4vC1L24-05" n="24"/><w n="18">μετα</w><w n="20">μαριας</w><w n="22">της</w><w n="24">μητρος</w><w n="26">αυτου</w>
+<lb xml:id="P4vC1L25-05" n="25"/><w n="28">και</w><w n="30">πεσοντες</w><w n="32">προσεκυνησαν</w><w n="34">αυτω</w>
+<lb xml:id="P4vC1L26-05" n="26"/><w n="36">και</w><w n="38">ανοιξαντες</w><w n="40">τους</w><w n="42">θηνσαυρους</w><w n="44">αυτων</w>
+<lb xml:id="P4vC1L27-05" n="27"/><w n="46">προσηνεγκαν</w><w n="48">αυτω</w><w n="50">δωρα</w>
+<lb xml:id="P4vC1L28-05" n="28"/><w n="52">χρυσον</w><w n="54">και</w><w n="56">λιβανον</w><w n="58">και</w><w n="60">ζμυρναν</w>
+<lb xml:id="P4vC1L29-05" n="29"/></ab><ab n="B01K2V12" xml:lang="grc"><w n="2">και</w><w n="4">χρηματισθεντες</w><w n="6">κατ</w><w n="8">οναρ</w>
+<lb xml:id="P4vC1L30-05" n="30"/><w n="10">μη</w><w n="12">ανακαμψαι</w><w n="14">προς</w><w n="16">ηρωδην</w>
+<lb xml:id="P4vC1L31-05" n="31"/><seg type="margin" subtype="lineleft"><fw type="lectTitle">αρχη</fw></seg><w n="18">δι</w><w n="20">αλλης</w><w n="22">οδου</w><w n="24">ανεχωρησαν</w>
+<lb xml:id="P4vC1L32-05" n="32"/><w n="26">εις</w><w n="28">την</w><w n="30">χωραν</w><w n="32">αυτων</w><seg type="margin" subtype="lineright"><fw type="lectTitle" rend="M?">τον μαγον</fw></seg>
+<lb xml:id="P4vC1L33-05" rend="hang" n="33"/></ab><ab n="B01K2V13" xml:lang="grc"><w n="2">αυτων</w><w n="4">δε</w><w n="6">αναχωρησαντων</w><pc>·</pc><w n="10">ειδου</w><w n="12">αγγελος</w><w n="14"><abbr type="nomSac"><hi rend="ol">κυ</hi></abbr></w>
+<pb xml:id="P5v-05" n="5v" type="Quire_1-5v" subtype="hair" facs="http://cudl.lib.cam.ac.uk/view/MS-NN-00002-00041/12/" />
+
+<!-- content removed to reduce test data size -->
+
+<pb xml:id="P510v-05" n="510v" type="Quire_64-8v" subtype="flesh" facs="http://cudl.lib.cam.ac.uk/view/MS-NN-00002-00041/849/" />
+<seg type="margin" subtype="pagetop"><fw type="runTitle" place="center"><w n="2">πραξ<ex>εις</ex></w><w n="4">αποστολων</w></fw></seg>
+<cb xml:id="P510vC1-05" n="1"/>
+<lb xml:id="P510vC1L1-05" n="1"/></ab><ab n="B05K22V20" xml:lang="grc"><gap reason="page" unit="line" extent="1"/><w n="2">και</w><w n="4">φυλασσων</w><w n="6">τα</w><w n="8">ειματια</w>
+<lb xml:id="P510vC1L2-05" n="2"/><w n="10">των</w><w n="12">αναιρουντων</w><w n="14">αυτον</w>
+<lb xml:id="P510vC1L3-05" n="3"/></ab><ab n="B05K22V21" xml:lang="grc"><w n="2">και</w><w n="4">ειπεν</w><w n="6">προς</w><w n="8">με</w><w n="10">πορευου</w>
+<lb xml:id="P510vC1L4-05" n="4"/><w n="12">οτι</w><w n="14">εγω</w><w n="16">εις</w><w n="18">εθνη</w><w n="20">μακραν</w><w n="22">εξαποστελλω</w><w n="24">σε</w>
+<lb xml:id="P510vC1L5-05" n="5"/></ab><ab n="B05K22V22" xml:lang="grc"><w n="2">ηκουσαν</w><w n="4">δε</w><w n="6">αυτου</w><w n="8">αχρι</w><w n="10">τουτου</w><w n="12">του</w><w n="14">λογου</w>
+<lb xml:id="P510vC1L6-05" n="6"/><w n="16">και</w><w n="18">επηραν</w><w n="20">την</w><w n="22">φωνην</w><w n="24">αυτων</w><w n="26">λεγοντες</w>
+<lb xml:id="P510vC1L7-05" n="7"/><w n="28">αιρε</w><w n="30">απο</w><w n="32">της</w><w n="34">γης</w><w n="36">τον</w><w n="38">τοιουτον</w>
+<lb xml:id="P510vC1L8-05" n="8"/><w n="40">ου</w><w n="42">γαρ</w><app><rdg type="orig" hand="p.m."><w n="44">καθηκεν</w></rdg><rdg type="corr" hand="s.m."><w n="44">καθηκον</w></rdg></app><w n="46">αυτον</w><w n="48">ζην</w>
+<lb xml:id="P510vC1L9-05" n="9"/></ab><ab n="B05K22V23" xml:lang="grc"><w n="2">κραυγαζοντω<supplied reason="lacuna">ν</supplied></w><w n="4">δε</w>
+<lb xml:id="P510vC1L10-05" n="10"/><w n="6">και</w><w n="8">ρειπτοντω<supplied reason="lacuna">ν</supplied></w><w n="10">τα</w><w n="12">ειματια</w>
+<lb xml:id="P510vC1L11-05" n="11"/><w n="14">και</w><w n="16">κονιορτον</w><w n="18">βαλλοντων</w><w n="20">εις</w><w n="22">τον</w><w n="24">ουρανον</w>
+<lb xml:id="P510vC1L12-05" n="12"/></ab><ab n="B05K22V24" xml:lang="grc"><w n="2">εκελευσεν</w><w n="4">ο</w><w n="6">χειλιαρχος</w><w n="8">εισαγεσθαι</w><w n="10">αυτον</w>
+<lb xml:id="P510vC1L13-05" n="13"/><w n="12">εις</w><w n="14">την</w><w n="16">παρεμβολην</w><w n="18">ειπας</w>
+<lb xml:id="P510vC1L14-05" n="14"/><w n="20">μαστιξιν</w><app><rdg type="orig" hand="p.m."><w n="22">ανεταζειν</w></rdg><rdg type="corr" hand="B"><w n="22">ανεταζε<unclear>σθ</unclear>αι</w></rdg></app><w n="24">αυτον</w>
+<lb xml:id="P510vC1L15-05" n="15"/><w n="26">ϊνα</w><w n="28">επιγνω</w><w n="30">δι</w><w n="32">ην</w><w n="34">αιτιαν</w>
+<lb xml:id="P510vC1L16-05" n="16"/><w n="36">ουτως</w><w n="38">κατεφωνουν</w><w n="40">περι</w><w n="42">αυτου</w>
+<lb xml:id="P510vC1L17-05" rend="hang" n="17"/></ab><ab n="B05K22V25" xml:lang="grc"><w n="2">ως</w><w n="4">δε</w><w n="6">προσετιναν</w><w n="8">αυτον</w><w n="10">τοις</w><w n="12">ειμασιν</w>
+<lb xml:id="P510vC1L18-05" n="18"/><w n="14">ειπεν</w><w n="16">προς</w><w n="18">τον</w><w n="20">εστωτα</w><w n="22">εκατονταρχην</w>
+<lb xml:id="P510vC1L19-05" n="19"/><w n="24">ει</w><w n="26">εξεστιν</w><w n="28">ϋμειν</w><w n="30">ανθρωπον</w><w n="32">ρωμαιον</w>
+<lb xml:id="P510vC1L20-05" n="20"/><w n="34">και</w><w n="36">ακατακριτον</w><w n="38">μαστιζειν</w>
+<lb xml:id="P510vC1L21-05" n="21"/></ab><ab n="B05K22V26" xml:lang="grc"><w n="2">τουτο</w><w n="4">ακουσας</w><w n="6">ο</w><w n="8">εκατονταρχης</w>
+<lb xml:id="P510vC1L22-05" n="22"/><w n="10">οτι</w><w n="12">ρωμαιον</w><w n="14">εαυτον</w><w n="16">λεγει</w>
+<lb xml:id="P510vC1L23-05" n="23"/><w n="18">προσελθων</w><w n="20">τω</w><w n="22">χειλειαρχω</w><app><rdg type="orig" hand="p.m."><w n="24"><unclear>ε</unclear>πηγγειλεν</w></rdg><rdg type="corr" hand="B"><w n="24">απηγγειλεν</w></rdg></app><w n="26">αυτω</w>
+<lb xml:id="P510vC1L24-05" n="24"/><w n="28">ορα</w><w n="30">τι</w><w n="32">μελλεις</w><w n="34">ποιειν</w>
+<lb xml:id="P510vC1L25-05" n="25"/><w n="36">ο</w><app><rdg type="orig" hand="p.m."><w n="38">&om;</w></rdg><rdg type="corr" hand="B?"><w n="38">γαρ</w></rdg></app><w n="40">ανθρωπος</w><w n="42">ουτος</w><w n="44">ρωμαιος</w><w n="46">εστιν</w>
+<lb xml:id="P510vC1L26-05" rend="hang" n="26"/></ab><ab n="B05K22V27" xml:lang="grc"><w n="2">τοτε</w><w n="4">προσελθων</w><w n="6">ο</w><w n="8">χειλιαρχος</w>
+<lb xml:id="P510vC1L27-05" n="27"/><w n="10">επηρωτησεν</w><w n="12">αυτον</w><w n="14">λεγε</w><w n="16">μοι</w><w n="18">συ</w><w n="20">ρωμαιος</w><w n="22">ει</w>
+<lb xml:id="P510vC1L28-05" n="28"/><w n="24">ο</w><w n="26">δε</w><w n="28">ειπεν</w><w n="30">ειμι</w>
+<lb xml:id="P510vC1L29-05" rend="hang" n="29"/></ab><ab n="B05K22V28" xml:lang="grc"><w n="2">και</w><w n="4">αποκριθεις</w><w n="6">ο</w><w n="8">χειλιαρχος</w><app><rdg type="orig" hand="p.m."><gap extent="2−3" unit="char" reason="lacuna"/></rdg><rdg type="corr" hand="B?"><w n="10">&om;</w></rdg></app><w n="12">ειπεν</w>
+<lb xml:id="P510vC1L30-05" n="30"/><w n="14">εγω</w><w n="16">οιδα</w><w n="18">ποσου</w><w n="20">κεφαλαιου</w>
+<lb xml:id="P510vC1L31-05" n="31"/><w n="22">την</w><w n="24">πολειτειαν</w><w n="26">ταυτην</w><w n="28">εκτησαμην</w>
+<lb xml:id="P510vC1L32-05" rend="hang" n="33"/><w n="30">παυλος</w><w n="32">δε</w><w n="34">εφη</w><w n="36">εγω</w><w n="38">δε</w><w n="40">και</w><app><rdg type="orig" hand="p.m."><w n="42">γεγεννημαι</w></rdg><rdg type="corr" hand="B?"><w n="42">γεγενημαι</w></rdg></app>
+<lb xml:id="P510vC1L33-05" n="33"/></ab><ab n="B05K22V29" xml:lang="grc"><w n="2">τοτε</w><w n="4">απεστησαν</w><w n="6">απ</w><w n="8">αυτου</w>
+<seg type="margin" subtype="pagebottom"><note type="library" rend="pencil" xml:lang="en" place="center">The remaining <lb/>gone</note></seg><lb/></ab></div></div>
+<pb xml:id="flyleaf7v-05" n="flyleaf" facs="http://cudl.lib.cam.ac.uk/view/MS-NN-00002-00041/852/"/>
+<note type="editorial">Flyleaf (out of sequence?)</note>
+<pb xml:id="flyleaf8v-05" n="flyleaf" facs="http://cudl.lib.cam.ac.uk/view/MS-NN-00002-00041/853/"/>
+<note type="editorial">Flyleaf</note>
+<pb xml:id="backcover2-05" n="back cover" facs="http://cudl.lib.cam.ac.uk/view/MS-NN-00002-00041/855/"/>
+<note type="editorial">Inside back cover (volume 2)</note>
+</div></body></text></TEI>

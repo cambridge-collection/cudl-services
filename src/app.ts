@@ -12,7 +12,10 @@ const logger = require('morgan');
 const Strategy = require('passport-accesstoken').Strategy;
 
 import { Config, User, Users } from './config';
-import { MetadataRepository } from './metadata';
+import {
+  LegacyDarwinMetadataRepository,
+  CUDLMetadataRepository,
+} from './metadata';
 import { BaseResource, using } from './resources';
 
 const debug = Debugger('cudl-services');
@@ -28,7 +31,7 @@ const debug = Debugger('cudl-services');
 import * as darwin from './routes/darwin';
 import * as metadata from './routes/metadata';
 // const tags = require('./routes/tags');
-// const transcription = require('./routes/transcription.js');
+import * as transcription from './routes/transcription';
 import * as translation from './routes/translation';
 import * as membership from './routes/membership';
 // const similarity = require('./routes/similarity');
@@ -42,7 +45,8 @@ import {
 
 export interface AppOptions {
   users: Users;
-  metadataRepository: MetadataRepository;
+  metadataRepository: CUDLMetadataRepository;
+  legacyDarwinMetadataRepository: LegacyDarwinMetadataRepository;
   databasePool: DatabasePool;
   darwinXtfUrl: string;
 }
@@ -61,7 +65,10 @@ export class App extends BaseResource {
 
   static fromConfig(config: Config) {
     return new App({
-      metadataRepository: new MetadataRepository(config.dataDir),
+      metadataRepository: new CUDLMetadataRepository(config.dataDir),
+      legacyDarwinMetadataRepository: new LegacyDarwinMetadataRepository(
+        config.legacyDcpDataDir
+      ),
       databasePool: PostgresDatabasePool.fromConfig(config),
       users: config.users,
       darwinXtfUrl: config.darwinXTF,
@@ -122,7 +129,17 @@ export class App extends BaseResource {
     );
 
     // app.use('/v1/tags', tags.router);
-    // app.use('/v1/transcription',transcription);
+
+    app.use(
+      '/v1/transcription',
+      transcription.getRoutes({
+        metadataRepository: this.options.metadataRepository,
+        legacyDarwinMetadataRepository: this.options
+          .legacyDarwinMetadataRepository,
+        xsltExecutor: this.xsltExecutor,
+      })
+    );
+
     app.use(
       '/v1/translation',
       translation.getRoutes({

@@ -3,6 +3,7 @@
   "properties": {
     "darwinXTF": {"type": "string"},
     "dataDir": {"type": "string"},
+    "legacyDcpDataDir": {"type": "string"},
     "postDatabase": {"type": "string"},
     "postHost": {"type": "string"},
     "postPort": {"type": "number"},

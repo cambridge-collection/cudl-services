@@ -5,7 +5,7 @@ import proxy from 'express-http-proxy';
 import { URL } from 'url';
 import * as util from 'util';
 
-import { MetadataRepository } from '../metadata';
+import { CUDLMetadataRepository } from '../metadata';
 
 const debug = Debugger('cudl-services:darwin');
 

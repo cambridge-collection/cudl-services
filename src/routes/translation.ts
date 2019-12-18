@@ -1,17 +1,16 @@
 import { XSLTExecutor } from '@lib.cam/xslt-nailgun';
-import Debugger from 'debug';
 import express, { Request, Response } from 'express';
 import expressAsyncHandler from 'express-async-handler';
 import fs from 'fs';
 import { BAD_REQUEST, NOT_FOUND } from 'http-status-codes';
 import * as path from 'path';
 import util, { promisify } from 'util';
-import { MetadataRepository } from '../metadata';
+import { CUDLFormat, CUDLMetadataRepository } from '../metadata';
 import { isSimplePathSegment } from '../util';
 
 export function getRoutes(options: {
   router?: express.Router;
-  metadataRepository: MetadataRepository;
+  metadataRepository: CUDLMetadataRepository;
   xsltExecutor: XSLTExecutor;
 }) {
   const router = options.router || express.Router();
@@ -36,7 +35,7 @@ const TEI_XSL = path.resolve(
 );
 
 function createTeiTranslationHandler(
-  metadataRepository: MetadataRepository,
+  metadataRepository: CUDLMetadataRepository,
   xsltExecutor: XSLTExecutor
 ) {
   return expressAsyncHandler(async (req: Request, res: Response) => {
@@ -49,7 +48,10 @@ function createTeiTranslationHandler(
       }
     }
 
-    const teiPath = metadataRepository.getPath('tei', req.params.id);
+    const teiPath = await metadataRepository.getPath(
+      CUDLFormat.TEI,
+      req.params.id
+    );
     try {
       await promisify(fs.access)(teiPath);
     } catch (e) {

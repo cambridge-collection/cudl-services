@@ -38,3 +38,21 @@ export class BaseError extends NestedError {
     return this.constructor.name;
   }
 }
+
+export class NotFoundError extends BaseError {}
+
+export class UpstreamError extends BaseError {}
+
+/**
+ * A type guard which narrows strings to members of string-valued enums.
+ *
+ * @param _enum The enum type
+ * @param val The value to narrow
+ */
+export function isEnumMember<E extends string>(
+  _enum: { [k in string]: E },
+  val: string
+): val is E {
+  const members = Object.values(_enum) as unknown[];
+  return members.includes(val);
+}

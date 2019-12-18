@@ -10,21 +10,21 @@ import {
 import path from 'path';
 import request from 'supertest';
 import { promisify } from 'util';
-import { MetadataRepository } from '../../src/metadata';
+import { CUDLMetadataRepository } from '../../src/metadata';
 
 import { getRoutes } from '../../src/routes/metadata';
 import { TEST_DATA_PATH } from '../constants';
 
 import { getTestDataMetadataRepository } from '../utils';
 
-function getTestApp(metadataRepository: MetadataRepository) {
+function getTestApp(metadataRepository: CUDLMetadataRepository) {
   const app = express();
   app.use('/', getRoutes({ metadataRepository }));
   return app;
 }
 
 describe(`metadata routes /:format/:id`, () => {
-  let repo: MetadataRepository, app: express.Application;
+  let repo: CUDLMetadataRepository, app: express.Application;
 
   beforeEach(() => {
     repo = getTestDataMetadataRepository();
