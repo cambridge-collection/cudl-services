@@ -19,7 +19,9 @@
         },
         "required": ["username", "email"]
       }
-    }
+    },
+    "xtfBase": {"type": "string"},
+    "xtfIndexPath": {"type": "string"}
   },
-  "required": ["darwinXTF", "dataDir", "postDatabase", "postHost", "postPass", "postUser", "users"]
+  "required": ["darwinXTF", "dataDir", "postDatabase", "postHost", "postPass", "postUser", "users", "xtfBase", "xtfIndexPath"]
 }

@@ -38,7 +38,7 @@ function validateObjectIsConfig(config: any): asserts config is Config {
   }
 }
 
-export interface Config {
+export interface Config extends XTFConfig {
   dataDir: string;
   legacyDcpDataDir: string;
   users: Users;
@@ -49,6 +49,11 @@ export interface Config {
   postPass: string;
   postDatabase: string;
   [index: string]: unknown;
+}
+
+export interface XTFConfig {
+  xtfBase: string;
+  xtfIndexPath: string;
 }
 
 export interface Users {

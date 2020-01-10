@@ -1,25 +1,25 @@
 jest.mock('superagent');
 
 import superagent, { Response, SuperAgentRequest } from 'superagent';
+import { mocked } from 'ts-jest/utils';
 import { XTFConfig } from '../src/config';
-import { getSimilarItems, getUrl, search } from '../src/xtf';
+import { expectElementWithTag, expectNodeWithType, NodeType } from '../src/dom';
+import { DefaultXTF, XTF } from '../src/xtf';
 
 const exampleConfig: XTFConfig = {
   xtfBase: 'http://xtf.example.com/foo/',
   xtfIndexPath: '/opt/xtf/index',
 };
 
-function mocked<T extends (...args: unknown[]) => unknown>(
-  func: T
-): jest.MockedFunction<T> {
-  if (typeof ((func as unknown) as { mock: unknown })['mock'] !== 'object') {
-    throw new Error(`func is not a mock: ${func}`);
-  }
-  return func as jest.MockedFunction<T>;
-}
+let xtf: XTF & DefaultXTF;
+
+beforeEach(() => {
+  jest.clearAllMocks();
+  xtf = new DefaultXTF(exampleConfig);
+});
 
 test('getUrl', () => {
-  expect(getUrl(exampleConfig, 'search?smode=123&abc=foo')).toEqual(
+  expect(xtf['getUrl']('search?smode=123&abc=foo')).toEqual(
     `http://xtf.example.com/foo/search?smode=123&abc=foo&indexPath=${encodeURIComponent(
       exampleConfig.xtfIndexPath
     )}`
@@ -30,12 +30,13 @@ test('search() makes HTTP request to XTF', async () => {
   const response: Partial<Response> = {
     ok: true,
     type: 'text/xml',
+    text: '<example/>',
   };
   mocked(superagent.get).mockResolvedValueOnce(
     (response as unknown) as SuperAgentRequest
   );
 
-  const result = await search(exampleConfig, { identifier: 'foo' });
+  const result = await xtf.search({ identifier: 'foo' });
 
   expect(superagent.get).toHaveBeenCalledTimes(1);
   expect(superagent.get).toHaveBeenCalledWith(
@@ -43,7 +44,8 @@ test('search() makes HTTP request to XTF', async () => {
       exampleConfig.xtfIndexPath
     )}`
   );
-  expect(result).toBe(result);
+  expectNodeWithType(result.firstChild, NodeType.ELEMENT_NODE);
+  expectElementWithTag(result.firstChild, null, 'example');
 });
 
 test.each<[string, Partial<Response>, string]>([
@@ -62,30 +64,32 @@ test.each<[string, Partial<Response>, string]>([
     (response as unknown) as SuperAgentRequest
   );
 
-  await expect(search(exampleConfig, {})).rejects.toThrow(msg);
+  await expect(xtf.search({})).rejects.toThrow(msg);
 });
 
 test('getSimilarItems()', async () => {
   const response: Partial<Response> = {
     ok: true,
     type: 'text/xml',
+    text: `<example/>`,
   };
   mocked(superagent.get).mockResolvedValueOnce(
     (response as unknown) as SuperAgentRequest
   );
 
-  const result = await getSimilarItems(exampleConfig, 'MS-FOO', 'abcd', 10);
+  const result = await xtf.getSimilarItems('MS-FOO', 'abcd', 10);
   expect(superagent.get).toHaveBeenCalledTimes(1);
   expect(superagent.get).toHaveBeenCalledWith(
     `http://xtf.example.com/foo/search?normalizeScores=true&smode=moreLike&identifier=MS-FOO%2Fabcd&docsPerPage=10&raw=true&indexPath=${encodeURIComponent(
       exampleConfig.xtfIndexPath
     )}`
   );
-  expect(result).toBe(response);
+  expectNodeWithType(result.firstChild, NodeType.ELEMENT_NODE);
+  expectElementWithTag(result.firstChild, null, 'example');
 });
 
 test('getSimilarItems() count must be positive', async () => {
-  await expect(getSimilarItems(exampleConfig, 'A', 'B', -1)).rejects.toThrow(
+  await expect(xtf.getSimilarItems('A', 'B', -1)).rejects.toThrow(
     'Count was negative: -1'
   );
 });

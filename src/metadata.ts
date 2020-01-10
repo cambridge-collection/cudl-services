@@ -45,7 +45,13 @@ abstract class BaseMetadataRepository<T extends string>
   }
 }
 
-export class CUDLMetadataRepository extends BaseMetadataRepository<CUDLFormat> {
+export interface CUDLMetadataRepository extends MetadataRepository<CUDLFormat> {
+  getJSON(id: string): Promise<ItemJSON>;
+}
+
+export class DefaultCUDLMetadataRepository
+  extends BaseMetadataRepository<CUDLFormat>
+  implements CUDLMetadataRepository {
   private readonly dataDir: string;
 
   constructor(dataDir: string) {

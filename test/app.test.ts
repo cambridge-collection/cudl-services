@@ -1,13 +1,19 @@
+jest.mock('../src/routes/similarity-impl');
+
 import express from 'express';
 import * as fs from 'fs';
 import { IM_A_TEAPOT, OK, UNAUTHORIZED } from 'http-status-codes';
 import * as path from 'path';
 import request from 'supertest';
 import superagent from 'superagent';
+import { mocked } from 'ts-jest/utils';
 import { promisify } from 'util';
 
 import { App, AppOptions } from '../src/app';
 import { CUDLMetadataRepository } from '../src/metadata';
+import { embedMetadata } from '../src/routes/similarity-impl';
+import { SimilaritySearch } from '../src/transforms/similarity';
+import { XTF } from '../src/xtf';
 import {
   STATIC_FILES,
   EXAMPLE_STATIC_FILES,
@@ -18,6 +24,7 @@ import {
   getTestDataMetadataRepository,
   getTestDataLegacyDarwinMetadataRepository,
   MemoryDatabasePool,
+  getMockXTF,
 } from './utils';
 
 import { get } from 'superagent';
@@ -44,6 +51,7 @@ describe('app', () => {
   let mockDarwinUpstream: DummyHttpServer;
   let application: App;
   let app: express.Application;
+  let xtf: XTF;
 
   beforeAll(async () => {
     mockDarwinUpstream = new DummyHttpServer();
@@ -71,11 +79,13 @@ describe('app', () => {
           ],
         },
       }),
+      xtf,
     };
   }
 
   beforeEach(() => {
-    mockDarwinUpstream.requestHandler.mockClear();
+    jest.clearAllMocks();
+    xtf = getMockXTF();
     application = new App(defaultAppOptions());
     app = application.expressApp;
   });
@@ -162,6 +172,17 @@ describe('app', () => {
       );
       expect(response.ok).toBeTruthy();
       expect(response.text).toBe(html);
+    });
+  });
+
+  describe('/v1/similarity', () => {
+    test('route is registered', async () => {
+      mocked(embedMetadata).mockResolvedValueOnce(({
+        example: 'example',
+      } as unknown) as SimilaritySearch);
+      const response = await request(app).get('/v1/xtf/similarity/MS-FOO/3');
+      expect(response.ok).toBeTruthy();
+      expect(response.body).toEqual({ example: 'example' });
     });
   });
 });

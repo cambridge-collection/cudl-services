@@ -15,6 +15,7 @@ import { Config, User, Users } from './config';
 import {
   LegacyDarwinMetadataRepository,
   CUDLMetadataRepository,
+  DefaultCUDLMetadataRepository,
 } from './metadata';
 import { BaseResource, using } from './resources';
 
@@ -34,7 +35,7 @@ import * as metadata from './routes/metadata';
 import * as transcription from './routes/transcription';
 import * as translation from './routes/translation';
 import * as membership from './routes/membership';
-// const similarity = require('./routes/similarity');
+import * as similarity from './routes/similarity';
 
 import {
   Database,
@@ -42,6 +43,7 @@ import {
   PostgresDatabase,
   PostgresDatabasePool,
 } from './db';
+import { DefaultXTF, XTF } from './xtf';
 
 export interface AppOptions {
   users: Users;
@@ -49,6 +51,7 @@ export interface AppOptions {
   legacyDarwinMetadataRepository: LegacyDarwinMetadataRepository;
   databasePool: DatabasePool;
   darwinXtfUrl: string;
+  xtf: XTF;
 }
 
 export class App extends BaseResource {
@@ -65,13 +68,14 @@ export class App extends BaseResource {
 
   static fromConfig(config: Config) {
     return new App({
-      metadataRepository: new CUDLMetadataRepository(config.dataDir),
+      metadataRepository: new DefaultCUDLMetadataRepository(config.dataDir),
       legacyDarwinMetadataRepository: new LegacyDarwinMetadataRepository(
         config.legacyDcpDataDir
       ),
       databasePool: PostgresDatabasePool.fromConfig(config),
       users: config.users,
       darwinXtfUrl: config.darwinXTF,
+      xtf: new DefaultXTF(config),
     });
   }
 
@@ -148,7 +152,13 @@ export class App extends BaseResource {
       })
     );
 
-    // app.use('/v1/xtf/similarity', similarity);
+    app.use(
+      '/v1/xtf/similarity',
+      similarity.getRoutes({
+        metadataRepository: this.options.metadataRepository,
+        xtf: this.options.xtf,
+      })
+    );
 
     app.use(
       '/v1/darwin',

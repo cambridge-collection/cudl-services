@@ -1,7 +1,9 @@
-import NestedError from 'nested-error-stacks';
-import express from 'express';
-import url from 'url';
+import { Request } from 'express';
 import escapeStringRegexp from 'escape-string-regexp';
+import express from 'express';
+import NestedError from 'nested-error-stacks';
+import url from 'url';
+import * as util from 'util';
 
 const CUDL_HOST = 'cudl.lib.cam.ac.uk';
 const CUDL_HOST_REGEX = new RegExp(
@@ -55,4 +57,23 @@ export function isEnumMember<E extends string>(
 ): val is E {
   const members = Object.values(_enum) as unknown[];
   return members.includes(val);
+}
+
+export function requireRequestParam(req: Request, param: string): string {
+  const value = req.params[param] as typeof req.params[string] | undefined;
+  if (typeof value !== 'string') {
+    throw new Error(`Request has no value for param ${util.inspect(param)}`);
+  }
+  return value;
+}
+
+export function requireRequestParams<T extends string>(
+  req: Request,
+  ...params: T[]
+): { [key in T]: string } {
+  const obj = {} as { [key in T]: string };
+  for (const param of params) {
+    obj[param] = requireRequestParam(req, param);
+  }
+  return obj;
 }

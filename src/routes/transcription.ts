@@ -13,7 +13,6 @@ import { JSDOM } from 'jsdom';
 import path from 'path';
 import superagent from 'superagent';
 import * as URI from 'uri-js';
-import * as util from 'util';
 import {
   CUDLFormat,
   CUDLMetadataRepository,
@@ -21,7 +20,12 @@ import {
   LegacyDarwinMetadataRepository,
   MetadataRepository,
 } from '../metadata';
-import { NotFoundError, UpstreamError } from '../util';
+import {
+  NotFoundError,
+  requireRequestParam,
+  requireRequestParams,
+  UpstreamError,
+} from '../util';
 import expressAsyncHandler = require('express-async-handler');
 
 interface TranscriptionEndpoint<T> {
@@ -231,25 +235,6 @@ function createTranscriptionHandler<T>(
       return;
     }
   });
-}
-
-function requireRequestParam(req: Request, param: string): string {
-  const value = req.params[param] as typeof req.params[string] | undefined;
-  if (typeof value !== 'string') {
-    throw new Error(`Request has no value for param ${util.inspect(param)}`);
-  }
-  return value;
-}
-
-function requireRequestParams<T extends string>(
-  req: Request,
-  ...params: T[]
-): { [key in T]: string } {
-  const obj = {} as { [key in T]: string };
-  for (const param of params) {
-    obj[param] = requireRequestParam(req, param);
-  }
-  return obj;
 }
 
 interface IDTranscriptionOptions {

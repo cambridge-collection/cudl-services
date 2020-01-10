@@ -6,12 +6,15 @@ import {
   createLegacyDarwinPathResolver,
   CUDLFormat,
   CUDLMetadataRepository,
+  DefaultCUDLMetadataRepository,
 } from '../src/metadata';
 import { NotFoundError } from '../src/util';
 import { TEST_DATA_PATH } from './constants';
 
 function getRepo() {
-  return new CUDLMetadataRepository(path.resolve(TEST_DATA_PATH, 'metadata'));
+  return new DefaultCUDLMetadataRepository(
+    path.resolve(TEST_DATA_PATH, 'metadata')
+  );
 }
 
 const ITEM_JSON_PATH = path.resolve(

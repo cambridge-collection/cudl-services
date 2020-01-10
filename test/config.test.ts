@@ -10,6 +10,8 @@ const EXAMPLE_CONFIG: Config = {
   postUser: 'example',
   postHost: 'example',
   postDatabase: 'example',
+  xtfBase: 'example',
+  xtfIndexPath: 'example',
 };
 
 describe('config', () => {

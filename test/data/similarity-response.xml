@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<crossQueryResult queryTime="0.033" totalDocs="29428" startDoc="1" endDoc="10">
+   <parameters>
+      <route>
+         <queryParser path="style/crossQuery/queryParser/default/queryParser.xsl"/>
+      </route>
+      <param name="normalizeScores" value="true">
+         <token value="true" isWord="yes">
+    </token>
+      </param>
+      <param name="smode" value="moreLike">
+         <token value="moreLike" isWord="yes">
+    </token>
+      </param>
+      <param name="identifier" value="MS-ADD-03958/3">
+         <token value="MS" isWord="yes">
+    </token>
+         <token value="-" isWord="no">
+    </token>
+         <token value="ADD" isWord="yes">
+    </token>
+         <token value="-" isWord="no">
+    </token>
+         <token value="03958/3" isWord="yes">
+    </token>
+      </param>
+      <param name="docsPerPage" value="10">
+         <token value="10" isWord="yes">
+    </token>
+      </param>
+      <param name="indexPath" value="/usr/local/indices/index-cudl">
+         <token value="/" isWord="no">
+    </token>
+         <token value="usr" isWord="yes">
+    </token>
+         <token value="/" isWord="no">
+    </token>
+         <token value="local" isWord="yes">
+    </token>
+         <token value="/" isWord="no">
+    </token>
+         <token value="indices" isWord="yes">
+    </token>
+         <token value="/" isWord="no">
+    </token>
+         <token value="index" isWord="yes">
+    </token>
+         <token value="-" isWord="no">
+    </token>
+         <token value="cudl" isWord="yes">
+    </token>
+      </param>
+   </parameters>
+   <query indexPath="/usr/local/indices/index-cudl" termLimit="1000" workLimit="1000000"
+          style="style/crossQuery/resultFormatter/default/resultFormatter.xsl"
+          startDoc="1"
+          maxDocs="10"
+          normalizeScores="true">
+      <facet field="facet-collection" select="*" sortGroupsBy="value"/>
+      <facet field="facet-subject" select="*[1-30]" sortGroupsBy="totalDocs"/>
+      <facet field="facet-date" select="*" sortGroupsBy="value"/>
+      <and>
+         <moreLike fields="similarity-title,similarity-name,similarity-subject,similarity-place,similarity-text">
+            <term field="identifier">MS-ADD-03958/3</term>
+         </moreLike>
+         <not>
+            <term field="itemId">MS-ADD-03958</term>
+         </not>
+      </and>
+   </query>
+   <docHit rank="1" path="index-cudl:MS-ADD-03965.json" score="100" totalHits="0"
+           subDocument="similarity-31">
+      <meta>
+         <display>dynaxml</display>
+         <identifier>MS-ADD-03965/31</identifier>
+         <itemId>MS-ADD-03965</itemId>
+         <structureNodeId>31</structureNodeId>
+         <similarity-title>Letter from J. Leon to Isaac Newton, reused for Newton's own calculations</similarity-title>
+         <similarity-title>On the Resistance of fluids; account of Hauksbee's experiments, with Newton's deductions; chiefly rough notes</similarity-title>
+         <similarity-title>Papers connected with the Principia</similarity-title>
+         <similarity-name>Leon, J.</similarity-name>
+         <similarity-name>Portsmouth, Isaac Newton Wallop, Earl of, 1825-1891</similarity-name>
+         <similarity-name>Newton, Isaac, Sir, 1642-1727</similarity-name>
+         <similarity-text>Early drafts of the Principia and related notes; additions, corrections and revisions to the Principia. This is the 'general' category: papers relating specifically to lunar theory or containing mathematical problems are classified separately. See Isaac Cohen, Introduction to Newton's Principia (Cambridge, 1971) pp.29-32 for general information on the collection. Some of the texts are published in D.T. Whiteside, The mathematical papers of Isaac Newton, Cambridge, 1967-1981 and A.R. Hall and M.B. Hall, 'Unpublished Scientific Papers of Isaac Newton' (Cambridge, 1962) This item is included in the Library’s 600th anniversary exhibition Lines of Thought: Discoveries that changed the world which runs until 30 September 2016.</similarity-text>
+         <similarity-subject>Celestial Mechanics - Early works to 1800</similarity-subject>
+         <similarity-subject>Mechanics - Early works to 1800</similarity-subject>
+         <similarity-place>England</similarity-place>
+      </meta>
+   </docHit>
+   <docHit rank="2" path="index-cudl:MS-ADD-03965.json" score="99" totalHits="0"
+           subDocument="similarity-26">
+      <meta>
+         <display>dynaxml</display>
+         <identifier>MS-ADD-03965/26</identifier>
+         <itemId>MS-ADD-03965</itemId>
+         <structureNodeId>26</structureNodeId>
+         <similarity-title>Letter from Sir Joseph Tily, probably to Isaac Newton</similarity-title>
+         <similarity-title>On the Resistance of fluids; account of Hauksbee's experiments, with Newton's deductions; chiefly rough notes</similarity-title>
+         <similarity-title>Papers connected with the Principia</similarity-title>
+         <similarity-name>Tily, Joseph, Sir</similarity-name>
+         <similarity-name>Portsmouth, Isaac Newton Wallop, Earl of, 1825-1891</similarity-name>
+         <similarity-name>Newton, Isaac, Sir, 1642-1727</similarity-name>
+         <similarity-text>Covered with autograph notes relating to the Principia</similarity-text>
+         <similarity-text>Early drafts of the Principia and related notes; additions, corrections and revisions to the Principia. This is the 'general' category: papers relating specifically to lunar theory or containing mathematical problems are classified separately. See Isaac Cohen, Introduction to Newton's Principia (Cambridge, 1971) pp.29-32 for general information on the collection. Some of the texts are published in D.T. Whiteside, The mathematical papers of Isaac Newton, Cambridge, 1967-1981 and A.R. Hall and M.B. Hall, 'Unpublished Scientific Papers of Isaac Newton' (Cambridge, 1962) This item is included in the Library’s 600th anniversary exhibition Lines of Thought: Discoveries that changed the world which runs until 30 September 2016.</similarity-text>
+         <similarity-subject>Celestial Mechanics - Early works to 1800</similarity-subject>
+         <similarity-subject>Mechanics - Early works to 1800</similarity-subject>
+         <similarity-place>England</similarity-place>
+      </meta>
+   </docHit>
+   <docHit rank="3" path="index-cudl:MS-ADD-03965.json" score="96" totalHits="0"
+           subDocument="similarity-4">
+      <meta>
+         <display>dynaxml</display>
+         <identifier>MS-ADD-03965/4</identifier>
+         <itemId>MS-ADD-03965</itemId>
+         <structureNodeId>4</structureNodeId>
+         <similarity-title>An early partial Principia draft</similarity-title>
+         <similarity-title>Papers connected with the Principia</similarity-title>
+         <similarity-text>Written in the hand of Humphrey Newton.</similarity-text>
+         <similarity-text>Early drafts of the Principia and related notes; additions, corrections and revisions to the Principia. This is the 'general' category: papers relating specifically to lunar theory or containing mathematical problems are classified separately. See Isaac Cohen, Introduction to Newton's Principia (Cambridge, 1971) pp.29-32 for general information on the collection. Some of the texts are published in D.T. Whiteside, The mathematical papers of Isaac Newton, Cambridge, 1967-1981 and A.R. Hall and M.B. Hall, 'Unpublished Scientific Papers of Isaac Newton' (Cambridge, 1962) This item is included in the Library’s 600th anniversary exhibition Lines of Thought: Discoveries that changed the world which runs until 30 September 2016.</similarity-text>
+         <similarity-name>Portsmouth, Isaac Newton Wallop, Earl of, 1825-1891</similarity-name>
+         <similarity-name>Newton, Isaac, Sir, 1642-1727</similarity-name>
+         <similarity-subject>Celestial Mechanics - Early works to 1800</similarity-subject>
+         <similarity-subject>Mechanics - Early works to 1800</similarity-subject>
+         <similarity-place>England</similarity-place>
+      </meta>
+   </docHit>
+   <docHit rank="4" path="index-cudl:MS-ADD-03965.json" score="96" totalHits="0"
+           subDocument="similarity-35">
+      <meta>
+         <display>dynaxml</display>
+         <identifier>MS-ADD-03965/35</identifier>
+         <itemId>MS-ADD-03965</itemId>
+         <structureNodeId>35</structureNodeId>
+         <similarity-title>Fragment of early Principia draft</similarity-title>
+         <similarity-title>On the Resistance of fluids; account of Hauksbee's experiments, with Newton's deductions; chiefly rough notes</similarity-title>
+         <similarity-title>Papers connected with the Principia</similarity-title>
+         <similarity-text>Proposition numbers not filled in</similarity-text>
+         <similarity-text>Early drafts of the Principia and related notes; additions, corrections and revisions to the Principia. This is the 'general' category: papers relating specifically to lunar theory or containing mathematical problems are classified separately. See Isaac Cohen, Introduction to Newton's Principia (Cambridge, 1971) pp.29-32 for general information on the collection. Some of the texts are published in D.T. Whiteside, The mathematical papers of Isaac Newton, Cambridge, 1967-1981 and A.R. Hall and M.B. Hall, 'Unpublished Scientific Papers of Isaac Newton' (Cambridge, 1962) This item is included in the Library’s 600th anniversary exhibition Lines of Thought: Discoveries that changed the world which runs until 30 September 2016.</similarity-text>
+         <similarity-name>Portsmouth, Isaac Newton Wallop, Earl of, 1825-1891</similarity-name>
+         <similarity-name>Newton, Isaac, Sir, 1642-1727</similarity-name>
+         <similarity-subject>Celestial Mechanics - Early works to 1800</similarity-subject>
+         <similarity-subject>Mechanics - Early works to 1800</similarity-subject>
+         <similarity-place>England</similarity-place>
+      </meta>
+   </docHit>
+   <docHit rank="5" path="index-cudl:MS-ADD-03965.json" score="96" totalHits="0"
+           subDocument="similarity-19">
+      <meta>
+         <display>dynaxml</display>
+         <identifier>MS-ADD-03965/19</identifier>
+         <itemId>MS-ADD-03965</itemId>
+         <structureNodeId>19</structureNodeId>
+         <similarity-title>Newton's preliminary work following Bernoulli's critique of Principia Book II Proposition X [cont.]</similarity-title>
+         <similarity-title>On the Resistance of fluids; account of Hauksbee's experiments, with Newton's deductions; chiefly rough notes</similarity-title>
+         <similarity-title>Papers connected with the Principia</similarity-title>
+         <similarity-text>Continued from f.109v.</similarity-text>
+         <similarity-text>Early drafts of the Principia and related notes; additions, corrections and revisions to the Principia. This is the 'general' category: papers relating specifically to lunar theory or containing mathematical problems are classified separately. See Isaac Cohen, Introduction to Newton's Principia (Cambridge, 1971) pp.29-32 for general information on the collection. Some of the texts are published in D.T. Whiteside, The mathematical papers of Isaac Newton, Cambridge, 1967-1981 and A.R. Hall and M.B. Hall, 'Unpublished Scientific Papers of Isaac Newton' (Cambridge, 1962) This item is included in the Library’s 600th anniversary exhibition Lines of Thought: Discoveries that changed the world which runs until 30 September 2016.</similarity-text>
+         <similarity-name>Portsmouth, Isaac Newton Wallop, Earl of, 1825-1891</similarity-name>
+         <similarity-name>Newton, Isaac, Sir, 1642-1727</similarity-name>
+         <similarity-subject>Celestial Mechanics - Early works to 1800</similarity-subject>
+         <similarity-subject>Mechanics - Early works to 1800</similarity-subject>
+         <similarity-place>England</similarity-place>
+      </meta>
+   </docHit>
+   <docHit rank="6" path="index-cudl:MS-ADD-03965.json" score="95" totalHits="0"
+           subDocument="similarity-38">
+      <meta>
+         <display>dynaxml</display>
+         <identifier>MS-ADD-03965/38</identifier>
+         <itemId>MS-ADD-03965</itemId>
+         <structureNodeId>38</structureNodeId>
+         <similarity-title>Draft of Principia Book II, Proposition X</similarity-title>
+         <similarity-title>On the Resistance of fluids; account of Hauksbee's experiments, with Newton's deductions; chiefly rough notes</similarity-title>
+         <similarity-title>Papers connected with the Principia</similarity-title>
+         <similarity-text>Newton's final attempt to recast Principia Book II, Proposition X taking account of Bernoulli's critique, but leaving the basic form intact</similarity-text>
+         <similarity-text>Early drafts of the Principia and related notes; additions, corrections and revisions to the Principia. This is the 'general' category: papers relating specifically to lunar theory or containing mathematical problems are classified separately. See Isaac Cohen, Introduction to Newton's Principia (Cambridge, 1971) pp.29-32 for general information on the collection. Some of the texts are published in D.T. Whiteside, The mathematical papers of Isaac Newton, Cambridge, 1967-1981 and A.R. Hall and M.B. Hall, 'Unpublished Scientific Papers of Isaac Newton' (Cambridge, 1962) This item is included in the Library’s 600th anniversary exhibition Lines of Thought: Discoveries that changed the world which runs until 30 September 2016.</similarity-text>
+         <similarity-name>Portsmouth, Isaac Newton Wallop, Earl of, 1825-1891</similarity-name>
+         <similarity-name>Newton, Isaac, Sir, 1642-1727</similarity-name>
+         <similarity-subject>Celestial Mechanics - Early works to 1800</similarity-subject>
+         <similarity-subject>Mechanics - Early works to 1800</similarity-subject>
+         <similarity-place>England</similarity-place>
+      </meta>
+   </docHit>
+   <docHit rank="7" path="index-cudl:MS-ADD-03965.json" score="95" totalHits="0"
+           subDocument="similarity-29">
+      <meta>
+         <display>dynaxml</display>
+         <identifier>MS-ADD-03965/29</identifier>
+         <itemId>MS-ADD-03965</itemId>
+         <structureNodeId>29</structureNodeId>
+         <similarity-title>Early draft of a corollary and a scholium from the Principia</similarity-title>
+         <similarity-title>On the Resistance of fluids; account of Hauksbee's experiments, with Newton's deductions; chiefly rough notes</similarity-title>
+         <similarity-title>Papers connected with the Principia</similarity-title>
+         <similarity-name>Portsmouth, Isaac Newton Wallop, Earl of, 1825-1891</similarity-name>
+         <similarity-name>Newton, Isaac, Sir, 1642-1727</similarity-name>
+         <similarity-text>Early drafts of the Principia and related notes; additions, corrections and revisions to the Principia. This is the 'general' category: papers relating specifically to lunar theory or containing mathematical problems are classified separately. See Isaac Cohen, Introduction to Newton's Principia (Cambridge, 1971) pp.29-32 for general information on the collection. Some of the texts are published in D.T. Whiteside, The mathematical papers of Isaac Newton, Cambridge, 1967-1981 and A.R. Hall and M.B. Hall, 'Unpublished Scientific Papers of Isaac Newton' (Cambridge, 1962) This item is included in the Library’s 600th anniversary exhibition Lines of Thought: Discoveries that changed the world which runs until 30 September 2016.</similarity-text>
+         <similarity-subject>Celestial Mechanics - Early works to 1800</similarity-subject>
+         <similarity-subject>Mechanics - Early works to 1800</similarity-subject>
+         <similarity-place>England</similarity-place>
+      </meta>
+   </docHit>
+   <docHit rank="8" path="index-cudl:MS-ADD-03965.json" score="95" totalHits="0"
+           subDocument="similarity-8">
+      <meta>
+         <display>dynaxml</display>
+         <identifier>MS-ADD-03965/8</identifier>
+         <itemId>MS-ADD-03965</itemId>
+         <structureNodeId>8</structureNodeId>
+         <similarity-title>Papers relating to the first (unpublished) revision of Principia</similarity-title>
+         <similarity-title>Papers connected with the Principia</similarity-title>
+         <similarity-text>ff.38 and 39 form part of the 'revised and augmented treatise on quadrature'.</similarity-text>
+         <similarity-text>Early drafts of the Principia and related notes; additions, corrections and revisions to the Principia. This is the 'general' category: papers relating specifically to lunar theory or containing mathematical problems are classified separately. See Isaac Cohen, Introduction to Newton's Principia (Cambridge, 1971) pp.29-32 for general information on the collection. Some of the texts are published in D.T. Whiteside, The mathematical papers of Isaac Newton, Cambridge, 1967-1981 and A.R. Hall and M.B. Hall, 'Unpublished Scientific Papers of Isaac Newton' (Cambridge, 1962) This item is included in the Library’s 600th anniversary exhibition Lines of Thought: Discoveries that changed the world which runs until 30 September 2016.</similarity-text>
+         <similarity-name>Portsmouth, Isaac Newton Wallop, Earl of, 1825-1891</similarity-name>
+         <similarity-name>Newton, Isaac, Sir, 1642-1727</similarity-name>
+         <similarity-subject>Celestial Mechanics - Early works to 1800</similarity-subject>
+         <similarity-subject>Mechanics - Early works to 1800</similarity-subject>
+         <similarity-place>England</similarity-place>
+      </meta>
+   </docHit>
+   <docHit rank="9" path="index-cudl:MS-ADD-03965.json" score="95" totalHits="0"
+           subDocument="similarity-17">
+      <meta>
+         <display>dynaxml</display>
+         <identifier>MS-ADD-03965/17</identifier>
+         <itemId>MS-ADD-03965</itemId>
+         <structureNodeId>17</structureNodeId>
+         <similarity-title>On the Resistance of fluids; account of Hauksbee's experiments, with Newton's deductions; chiefly rough notes</similarity-title>
+         <similarity-title>Papers connected with the Principia</similarity-title>
+         <similarity-name>Portsmouth, Isaac Newton Wallop, Earl of, 1825-1891</similarity-name>
+         <similarity-name>Newton, Isaac, Sir, 1642-1727</similarity-name>
+         <similarity-text>Early drafts of the Principia and related notes; additions, corrections and revisions to the Principia. This is the 'general' category: papers relating specifically to lunar theory or containing mathematical problems are classified separately. See Isaac Cohen, Introduction to Newton's Principia (Cambridge, 1971) pp.29-32 for general information on the collection. Some of the texts are published in D.T. Whiteside, The mathematical papers of Isaac Newton, Cambridge, 1967-1981 and A.R. Hall and M.B. Hall, 'Unpublished Scientific Papers of Isaac Newton' (Cambridge, 1962) This item is included in the Library’s 600th anniversary exhibition Lines of Thought: Discoveries that changed the world which runs until 30 September 2016.</similarity-text>
+         <similarity-subject>Celestial Mechanics - Early works to 1800</similarity-subject>
+         <similarity-subject>Mechanics - Early works to 1800</similarity-subject>
+         <similarity-place>England</similarity-place>
+      </meta>
+   </docHit>
+   <docHit rank="10" path="index-cudl:MS-ADD-03965.json" score="95" totalHits="0"
+           subDocument="similarity-22">
+      <meta>
+         <display>dynaxml</display>
+         <identifier>MS-ADD-03965/22</identifier>
+         <itemId>MS-ADD-03965</itemId>
+         <structureNodeId>22</structureNodeId>
+         <similarity-title>Miscellaneous calculations and experiment results</similarity-title>
+         <similarity-title>On the Resistance of fluids; account of Hauksbee's experiments, with Newton's deductions; chiefly rough notes</similarity-title>
+         <similarity-title>Papers connected with the Principia</similarity-title>
+         <similarity-name>Portsmouth, Isaac Newton Wallop, Earl of, 1825-1891</similarity-name>
+         <similarity-name>Newton, Isaac, Sir, 1642-1727</similarity-name>
+         <similarity-text>Early drafts of the Principia and related notes; additions, corrections and revisions to the Principia. This is the 'general' category: papers relating specifically to lunar theory or containing mathematical problems are classified separately. See Isaac Cohen, Introduction to Newton's Principia (Cambridge, 1971) pp.29-32 for general information on the collection. Some of the texts are published in D.T. Whiteside, The mathematical papers of Isaac Newton, Cambridge, 1967-1981 and A.R. Hall and M.B. Hall, 'Unpublished Scientific Papers of Isaac Newton' (Cambridge, 1962) This item is included in the Library’s 600th anniversary exhibition Lines of Thought: Discoveries that changed the world which runs until 30 September 2016.</similarity-text>
+         <similarity-subject>Celestial Mechanics - Early works to 1800</similarity-subject>
+         <similarity-subject>Mechanics - Early works to 1800</similarity-subject>
+         <similarity-place>England</similarity-place>
+      </meta>
+   </docHit>
+   <facet field="facet-collection" totalGroups="0" totalDocs="0"/>
+   <facet field="facet-subject" totalGroups="0" totalDocs="0"/>
+   <facet field="facet-date" totalGroups="0" totalDocs="0"/>
+</crossQueryResult>

@@ -1,23 +1,26 @@
 import {
-  execute,
   Closable,
   CreateOptions,
+  execute,
   ExecuteOptions,
   XSLTExecutor,
 } from '@lib.cam/xslt-nailgun';
-import collapseWhitespace from 'collapse-whitespace';
 import { AssertionError } from 'assert';
+import collapseWhitespace from 'collapse-whitespace';
 import http from 'http';
 import { IM_A_TEAPOT } from 'http-status-codes';
 import * as path from 'path';
 import { promisify } from 'util';
 
-import { Database, Collection, DatabasePool } from '../src/db';
+import { Collection, Database, DatabasePool } from '../src/db';
 import {
-  LegacyDarwinMetadataRepository,
   CUDLMetadataRepository,
+  DefaultCUDLMetadataRepository,
+  LegacyDarwinMetadataRepository,
 } from '../src/metadata';
 import { BaseResource } from '../src/resources';
+import { XTF } from '../src/xtf';
+import { TEST_DATA_PATH } from './constants';
 
 /**
  * An HTTP server listening on a random port on the loopback interface which
@@ -97,16 +100,23 @@ export class MemoryDatabase extends BaseResource implements Database {
   }
 }
 
-import { TEST_DATA_PATH } from './constants';
-
 export function getTestDataMetadataRepository(): CUDLMetadataRepository {
-  return new CUDLMetadataRepository(path.resolve(TEST_DATA_PATH, 'metadata'));
+  return new DefaultCUDLMetadataRepository(
+    path.resolve(TEST_DATA_PATH, 'metadata')
+  );
 }
 
 export function getTestDataLegacyDarwinMetadataRepository(): LegacyDarwinMetadataRepository {
   return new LegacyDarwinMetadataRepository(
     path.resolve(TEST_DATA_PATH, 'legacy-darwin')
   );
+}
+
+export function getMockXTF(): XTF {
+  return {
+    getSimilarItems: jest.fn(),
+    search: jest.fn(),
+  };
 }
 
 export function normaliseSpace(value?: Node | null): string {
