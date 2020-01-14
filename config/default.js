@@ -28,3 +28,6 @@ module.exports = config;
 
 // Tagging
 config.defaultRemoveRatio = 1/5;
+
+// Zacynthius Data
+config.zacynthiusDataService = 'http://codex-zacynthius-transcription.cudl.lib.cam.ac.uk';
