@@ -1,15 +1,15 @@
-var http = require('http');
-
+var SimpleCache = require('Simple-Cache').SimpleCache;
 var debug = require('debug')('cudl:transcription');
 var express = require('express');
 var glob = require('glob');
+var http = require('http');
 var iconv = require('iconv-lite');
 var parseHttpHeader = require('parse-http-header');
-var SimpleCache = require('Simple-Cache').SimpleCache;
 var tidy = require('htmltidy2').tidy;
-var util = require('util');
+var url = require('url');
 var xslt = require('xslt4node');
 var zacynthius = require('../lib/zacynthius');
+var zacynthiusHandlers = require('./zacynthius-handlers');
 
 var config = require('../config/base');
 var cache = SimpleCache(config.cacheDir+'/transcriptions', debug);
@@ -389,37 +389,16 @@ router.get('/palimpsest/:type/:location/:id/:from/:to', function(req, res) {
     });
 });
 
-var ZACYNTHIUS_TYPES = [zacynthius.TYPE_UNDERTEXT, zacynthius.TYPE_OVERTEXT];
+const ZACYNTHIUS_TRANSCRIPTION_TYPES = [zacynthius.TYPE_UNDERTEXT, zacynthius.TYPE_OVERTEXT];
 
-router.get('/zacynthius/:type/:page', function (req, res) {
-    var type = req.params.type;
-    var page = req.params.page;
-
-    if(ZACYNTHIUS_TYPES.indexOf(type) === -1) {
-        res.status(400).send(util.format('Invalid type: possible values are %s', ZACYNTHIUS_TYPES.join(', ')));
-        return;
+router.get('/zacynthius/:type/:page', zacynthiusHandlers.createDataHandler({
+    types: ZACYNTHIUS_TRANSCRIPTION_TYPES,
+    resourceUrlRewriter: ({type, relativeURL}) => {
+        return url.resolve(`../resources/${type}/`, relativeURL);
     }
-    if(!zacynthius.isValidPage(page)) {
-        res.status(400).send('Invalid page');
-        return;
-    }
-
-    zacynthius.getZacynthiusData(type, page, function(err, data) {
-        if(err && err.missingPage) {
-            res.status(404).json({message: 'Page not found', page: page});
-        }
-        if(err && err.isTemporary) {
-            res.status(502).json({message: 'Zacynthius service is temporarily unavailable'});
-            return;
-        }
-        else if(err) {
-            res.status(500).json({message: 'Something went wrong'});
-            return;
-        }
-
-        res.type('text/html');
-        res.send(data);
-    });
-});
+}));
+router.get('/zacynthius/resources/:type/:path(*)', zacynthiusHandlers.createResourceHandler({
+    types: ZACYNTHIUS_TRANSCRIPTION_TYPES
+}));
 
 module.exports = router;
