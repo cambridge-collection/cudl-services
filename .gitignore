@@ -13,7 +13,6 @@
 
 # NodeJS
 /node_modules/
-package-lock.json
 
 # Local configuration
 /config/*-dev.js
