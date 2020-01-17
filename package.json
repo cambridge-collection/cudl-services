@@ -27,7 +27,7 @@
     "passport": "~0.2.0",
     "passport-accesstoken": "~0.1.0",
     "passport-token": "~0.1.3",
-    "pg": "~4.4.0",
+    "pg": "^6.4.2",
     "q": "^1",
     "regexp-quote": "0.0.0",
     "relateurl": "^0.2.7",
