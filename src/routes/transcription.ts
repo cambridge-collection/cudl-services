@@ -13,6 +13,7 @@ import { JSDOM } from 'jsdom';
 import path from 'path';
 import superagent from 'superagent';
 import * as URI from 'uri-js';
+import { NotFoundError, UpstreamError } from '../errors';
 import {
   CUDLFormat,
   CUDLMetadataRepository,
@@ -20,12 +21,7 @@ import {
   LegacyDarwinMetadataRepository,
   MetadataRepository,
 } from '../metadata';
-import {
-  NotFoundError,
-  requireRequestParam,
-  requireRequestParams,
-  UpstreamError,
-} from '../util';
+import { requireRequestParam, requireRequestParams } from '../util';
 import expressAsyncHandler = require('express-async-handler');
 
 interface TranscriptionEndpoint<T> {

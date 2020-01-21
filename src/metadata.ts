@@ -4,12 +4,8 @@ import fs from 'fs';
 import path from 'path';
 import * as util from 'util';
 import { promisify } from 'util';
-import {
-  BaseError,
-  isEnumMember,
-  isSimplePathSegment,
-  NotFoundError,
-} from './util';
+import { BaseError, NotFoundError } from './errors';
+import { isEnumMember, isSimplePathSegment } from './util';
 
 export class MetadataError extends BaseError {}
 
