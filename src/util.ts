@@ -44,6 +44,20 @@ export function isEnumMember<E extends string>(
   return members.includes(val);
 }
 
+export function validateEnumMember<E extends string>(
+  _enum: { [k in string]: E },
+  value: string
+): E {
+  if (isEnumMember(_enum, value)) {
+    return value;
+  }
+  throw new ValueError(
+    `$Expected a member of ${util.inspect(_enum)} but got: ${util.inspect(
+      value
+    )}`
+  );
+}
+
 export function requireRequestParam(req: Request, param: string): string {
   const value = req.params[param] as typeof req.params[string] | undefined;
   if (typeof value !== 'string') {

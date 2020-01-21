@@ -1,6 +1,6 @@
 SELECT
   annotation->>'name' AS tagname,
-  count(*)::int AS frequency
+  sum((annotation->>'raw')::int)::int AS frequency
 FROM
   "DocumentAnnotations",
   json_array_elements(annos->'annotations') AS annotation

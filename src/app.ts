@@ -1,24 +1,33 @@
-//Modules
 import { XSLTExecutor } from '@lib.cam/xslt-nailgun';
-import express, { NextFunction, Request, Response } from 'express';
 import bodyParser from 'body-parser';
-import fs from 'fs-extra';
+import Debugger from 'debug';
+import express, { NextFunction, Request, Response } from 'express';
 import passport from 'passport';
 import path from 'path';
-import Debugger from 'debug';
 import { CollectionDAO, PostgresCollectionDAO } from './collections';
+import { Config, User, Users } from './config';
+
+import { DAOPool, PostgresDatabasePool } from './db';
+import {
+  CUDLMetadataRepository,
+  DefaultCUDLMetadataRepository,
+  LegacyDarwinMetadataRepository,
+} from './metadata';
+import { BaseResource, ExternalResources, using } from './resources';
+import * as darwin from './routes/darwin';
+import * as membership from './routes/membership';
+import * as metadata from './routes/metadata';
+import * as similarity from './routes/similarity';
+import * as tags from './routes/tags';
+import { PostgresTagsDAO, TagsDAO } from './routes/tags-impl';
+import * as transcription from './routes/transcription';
+import * as translation from './routes/translation';
+import { DefaultXTF, XTF } from './xtf';
+
 const cookieParser = require('cookie-parser');
 const favicon = require('serve-favicon');
 const logger = require('morgan');
 const Strategy = require('passport-accesstoken').Strategy;
-
-import { Config, User, Users } from './config';
-import {
-  LegacyDarwinMetadataRepository,
-  CUDLMetadataRepository,
-  DefaultCUDLMetadataRepository,
-} from './metadata';
-import { BaseResource, ExternalResources, using } from './resources';
 
 const debug = Debugger('cudl-services');
 
@@ -28,25 +37,12 @@ const debug = Debugger('cudl-services');
 // fs.ensureDirSync(config.cacheDir+'/transcriptions');
 // fs.ensureDirSync(config.cacheDir+'/translations');
 
-//Routes
-//const routes = require('./routes/index.js');
-import * as darwin from './routes/darwin';
-import * as metadata from './routes/metadata';
-// const tags = require('./routes/tags');
-import * as transcription from './routes/transcription';
-import * as translation from './routes/translation';
-import * as membership from './routes/membership';
-import * as similarity from './routes/similarity';
-
-import { DAOPool, DatabasePool, PostgresDatabasePool } from './db';
-import { factory } from './util';
-import { DefaultXTF, XTF } from './xtf';
-
 export interface AppOptions {
   users: Users;
   metadataRepository: CUDLMetadataRepository;
   legacyDarwinMetadataRepository: LegacyDarwinMetadataRepository;
   collectionsDAOPool: DAOPool<CollectionDAO>;
+  tagsDAOPool: DAOPool<TagsDAO>;
   darwinXtfUrl: string;
   xtf: XTF;
 }
@@ -73,6 +69,7 @@ export class App extends BaseResource {
           config.legacyDcpDataDir
         ),
         collectionsDAOPool: PostgresCollectionDAO.createPool(dbPool),
+        tagsDAOPool: PostgresTagsDAO.createPool(dbPool),
         users: config.users,
         darwinXtfUrl: config.darwinXTF,
         xtf: new DefaultXTF(config),
@@ -116,7 +113,6 @@ export class App extends BaseResource {
       }
     });
 
-    //app.use('/', routes);
     app.use(
       '/v1/metadata',
       metadata.getRoutes({
@@ -134,7 +130,7 @@ export class App extends BaseResource {
       })
     );
 
-    // app.use('/v1/tags', tags.router);
+    app.use('/v1/tags', tags.getRoutes({ daoPool: this.options.tagsDAOPool }));
 
     app.use(
       '/v1/transcription',

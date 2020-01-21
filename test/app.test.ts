@@ -4,31 +4,26 @@ import express from 'express';
 import * as fs from 'fs';
 import { IM_A_TEAPOT, OK, UNAUTHORIZED } from 'http-status-codes';
 import * as path from 'path';
+import superagent, { get } from 'superagent';
 import request from 'supertest';
-import superagent from 'superagent';
 import { mocked } from 'ts-jest/utils';
 import { promisify } from 'util';
 
 import { App, AppOptions } from '../src/app';
-import { CUDLMetadataRepository } from '../src/metadata';
 import { embedMetadata } from '../src/routes/similarity-impl';
+import { TagSourceName } from '../src/routes/tags';
 import { SimilaritySearch } from '../src/transforms/similarity';
 import { XTF } from '../src/xtf';
-import {
-  STATIC_FILES,
-  EXAMPLE_STATIC_FILES,
-  TEST_DATA_PATH,
-} from './constants';
+import { EXAMPLE_STATIC_FILES, STATIC_FILES } from './constants';
 import {
   DummyHttpServer,
-  getTestDataMetadataRepository,
-  getTestDataLegacyDarwinMetadataRepository,
-  MemoryDatabasePool,
   getMockXTF,
+  getTestDataLegacyDarwinMetadataRepository,
+  getTestDataMetadataRepository,
   MemoryCollectionsDAO,
+  MemoryDatabasePool,
+  MemoryTagsDAO,
 } from './utils';
-
-import { get } from 'superagent';
 
 type PartialResponse = Pick<
   superagent.Response,
@@ -81,6 +76,19 @@ describe('app', () => {
           ],
         }
       ),
+      tagsDAOPool: MemoryDatabasePool.createPooledDAO(MemoryTagsDAO, {
+        'MS-FOO': {
+          [TagSourceName.THIRD_PARTY]: [
+            ['foo', 42],
+            ['bar', 1],
+          ],
+          [TagSourceName.ANNOTATIONS]: [
+            ['foo', -10],
+            ['bar', -5],
+          ],
+          [TagSourceName.USER_REMOVES]: [['bar', 5]],
+        },
+      }),
       xtf,
     };
   }
@@ -185,6 +193,20 @@ describe('app', () => {
       const response = await request(app).get('/v1/xtf/similarity/MS-FOO/3');
       expect(response.ok).toBeTruthy();
       expect(response.body).toEqual({ example: 'example' });
+    });
+  });
+
+  describe('/v1/tags', () => {
+    test('route is registered', async () => {
+      const response = await request(app).get('/v1/tags/MS-FOO');
+      expect(response.ok).toBeTruthy();
+      expect(response.body).toEqual({
+        id: 'MS-FOO',
+        tags: {
+          foo: 40,
+          bar: 1,
+        },
+      });
     });
   });
 });

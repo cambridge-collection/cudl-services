@@ -1,6 +1,6 @@
 SELECT
   tag->>'name' AS tagname,
-  -count(*)::int as frequency
+  sum((tag->>'raw')::int)::int as frequency
 FROM
   "DocumentRemovedTags",
   json_array_elements(removedtags->'tags') as tag

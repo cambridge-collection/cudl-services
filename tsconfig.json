@@ -20,7 +20,7 @@
     "sourceRoot": "../src",
     "strictNullChecks": true,
     "target": "es2017",
-    "lib": ["es2017"]
+    "lib": ["es2019"]
   },
   "include": [
     "src/**/*",

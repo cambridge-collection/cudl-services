@@ -1,7 +1,8 @@
 SELECT
   tag->>'name' AS tagname,
-  (tag->>'raw')::int AS frequency
+  sum((tag->>'raw')::int)::int AS frequency
 FROM
   "DocumentTags",
   json_array_elements(tags->'tags') AS tag
-WHERE "docId" = $1;
+WHERE "docId" = $1
+GROUP BY tagname;

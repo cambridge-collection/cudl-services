@@ -20,6 +20,14 @@ import {
   DefaultCUDLMetadataRepository,
   LegacyDarwinMetadataRepository,
 } from '../src/metadata';
+import { TagSourceName } from '../src/routes/tags';
+import {
+  DefaultTagSet,
+  Tag,
+  TagsDAO,
+  TagSet,
+  TagSource,
+} from '../src/routes/tags-impl';
 import { factory, UnaryConstructorArg } from '../src/util';
 import { XTF } from '../src/xtf';
 import { TEST_DATA_PATH } from './constants';
@@ -73,6 +81,22 @@ interface ItemCollections {
   [itemID: string]: Collection[];
 }
 
+export class SingletonDAOPool<DAO> implements DAOPool<DAO> {
+  private readonly dao: DAO;
+
+  constructor(dao: DAO) {
+    this.dao = dao;
+  }
+
+  static containing<DAO>(dao: DAO): SingletonDAOPool<DAO> {
+    return new SingletonDAOPool(dao);
+  }
+
+  async getInstance(): Promise<DAO> {
+    return this.dao;
+  }
+}
+
 export class MemoryDatabasePool<Data> implements DatabasePool<Data> {
   readonly data: Data;
 
@@ -103,6 +127,26 @@ export class MemoryCollectionsDAO extends BaseDAO<ItemCollections>
   }
 
   async close() {}
+}
+
+export class MemoryTagsDAO
+  extends BaseDAO<Record<string, Record<TagSourceName, Tag[]>>>
+  implements TagsDAO {
+  private getTags(type: TagSourceName, docID: string) {
+    return new DefaultTagSet(this.db![docID][type] || []);
+  }
+
+  async annotationTags(docId: string): Promise<TagSet> {
+    return this.getTags(TagSourceName.ANNOTATIONS, docId);
+  }
+
+  async removedTags(docId: string): Promise<TagSet> {
+    return this.getTags(TagSourceName.USER_REMOVES, docId);
+  }
+
+  async thirdPartyTags(docId: string): Promise<TagSet> {
+    return this.getTags(TagSourceName.THIRD_PARTY, docId);
+  }
 }
 
 export function getTestDataMetadataRepository(): CUDLMetadataRepository {
@@ -156,4 +200,63 @@ class TestXSLTExecutor implements Closable {
  */
 export function getTestXSLTExecutor(options?: CreateOptions): XSLTExecutor {
   return (new TestXSLTExecutor(options) as unknown) as XSLTExecutor;
+}
+
+export function product(): Iterable<[]>;
+export function product<A>(a: A[]): Iterable<[A]>;
+export function product<A, B>(a: A[], b: B[]): Iterable<[A, B]>;
+export function product<A, B, C>(a: A[], b: B[], c: C[]): Iterable<[A, B, C]>;
+export function product<A, B, C, D>(
+  a: A[],
+  b: B[],
+  c: C[],
+  d: D[]
+): Iterable<[A, B, C, D]>;
+export function* product<T>(...lists: T[][]): Iterable<T[]> {
+  if (lists.length === 0) {
+    yield [];
+    return;
+  }
+
+  const head = Array.from(lists);
+  const tail = head.pop();
+  if (tail === undefined) {
+    throw new AssertionError({
+      message: 'pop() on non-empty array returned undefined',
+    });
+  }
+
+  for (const headProduct of product.apply(undefined, head)) {
+    for (const t of tail) {
+      yield headProduct.concat([t]);
+    }
+  }
+}
+
+export function getAttribute(
+  obj: unknown,
+  ...attrPath: Array<string | number>
+): unknown {
+  if (attrPath.length === 0) {
+    return obj;
+  }
+
+  const tail = Array.from(attrPath);
+  const head = tail.shift();
+
+  if (typeof head === 'number') {
+    if (!Array.isArray(obj)) {
+      throw new Error(`Cannot index ${util.inspect(obj)} with number: ${head}`);
+    }
+    return getAttribute.apply(null, [obj[head]].concat(tail));
+  } else if (typeof head === 'string') {
+    if (typeof obj !== 'object') {
+      throw new Error(`Cannot index ${util.inspect(obj)} with string: ${head}`);
+    }
+    return getAttribute.apply(
+      null,
+      [(obj as Record<string, unknown>)[head]].concat(tail)
+    );
+  }
+  throw new AssertionError();
 }
