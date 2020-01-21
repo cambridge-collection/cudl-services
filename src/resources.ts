@@ -41,3 +41,19 @@ export async function using<A extends Resource, B>(
     throw e;
   }
 }
+
+export class ExternalResources<T> extends BaseResource {
+  private readonly resources: Resource[];
+  readonly value: T;
+
+  constructor(value: T, resources: Resource[]) {
+    super();
+    this.value = value;
+    this.resources = Array.from(resources);
+  }
+
+  async close(): Promise<void> {
+    super.close();
+    await Promise.all(this.resources.map(r => r.close()));
+  }
+}

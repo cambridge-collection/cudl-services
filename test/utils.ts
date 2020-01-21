@@ -10,15 +10,17 @@ import collapseWhitespace from 'collapse-whitespace';
 import http from 'http';
 import { IM_A_TEAPOT } from 'http-status-codes';
 import * as path from 'path';
+import * as util from 'util';
 import { promisify } from 'util';
+import { Collection, CollectionDAO } from '../src/collections';
 
-import { Collection, Database, DatabasePool } from '../src/db';
+import { BaseDAO, DAOPool, DatabasePool, DefaultDAOPool } from '../src/db';
 import {
   CUDLMetadataRepository,
   DefaultCUDLMetadataRepository,
   LegacyDarwinMetadataRepository,
 } from '../src/metadata';
-import { BaseResource } from '../src/resources';
+import { factory, UnaryConstructorArg } from '../src/util';
 import { XTF } from '../src/xtf';
 import { TEST_DATA_PATH } from './constants';
 
@@ -71,33 +73,36 @@ interface ItemCollections {
   [itemID: string]: Collection[];
 }
 
-export class MemoryDatabasePool extends BaseResource
-  implements DatabasePool<MemoryDatabase> {
-  readonly itemCollections: ItemCollections;
+export class MemoryDatabasePool<Data> implements DatabasePool<Data> {
+  readonly data: Data;
 
-  constructor(options: { itemCollections: ItemCollections }) {
-    super();
-    this.itemCollections = options.itemCollections;
+  constructor(data: Data) {
+    this.data = data;
   }
 
-  async getDatabase(): Promise<MemoryDatabase> {
-    this.ensureNotClosed();
-    return new MemoryDatabase(this);
+  static createPooledDAO<DAO extends new (db: unknown) => InstanceType<DAO>>(
+    dao: DAO,
+    data: UnaryConstructorArg<DAO>
+  ): DAOPool<InstanceType<DAO>> {
+    return new DefaultDAOPool(new MemoryDatabasePool(data), factory(dao));
   }
+
+  async getClient<T>(
+    clientFactory: <Client>(client: Data) => Promise<T> | T
+  ): Promise<T> {
+    return clientFactory(this.data);
+  }
+
+  async close(): Promise<void> {}
 }
 
-export class MemoryDatabase extends BaseResource implements Database {
-  private readonly pool: MemoryDatabasePool;
-
-  constructor(pool: MemoryDatabasePool) {
-    super();
-    this.pool = pool;
-  }
-
+export class MemoryCollectionsDAO extends BaseDAO<ItemCollections>
+  implements CollectionDAO {
   async getItemCollections(itemID: string): Promise<Collection[]> {
-    this.ensureNotClosed();
-    return this.pool.itemCollections[itemID] || [];
+    return this.db[itemID] || [];
   }
+
+  async close() {}
 }
 
 export function getTestDataMetadataRepository(): CUDLMetadataRepository {

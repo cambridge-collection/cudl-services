@@ -1,8 +1,7 @@
 import express from 'express';
 import expressAsyncHandler from 'express-async-handler';
 import xmlbuilder from 'xmlbuilder';
-
-import { Collection, GetItemCollections } from '../db';
+import { Collection, GetItemCollections } from '../collections';
 
 export function getRoutes(options: {
   router?: express.Router;

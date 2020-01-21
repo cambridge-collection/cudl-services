@@ -3,11 +3,11 @@ import { OK } from 'http-status-codes';
 import request from 'supertest';
 
 import xml2js from 'xml2js';
-import { Collection, GetItemCollections } from '../../src/db';
+import { Collection, GetItemCollections } from '../../src/collections';
 import { using } from '../../src/resources';
 
 import { getRoutes } from '../../src/routes/membership';
-import { MemoryDatabasePool } from '../utils';
+import { MemoryCollectionsDAO, MemoryDatabasePool } from '../utils';
 
 function getTestApp(getItemCollections: GetItemCollections) {
   const app = express();
@@ -38,14 +38,17 @@ describe('membership routes', () => {
       },
     ],
   };
-  const mockDatabase = new MemoryDatabasePool({ itemCollections });
+  const daoPool = MemoryDatabasePool.createPooledDAO(
+    MemoryCollectionsDAO,
+    itemCollections
+  );
 
   let getItemCollections: jest.Mock<Promise<Collection[]>, [string]>;
   let app: express.Application;
 
   beforeEach(() => {
     getItemCollections = jest.fn(async (itemID: string) =>
-      using(mockDatabase.getDatabase(), db => db.getItemCollections(itemID))
+      using(daoPool.getInstance(), db => db.getItemCollections(itemID))
     );
     app = getTestApp(getItemCollections);
   });

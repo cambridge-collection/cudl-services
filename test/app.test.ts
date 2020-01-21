@@ -25,6 +25,7 @@ import {
   getTestDataLegacyDarwinMetadataRepository,
   MemoryDatabasePool,
   getMockXTF,
+  MemoryCollectionsDAO,
 } from './utils';
 
 import { get } from 'superagent';
@@ -72,13 +73,14 @@ describe('app', () => {
       users: {
         supersecret: { username: 'foo', email: 'foo@example.com' },
       },
-      databasePool: new MemoryDatabasePool({
-        itemCollections: {
+      collectionsDAOPool: MemoryDatabasePool.createPooledDAO(
+        MemoryCollectionsDAO,
+        {
           'MS-ADD-03959': [
             { title: 'Foo', collectionOrder: 42, collectionID: 'foo' },
           ],
-        },
-      }),
+        }
+      ),
       xtf,
     };
   }

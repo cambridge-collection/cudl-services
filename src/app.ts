@@ -6,6 +6,7 @@ import fs from 'fs-extra';
 import passport from 'passport';
 import path from 'path';
 import Debugger from 'debug';
+import { CollectionDAO, PostgresCollectionDAO } from './collections';
 const cookieParser = require('cookie-parser');
 const favicon = require('serve-favicon');
 const logger = require('morgan');
@@ -17,7 +18,7 @@ import {
   CUDLMetadataRepository,
   DefaultCUDLMetadataRepository,
 } from './metadata';
-import { BaseResource, using } from './resources';
+import { BaseResource, ExternalResources, using } from './resources';
 
 const debug = Debugger('cudl-services');
 
@@ -37,19 +38,15 @@ import * as translation from './routes/translation';
 import * as membership from './routes/membership';
 import * as similarity from './routes/similarity';
 
-import {
-  Database,
-  DatabasePool,
-  PostgresDatabase,
-  PostgresDatabasePool,
-} from './db';
+import { DAOPool, DatabasePool, PostgresDatabasePool } from './db';
+import { factory } from './util';
 import { DefaultXTF, XTF } from './xtf';
 
 export interface AppOptions {
   users: Users;
   metadataRepository: CUDLMetadataRepository;
   legacyDarwinMetadataRepository: LegacyDarwinMetadataRepository;
-  databasePool: DatabasePool;
+  collectionsDAOPool: DAOPool<CollectionDAO>;
   darwinXtfUrl: string;
   xtf: XTF;
 }
@@ -66,17 +63,22 @@ export class App extends BaseResource {
     this.expressApp = this.createExpressApp();
   }
 
-  static fromConfig(config: Config) {
-    return new App({
-      metadataRepository: new DefaultCUDLMetadataRepository(config.dataDir),
-      legacyDarwinMetadataRepository: new LegacyDarwinMetadataRepository(
-        config.legacyDcpDataDir
-      ),
-      databasePool: PostgresDatabasePool.fromConfig(config),
-      users: config.users,
-      darwinXtfUrl: config.darwinXTF,
-      xtf: new DefaultXTF(config),
-    });
+  static fromConfig(config: Config): ExternalResources<App> {
+    const dbPool = PostgresDatabasePool.fromConfig(config);
+
+    return new ExternalResources(
+      new App({
+        metadataRepository: new DefaultCUDLMetadataRepository(config.dataDir),
+        legacyDarwinMetadataRepository: new LegacyDarwinMetadataRepository(
+          config.legacyDcpDataDir
+        ),
+        collectionsDAOPool: PostgresCollectionDAO.createPool(dbPool),
+        users: config.users,
+        darwinXtfUrl: config.darwinXTF,
+        xtf: new DefaultXTF(config),
+      }),
+      [dbPool]
+    );
   }
 
   private createExpressApp(): express.Application {
@@ -126,8 +128,8 @@ export class App extends BaseResource {
       '/v1/rdb/membership',
       membership.getRoutes({
         getItemCollections: async (itemID: string) =>
-          using(this.options.databasePool.getDatabase(), db =>
-            db.getItemCollections(itemID)
+          using(this.options.collectionsDAOPool.getInstance(), dao =>
+            dao.getItemCollections(itemID)
           ),
       })
     );
@@ -175,11 +177,7 @@ export class App extends BaseResource {
   }
 
   async close(): Promise<void> {
-    await Promise.all([
-      super.close(),
-      this.options.databasePool.close(),
-      this.xsltExecutor.close(),
-    ]);
+    await Promise.all([super.close(), this.xsltExecutor.close()]);
   }
 }
 

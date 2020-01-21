@@ -26,7 +26,7 @@ async function runAsync() {
     process.exit(1);
   }
 
-  await using(App.fromConfig(config), async application => {
+  await using(App.fromConfig(config), async ({ value: application }) => {
     application.expressApp.set('port', process.env.PORT || 3000);
 
     const server = application.expressApp.listen(
