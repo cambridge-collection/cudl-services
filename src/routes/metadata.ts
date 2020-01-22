@@ -1,19 +1,13 @@
 import express from 'express';
 import expressAsyncHandler from 'express-async-handler';
-import fs from 'fs';
 import {
   BAD_REQUEST,
   FORBIDDEN,
-  INTERNAL_SERVER_ERROR,
   NOT_FOUND,
   UNAUTHORIZED,
 } from 'http-status-codes';
-import NestedError from 'nested-error-stacks';
-import { type } from 'os';
-import path from 'path';
-import util, { promisify } from 'util';
-import { Config } from '../config';
-import { ItemJSON, CUDLMetadataRepository, CUDLFormat } from '../metadata';
+import util from 'util';
+import { CUDLFormat, CUDLMetadataRepository, ItemJSON } from '../metadata';
 
 import {
   CORS_HEADERS,
@@ -40,7 +34,7 @@ export function getRoutes(options: {
 
 function createMetadataHandler(metadataRepository: CUDLMetadataRepository) {
   return expressAsyncHandler(
-    async (req: express.Request, res: express.Response, next) => {
+    async (req: express.Request, res: express.Response) => {
       // We always want to allow remote ajax access
       res.set(CORS_HEADERS);
 
@@ -75,10 +69,10 @@ function createMetadataHandler(metadataRepository: CUDLMetadataRepository) {
           res.status(NOT_FOUND).json({
             error: `ID does not exist: ${id}`,
           });
+          return;
         } else {
-          next(e);
+          throw e;
         }
-        return;
       }
 
       if (req.params.format === 'json') {

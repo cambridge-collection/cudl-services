@@ -32,7 +32,6 @@ export function getRoutes(options: {
       await sendTagResponse({
         req,
         res,
-        next,
         sources: tagSources,
         sourceNames: req.query.sources,
         fixedResponseType:
@@ -83,12 +82,11 @@ function getTagSources(dao: TagsDAO): NamedTagSources<TagSourceName> {
 async function sendTagResponse(options: {
   req: express.Request;
   res: express.Response;
-  next: express.NextFunction;
   sources: NamedTagSources<TagSourceName>;
   sourceNames: string | undefined;
   fixedResponseType?: ResponseType;
 }) {
-  const { req, res, next, sources, sourceNames, fixedResponseType } = options;
+  const { req, res, sources, sourceNames, fixedResponseType } = options;
   try {
     const selectedSources = selectTagSources(
       sources,
@@ -108,7 +106,7 @@ async function sendTagResponse(options: {
     });
     sendResponse(res, response);
   } catch (e) {
-    handleErrors(res, next, e);
+    handleErrors(res, e);
   }
 }
 
@@ -219,17 +217,13 @@ function sendResponse(res: express.Response, responseData: Response) {
   res.set('Content-Type', responseData.type).send(responseData.body);
 }
 
-function handleErrors(
-  res: express.Response,
-  next: express.NextFunction,
-  error: unknown
-) {
+function handleErrors(res: express.Response, error: unknown) {
   if (error instanceof ValueError) {
     res
       .status(BAD_REQUEST)
       .type('text/plain')
       .send(`Bad request: ${error.message}`);
   } else {
-    next(error);
+    throw error;
   }
 }

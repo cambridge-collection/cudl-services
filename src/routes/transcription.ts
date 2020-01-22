@@ -1,13 +1,8 @@
 import { XSLTExecutor } from '@lib.cam/xslt-nailgun';
 import { ExecuteOptions } from '@lib.cam/xslt-nailgun/lib/_internals';
-import express, { Request } from 'express';
+import { Request, Router } from 'express';
 
-import {
-  BAD_GATEWAY,
-  BAD_REQUEST,
-  INTERNAL_SERVER_ERROR,
-  NOT_FOUND,
-} from 'http-status-codes';
+import { BAD_GATEWAY, BAD_REQUEST, NOT_FOUND } from 'http-status-codes';
 
 import { JSDOM } from 'jsdom';
 import path from 'path';
@@ -51,12 +46,12 @@ function xsltTranscriptionEndpoint<Fmt extends string, Opt>(options: {
 }
 
 export function getRoutes(options: {
-  router?: express.Router;
+  router?: Router;
   metadataRepository: CUDLMetadataRepository;
   legacyDarwinMetadataRepository: LegacyDarwinMetadataRepository;
   xsltExecutor: XSLTExecutor;
 }) {
-  const router = options.router || express.Router();
+  const router = options.router || Router();
 
   const tei = xsltTranscriptionEndpoint<
     CUDLFormat,
@@ -182,7 +177,7 @@ export function getRoutes(options: {
 }
 
 function attachTranscriptionHandler<T>(
-  router: express.Router,
+  router: Router,
   transcriptionService: TranscriptionService<T>,
   path: string,
   extractOptions: (req: Request) => T
@@ -223,8 +218,7 @@ function createTranscriptionHandler<T>(
         status = BAD_GATEWAY;
         msg = 'The external transcription provider is temporarily unavailable';
       } else {
-        status = INTERNAL_SERVER_ERROR;
-        msg = 'Something went wrong';
+        throw e;
       }
 
       res.status(status).json({ error: msg });

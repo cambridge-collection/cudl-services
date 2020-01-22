@@ -2,11 +2,9 @@ import createDebugger from 'debug';
 import express from 'express';
 import expressAsyncHandler from 'express-async-handler';
 import { BAD_GATEWAY, BAD_REQUEST } from 'http-status-codes';
-import { XTFConfig } from '../config';
 import { CUDLMetadataRepository } from '../metadata';
 import { CORS_HEADERS, isEnumMember, requireRequestParam } from '../util';
 import { XTF } from '../xtf';
-import * as xtf from '../xtf';
 import {
   embedMetadata,
   mapToJson,
@@ -35,7 +33,7 @@ function createSimilarityHandler(
   xtf: XTF
 ) {
   return expressAsyncHandler(
-    async (req: express.Request, res: express.Response, next) => {
+    async (req: express.Request, res: express.Response) => {
       // Allow x-domain ajax access
       res.set(CORS_HEADERS);
 
