@@ -21,7 +21,7 @@ copy-javascript: build/dist-root/lib
 		install -m 'u=rw,go=r' -D -T '{}' '../build/dist-root/lib/{}' ';'
 
 copy-files: build/dist-root copy-javascript
-	cp -a sql public views build/dist-root/
+	cp -a sql public views transforms build/dist-root/
 
 build/dist-root/package.json: FILTER = '\
 	. as $$root | \
