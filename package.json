@@ -17,7 +17,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@lib.cam/xslt-nailgun": "^0.2.0",
+    "@lib.cam/xslt-nailgun": "^0.2.1",
     "Simple-Cache": "~1.0.0",
     "accepts": "^1.3.0",
     "ajv": "^6.10.2",
