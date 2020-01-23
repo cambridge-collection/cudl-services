@@ -1,8 +1,13 @@
 import {
+  applyDefaults,
   compare,
   ComparePrimitive,
   CompareValue,
   isEnumMember,
+  NonNullable,
+  OmittableOptional,
+  pickDefined,
+  PickOptional,
   sorted,
 } from '../src/util';
 
@@ -172,4 +177,54 @@ describe('sorting', () => {
       expect(sorted(unsorted, t => [compare.desc, t.thing])).toEqual(expected);
     });
   });
+});
+
+interface Options {
+  a: string;
+  b?: string;
+  c: number | null;
+}
+
+test.each<[Options, OmittableOptional<Options>]>([
+  [{ a: 'abc', b: undefined, c: null }, { a: 'abc' }],
+  [
+    { a: 'abc', c: 42 },
+    { a: 'abc', c: 42 },
+  ],
+  [
+    { a: 'abc', b: 'x', c: null },
+    { a: 'abc', b: 'x' },
+  ],
+  [
+    { a: 'abc', b: 'def', c: 42 },
+    { a: 'abc', b: 'def', c: 42 },
+  ],
+])('pickDefined()', (options, expectedDefinedOptions) => {
+  const definedOptions = pickDefined(options);
+  expect(definedOptions).toEqual(expectedDefinedOptions);
+});
+
+interface Options {
+  a: string;
+  b?: string;
+  c: number | null;
+}
+
+test.each<[Options, Required<Options>]>([
+  [
+    { a: 'abc', c: null },
+    { a: 'abc', b: 'def', c: 42 },
+  ],
+  [
+    { a: 'abc', c: 54 },
+    { a: 'abc', b: 'def', c: 54 },
+  ],
+  [
+    { a: 'abc', b: 'foo', c: 54 },
+    { a: 'abc', b: 'foo', c: 54 },
+  ],
+])('applyDefaults()', (options, expected) => {
+  const defaults: NonNullable<PickOptional<Options>> = { b: 'def', c: 42 };
+  const actual = applyDefaults(options, defaults);
+  expect(actual).toEqual(expected);
 });

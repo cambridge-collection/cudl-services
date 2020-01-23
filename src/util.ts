@@ -177,3 +177,64 @@ function index<T>(items: Iterable<T>): Array<[number, T]> {
   }
   return index;
 }
+
+/** Keys of T to which U could be assigned. */
+export type KeysAccepting<T, U> = {
+  [K in keyof T]: U extends T[K] ? K : never;
+}[keyof T];
+/** Keys of T to which null can be assigned. */
+export type NullableKeys<T> = KeysAccepting<T, null>;
+/** Keys of T to which undefined can be assigned. */
+export type UndefinableKeys<T> = KeysAccepting<T, undefined>;
+/** Keys of T to which undefined or null can be assigned. */
+export type OptionalKeys<T> = NullableKeys<T> | UndefinableKeys<T>;
+
+/**
+ * From T, pick a set of properties which cannot be assigned null or undefined.
+ */
+export type PickRequired<T> = {
+  [K in Exclude<keyof T, OptionalKeys<T>>]: T[K];
+};
+/**
+ * From T, pick a set of properties which can be assigned null or undefined.
+ */
+export type PickOptional<T> = {
+  [K in OptionalKeys<T>]: T[K];
+};
+/**
+ * T where properties which can be assigned null or undefined are made omittable.
+ */
+export type OmittableOptional<T> = {
+  [K in keyof PickOptional<T>]?: Exclude<T[K], null>;
+} &
+  PickRequired<T>;
+
+export type NonNullable<T> = {
+  [K in keyof T]-?: Exclude<T[K], null | undefined>;
+};
+
+/**
+ * Select from obj values which are not null or undefined.
+ *
+ * The returned object has no key/value present for null/undefined values in the
+ * input obj.
+ */
+export function pickDefined<T extends {}>(obj: T): OmittableOptional<T> {
+  const result = {} as T;
+  for (const key in obj) {
+    if (
+      obj.hasOwnProperty(key) &&
+      !(obj[key] === null || obj[key] === undefined)
+    ) {
+      result[key] = obj[key];
+    }
+  }
+  return (result as unknown) as OmittableOptional<T>;
+}
+
+export function applyDefaults<T extends {}>(
+  obj: T,
+  defaults: NonNullable<PickOptional<T>>
+): NonNullable<T> {
+  return { ...defaults, ...pickDefined(obj) } as NonNullable<T>;
+}
