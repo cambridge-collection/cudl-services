@@ -1,3 +1,4 @@
+import { AssertionError } from 'assert';
 import escapeStringRegexp from 'escape-string-regexp';
 import { Request } from 'express';
 import url from 'url';
@@ -252,4 +253,17 @@ export function applyLazyDefaults<T extends {}>(
     }
   }
   return values as NonNullable<T>;
+}
+
+/**
+ * Like require('validate').validate() except won't be optimised away, so can use
+ * typescript "asserts <condition>" functionality.
+ */
+export function validate(
+  condition: boolean,
+  message?: string
+): asserts condition {
+  if (!condition) {
+    throw new AssertionError({ message });
+  }
 }
