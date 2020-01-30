@@ -1,9 +1,11 @@
 import {
   applyDefaults,
+  applyLazyDefaults,
   compare,
   ComparePrimitive,
   CompareValue,
   isEnumMember,
+  Lazy,
   NonNullable,
   OmittableOptional,
   pickDefined,
@@ -227,4 +229,31 @@ test.each<[Options, Required<Options>]>([
   const defaults: NonNullable<PickOptional<Options>> = { b: 'def', c: 42 };
   const actual = applyDefaults(options, defaults);
   expect(actual).toEqual(expected);
+});
+
+test.each<[Options, Required<Options>, { b: boolean; c: boolean }]>([
+  [
+    { a: 'abc', c: null },
+    { a: 'abc', b: 'def', c: 42 },
+    { b: true, c: true },
+  ],
+  [
+    { a: 'abc', c: 54 },
+    { a: 'abc', b: 'def', c: 54 },
+    { b: true, c: false },
+  ],
+  [
+    { a: 'abc', b: 'foo', c: 54 },
+    { a: 'abc', b: 'foo', c: 54 },
+    { b: false, c: false },
+  ],
+])('applyLazyDefaults()', (options, expected, defaultCalls) => {
+  const defaults: Lazy<NonNullable<PickOptional<Options>>> = {
+    b: jest.fn(() => 'def'),
+    c: jest.fn(() => 42),
+  };
+  const actual = applyLazyDefaults(options, defaults);
+  expect(actual).toEqual(expected);
+  expect(defaults.b).toHaveBeenCalledTimes(Number(defaultCalls.b));
+  expect(defaults.c).toHaveBeenCalledTimes(Number(defaultCalls.c));
 });

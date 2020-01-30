@@ -238,3 +238,18 @@ export function applyDefaults<T extends {}>(
 ): NonNullable<T> {
   return { ...defaults, ...pickDefined(obj) } as NonNullable<T>;
 }
+
+export type Lazy<T> = { [key in keyof T]: () => T[key] };
+
+export function applyLazyDefaults<T extends {}>(
+  obj: T,
+  defaults: Lazy<NonNullable<PickOptional<T>>>
+): NonNullable<T> {
+  const values = pickDefined(obj) as T;
+  for (const key of Object.keys(defaults)) {
+    if (!(key in values)) {
+      values[key as keyof T] = defaults[key as keyof typeof defaults]();
+    }
+  }
+  return values as NonNullable<T>;
+}
