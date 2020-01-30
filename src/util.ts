@@ -210,7 +210,7 @@ export type OmittableOptional<T> = {
 } &
   PickRequired<T>;
 
-export type NonNullable<T> = {
+export type NonOptional<T> = {
   [K in keyof T]-?: Exclude<T[K], null | undefined>;
 };
 
@@ -235,24 +235,24 @@ export function pickDefined<T extends {}>(obj: T): OmittableOptional<T> {
 
 export function applyDefaults<T extends {}>(
   obj: T,
-  defaults: NonNullable<PickOptional<T>>
-): NonNullable<T> {
-  return { ...defaults, ...pickDefined(obj) } as NonNullable<T>;
+  defaults: NonOptional<PickOptional<T>>
+): NonOptional<T> {
+  return { ...defaults, ...pickDefined(obj) } as NonOptional<T>;
 }
 
 export type Lazy<T> = { [key in keyof T]: () => T[key] };
 
 export function applyLazyDefaults<T extends {}>(
   obj: T,
-  defaults: Lazy<NonNullable<PickOptional<T>>>
-): NonNullable<T> {
+  defaults: Lazy<NonOptional<PickOptional<T>>>
+): NonOptional<T> {
   const values = pickDefined(obj) as T;
   for (const key of Object.keys(defaults)) {
     if (!(key in values)) {
       values[key as keyof T] = defaults[key as keyof typeof defaults]();
     }
   }
-  return values as NonNullable<T>;
+  return values as NonOptional<T>;
 }
 
 /**

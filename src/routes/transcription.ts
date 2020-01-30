@@ -1,13 +1,11 @@
-import { XSLTExecutor } from '@lib.cam/xslt-nailgun';
-import { ExecuteOptions } from '@lib.cam/xslt-nailgun/lib/_internals';
+import { ExecuteOptions, XSLTExecutor } from '@lib.cam/xslt-nailgun';
 import { Request, Router } from 'express';
 
 import { BAD_GATEWAY, BAD_REQUEST, NOT_FOUND } from 'http-status-codes';
 
 import { JSDOM } from 'jsdom';
 import path from 'path';
-import superagent from 'superagent';
-import * as URI from 'uri-js';
+import { URL } from 'url';
 import { NotFoundError, UpstreamError } from '../errors';
 import {
   CUDLFormat,
@@ -16,7 +14,12 @@ import {
   LegacyDarwinMetadataRepository,
   MetadataRepository,
 } from '../metadata';
-import { requireRequestParam, requireRequestParams } from '../util';
+import {
+  applyLazyDefaults,
+  requireRequestParam,
+  requireRequestParams,
+} from '../util';
+import { delegateToExternalHTML } from './transcription-impl';
 import expressAsyncHandler = require('express-async-handler');
 
 interface TranscriptionEndpoint<T> {
@@ -46,12 +49,15 @@ function xsltTranscriptionEndpoint<Fmt extends string, Opt>(options: {
 }
 
 export function getRoutes(options: {
-  router?: Router;
-  metadataRepository: CUDLMetadataRepository;
   legacyDarwinMetadataRepository: LegacyDarwinMetadataRepository;
+  metadataRepository: CUDLMetadataRepository;
+  router?: Router;
   xsltExecutor: XSLTExecutor;
+  zacynthiusServiceURL: URL;
 }) {
-  const router = options.router || Router();
+  const { router, zacynthiusServiceURL } = applyLazyDefaults(options, {
+    router: () => Router(),
+  });
 
   const tei = xsltTranscriptionEndpoint<
     CUDLFormat,
@@ -121,47 +127,11 @@ export function getRoutes(options: {
     }),
   });
 
-  const newton = {
-    path: '/newton/:type/external/:id/:start/:end',
-    service: new NewtonProjectTranscriptionService({
-      baseUrl: 'http://www.newtonproject.ox.ac.uk/',
-      baseResourceUrl: '/v1/resources/www.newtonproject.ox.ac.uk/',
-    }),
-    options: extractTranscriptionOptions,
-  };
-
-  const darwinManuscripts = {
-    path: '/dmp/diplomatic/external/:id',
-    service: new DarwinManuscriptsTranscriptionService({
-      baseUrl: 'http://darwin.amnh.org/',
-    }),
-    options: extractIDTranscriptionOptions,
-  };
-
-  const itseet: TranscriptionEndpoint<IDPageTranscriptionOptions> = {
-    path: '/palimpsest/normalised/external/:id/:start/:end',
-    service: new ITSEETranscriptionService({
-      baseUrl: 'http://cal-itsee.bham.ac.uk/',
-    }),
-    options: req => {
-      const opts = extractIDPagesTranscriptionOptions(req);
-      if (opts.start !== opts.end) {
-        throw new InvalidTranscriptionOptionsError(
-          'Only single-page requests are supported'
-        );
-      }
-      return { id: opts.id, page: opts.start };
-    },
-  };
-
   const transcriptions: Array<TranscriptionEndpoint<unknown>> = [
     tei,
     bezae,
     dcp,
     dcpfull,
-    newton,
-    darwinManuscripts,
-    itseet,
   ];
 
   for (const trans of transcriptions) {
@@ -172,6 +142,61 @@ export function getRoutes(options: {
       trans.options
     );
   }
+
+  router.use(
+    '/newton/',
+    delegateToExternalHTML({
+      pathPattern: '/:type/external/:id/:start/:end',
+      externalBaseURL: 'http://www.newtonproject.ox.ac.uk/',
+      externalPathGenerator: req => {
+        const options = requireRequestParams(req, 'id', 'start', 'end', 'type');
+        return `view/texts/${options.type}/${encodeURIComponent(
+          options.id
+        )}?skin=minimal&show_header=no&start=${encodeURIComponent(
+          options.start
+        )}&end=${encodeURIComponent(options.end)}`;
+      },
+    })
+  );
+
+  router.use(
+    '/dmp/',
+    delegateToExternalHTML({
+      pathPattern: '/diplomatic/external/:id',
+      externalBaseURL: 'http://darwin.amnh.org/',
+      externalPathGenerator: req =>
+        `transcription-viewer.php?eid=${encodeURIComponent(
+          extractIDTranscriptionOptions(req).id
+        )}`,
+    })
+  );
+
+  router.use(
+    '/palimpsest/',
+    delegateToExternalHTML({
+      pathPattern: '/normalised/external/:id/:start/:end',
+      externalBaseURL: 'http://cal-itsee.bham.ac.uk/',
+      externalPathGenerator: req => {
+        const opts = extractIDPagesTranscriptionOptions(req);
+        if (opts.start !== opts.end) {
+          throw new InvalidTranscriptionOptionsError(
+            'Only single-page requests are supported'
+          );
+        }
+        return `itseeweb/fedeli/${opts.id}/${opts.start}_${opts.id}.html`;
+      },
+    })
+  );
+
+  router.use(
+    '/zacynthius/',
+    delegateToExternalHTML({
+      pathPattern: '/:type(overtext|undertext)/:page(\\w+)',
+      externalBaseURL: zacynthiusServiceURL,
+      externalPathGenerator: req =>
+        `${req.params.type}/${req.params.page}.html`,
+    })
+  );
 
   return router;
 }
@@ -261,135 +286,6 @@ function extractTranscriptionOptions(req: Request): TranscriptionOptions {
 
 interface TranscriptionService<Params> {
   getTranscription(options: Params): Promise<string>;
-}
-
-interface HTML {
-  html: string;
-  baseUrl: string;
-}
-
-export type HttpGet = typeof superagent.get;
-
-export abstract class HttpTranscriptionService<Params>
-  implements TranscriptionService<Params> {
-  protected readonly baseUrl: URI.URIComponents;
-  protected readonly httpGet: HttpGet;
-
-  constructor(options: { baseUrl: string; httpGet?: HttpGet }) {
-    this.baseUrl = URI.parse(options.baseUrl);
-    this.httpGet = options.httpGet || superagent.get;
-  }
-
-  protected getUrl(options: Params) {
-    return URI.serialize(
-      URI.resolveComponents(this.baseUrl, this.getRelativeUrl(options))
-    );
-  }
-
-  protected abstract getRelativeUrl(options: Params): URI.URIComponents;
-
-  protected async getExternalTranscription(options: Params): Promise<HTML> {
-    const url = this.getUrl(options);
-    const resp = await this.httpGet(url);
-
-    if (resp.ok) {
-      return { html: resp.text, baseUrl: url };
-    }
-    const msg = `External transcription provider responded with HTTP ${resp.status}: ${url}`;
-    const errClass =
-      resp.status === 404
-        ? NotFoundError
-        : resp.serverError
-        ? UpstreamError
-        : Error;
-    throw new errClass(msg);
-  }
-
-  protected filterTranscriptionHtml(html: HTML): string {
-    return html.html;
-  }
-
-  async getTranscription(options: Params) {
-    const html = await this.getExternalTranscription(options);
-    return this.filterTranscriptionHtml(html);
-  }
-}
-
-export class NewtonProjectTranscriptionService extends HttpTranscriptionService<
-  TranscriptionOptions
-> {
-  private readonly baseResourceUrl: URI.URIComponents;
-
-  constructor(options: {
-    baseUrl: string;
-    baseResourceUrl: string;
-    httpGet?: HttpGet;
-  }) {
-    super(options);
-    this.baseResourceUrl = URI.parse(options.baseResourceUrl);
-  }
-
-  protected getRelativeUrl(options: TranscriptionOptions) {
-    return {
-      path: `/view/texts/${options.type}/${encodeURIComponent(options.id)}`,
-      query: `skin=minimal&show_header=no&start=${encodeURIComponent(
-        options.start
-      )}&end=${encodeURIComponent(options.end)}`,
-    };
-  }
-
-  protected filterTranscriptionHtml(html: HTML) {
-    return rewriteHtmlResourceUrls({
-      ...html,
-      rewrite: options => {
-        const resource = URI.parse(options.url);
-        if (
-          URI.equal(httpOrigin(this.baseUrl), httpOrigin(resource)) &&
-          resource.path?.startsWith('/resources/')
-        ) {
-          return URI.serialize(
-            URI.resolveComponents(this.baseResourceUrl, {
-              path: resource.path?.substr('/resources/'.length),
-            })
-          );
-        }
-      },
-    });
-  }
-}
-
-export class DarwinManuscriptsTranscriptionService extends HttpTranscriptionService<
-  IDTranscriptionOptions
-> {
-  protected getRelativeUrl(options: TranscriptionOptions): URI.URIComponents {
-    return {
-      path: 'transcription-viewer.php',
-      query: `eid=${encodeURIComponent(options.id)}`,
-    };
-  }
-}
-
-export class ITSEETranscriptionService extends HttpTranscriptionService<
-  IDPageTranscriptionOptions
-> {
-  protected getRelativeUrl(
-    options: IDPageTranscriptionOptions
-  ): URI.URIComponents {
-    const id = encodeURIComponent(options.id);
-    const page = encodeURIComponent(options.page);
-    return {
-      path: `/itseeweb/fedeli/${id}/${page}_${id}.html`,
-    };
-  }
-}
-
-function httpOrigin(url: URI.URIComponents) {
-  return URI.serialize({
-    ...url,
-    path: undefined,
-    query: undefined,
-    fragment: undefined,
-  });
 }
 
 type ElementWithHref = Element & { href: string };

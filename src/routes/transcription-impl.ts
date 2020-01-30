@@ -8,7 +8,8 @@ import superagent from 'superagent';
 import url, { URL } from 'url';
 import { ValueError } from '../errors';
 import {
-  isSameOrigin,
+  ensureURL,
+  isParent,
   parseHTML,
   rewriteResourceURLs,
   URLRewriter,
@@ -80,7 +81,10 @@ export function delegateToExternalHTML(options: {
         contentTypeWhitelist: HTML_MEDIA_TYPES,
       }),
       createRewriteHTMLResourceURLsResponseHandler(
-        createDefaultResourceURLRewriter({ baseResourceURL })
+        createDefaultResourceURLRewriter({
+          upstreamRootURL: ensureURL(externalBaseURL),
+          baseResourceURL,
+        })
       ),
     ],
   });
@@ -363,19 +367,34 @@ export function createRestrictedTypeResponseHandler(options: {
 }
 
 export function createDefaultResourceURLRewriter(options?: {
+  upstreamRootURL?: URL;
   baseResourceURL?: string;
 }): URLRewriter {
-  const { baseResourceURL } = applyDefaults(options || {}, {
-    baseResourceURL: 'resources/',
-  });
+  const { baseResourceURL } = applyDefaults(
+    { baseResourceURL: options?.baseResourceURL },
+    {
+      baseResourceURL: 'resources/',
+    }
+  );
   return ({ baseURL, resolvedURL }) => {
-    if (!isSameOrigin(baseURL, resolvedURL)) {
+    if (
+      options?.upstreamRootURL &&
+      !isParent(options.upstreamRootURL, baseURL)
+    ) {
+      throw new ValueError(`upstreamRootURL is not a parent of baseURL`);
+    }
+    const upstreamRoot = options?.upstreamRootURL
+      ? String(options?.upstreamRootURL)
+      : new URL(resolvedURL).origin;
+
+    if (!isParent(upstreamRoot, resolvedURL)) {
       return undefined;
     }
 
     const rootRelativeResourceURL = RelateURL.relate(
-      new URL(resolvedURL).origin,
-      resolvedURL
+      upstreamRoot,
+      resolvedURL,
+      { output: RelateURL.PATH_RELATIVE }
     );
     return url.resolve(baseResourceURL, rootRelativeResourceURL);
   };

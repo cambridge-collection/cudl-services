@@ -1,6 +1,8 @@
 import { mocked } from 'ts-jest/utils';
 import { URL } from 'url';
 import {
+  ensureURL,
+  isParent,
   isSameOrigin,
   parseHTML,
   rewriteResourceURLs,
@@ -32,6 +34,27 @@ test.each<[string | URL, string | URL, boolean]>([
   ['https://foo.com:443/a', 'https://foo.com/b', true],
 ])('isSameOrigin(%s, %s) === %s', (a, b, expected) => {
   expect(isSameOrigin(a, b)).toBe(expected);
+});
+
+test.each<[string | URL, string | URL, boolean]>([
+  ['http://foo.com/', 'http://foo.com/', true],
+  ['http://foo.com/', 'http://foo.com/?a=1', true],
+  // query on parent is ignored
+  ['http://foo.com/?a=2', 'http://foo.com/?a=1', true],
+  ['http://foo.com/', 'http://foo.com/abc', true],
+  ['http://foo.com/', 'http://foo.com/abc/def', true],
+  ['http://foo.com/a', 'http://foo.com/a', true],
+  ['http://foo.com/a', 'http://foo.com/ab', false],
+  ['http://foo.com/a', 'http://foo.com/a/b', true],
+  ['http://bar.com/a', 'http://foo.com/a', false],
+])('isParent(%s, %s) === %s', (a, b, expected) => {
+  expect(isParent(a, b)).toBe(expected);
+});
+
+test('ensureURL()', () => {
+  const url = new URL('http://example/foo');
+  expect(ensureURL(url)).toBe(url);
+  expect(ensureURL(String(url))).toEqual(url);
 });
 
 describe('parseHTML()', () => {

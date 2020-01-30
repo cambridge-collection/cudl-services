@@ -4,7 +4,6 @@ import express from 'express';
 import * as fs from 'fs';
 import { IM_A_TEAPOT, OK, UNAUTHORIZED } from 'http-status-codes';
 import * as path from 'path';
-import superagent, { get } from 'superagent';
 import request from 'supertest';
 import { mocked } from 'ts-jest/utils';
 import { promisify } from 'util';
@@ -14,7 +13,12 @@ import { embedMetadata } from '../src/routes/similarity-impl';
 import { TagSourceName } from '../src/routes/tags';
 import { SimilaritySearch } from '../src/transforms/similarity';
 import { XTF } from '../src/xtf';
-import { EXAMPLE_STATIC_FILES, STATIC_FILES } from './constants';
+import {
+  EXAMPLE_STATIC_FILES,
+  EXAMPLE_ZACYNTHIUS_URL,
+  STATIC_FILES,
+} from './constants';
+import { mockGetResponder } from './mocking/superagent-mocking';
 import {
   DummyHttpServer,
   getMockXTF,
@@ -24,24 +28,6 @@ import {
   MemoryDatabasePool,
   MemoryTagsDAO,
 } from './utils';
-
-type PartialResponse = Pick<
-  superagent.Response,
-  'status' | 'text' | 'ok' | 'serverError'
->;
-let getMockGetResponse: (() => Promise<PartialResponse>) | undefined;
-
-jest.mock('superagent', () => ({
-  get: jest.fn(
-    async (url: string): Promise<PartialResponse> => {
-      if (getMockGetResponse === undefined) {
-        throw new Error('mockGetResponse is undefined');
-      }
-      return getMockGetResponse();
-    }
-  ),
-}));
-const mockGet = get as jest.MockedFunction<typeof get>;
 
 describe('app', () => {
   let mockDarwinUpstream: DummyHttpServer;
@@ -90,6 +76,7 @@ describe('app', () => {
         },
       }),
       xtf,
+      zacynthiusServiceURL: EXAMPLE_ZACYNTHIUS_URL,
     };
   }
 
@@ -163,16 +150,17 @@ describe('app', () => {
 
   describe('/v1/transcription', () => {
     afterEach(() => {
-      getMockGetResponse = undefined;
-      mockGet.mockClear();
+      jest.clearAllMocks();
     });
 
     test('route is registered', async () => {
       const html =
         '<!DOCTYPE html><html><head><title>foo</title></head><body></body></html>';
-      getMockGetResponse = async () => ({
+      mockGetResponder.mockResolvedValueOnce({
         status: 200,
         text: html,
+        body: Buffer.from(html, 'utf8'),
+        type: 'text/html',
         ok: true,
         serverError: false,
       });

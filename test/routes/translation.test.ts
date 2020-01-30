@@ -2,13 +2,15 @@ import { XSLTExecutor } from '@lib.cam/xslt-nailgun';
 import express, { Application } from 'express';
 import { BAD_REQUEST, NOT_FOUND, OK } from 'http-status-codes';
 import { JSDOM } from 'jsdom';
+import { get } from 'superagent';
 import request from 'supertest';
 import { CUDLMetadataRepository } from '../../src/metadata';
 import { getRoutes } from '../../src/routes/translation';
 
-import { getTestDataMetadataRepository, getTestXSLTExecutor } from '../utils';
+import { EXAMPLE_STATIC_FILES, EXAMPLE_ZACYNTHIUS_URL } from '../constants';
+import { mockGetResponder } from '../mocking/superagent-mocking';
 
-import { EXAMPLE_STATIC_FILES } from '../constants';
+import { getTestDataMetadataRepository, getTestXSLTExecutor } from '../utils';
 
 // Example translation requests:
 // /v1/translation/tei/EN/MS-LC-II-00077/15r/15r
@@ -19,25 +21,32 @@ function getTestApp(
   xsltExecutor: XSLTExecutor
 ) {
   const app = express();
-  app.use('/', getRoutes({ metadataRepository, xsltExecutor }));
+  app.use(
+    '/',
+    getRoutes({
+      metadataRepository,
+      xsltExecutor,
+      zacynthiusServiceURL: EXAMPLE_ZACYNTHIUS_URL,
+    })
+  );
   return app;
 }
 
+let metadataRepository: CUDLMetadataRepository;
+let xsltExecutor: XSLTExecutor;
+let app: Application;
+
+beforeAll(() => {
+  xsltExecutor = getTestXSLTExecutor();
+  metadataRepository = getTestDataMetadataRepository();
+  app = getTestApp(metadataRepository, xsltExecutor);
+});
+
+afterAll(async () => {
+  await xsltExecutor.close();
+});
+
 describe(`translation routes /tei/EN/:id/:from/:to`, () => {
-  let metadataRepository: CUDLMetadataRepository;
-  let xsltExecutor: XSLTExecutor;
-  let app: Application;
-
-  beforeAll(() => {
-    xsltExecutor = getTestXSLTExecutor();
-    metadataRepository = getTestDataMetadataRepository();
-    app = getTestApp(metadataRepository, xsltExecutor);
-  });
-
-  afterAll(async () => {
-    await xsltExecutor.close();
-  });
-
   test('responds with 404 for missing ID', async () => {
     const response = await request(app).get('/tei/EN/missing/1/2');
     expect(response.status).toBe(NOT_FOUND);
@@ -95,5 +104,28 @@ describe(`translation routes /tei/EN/:id/:from/:to`, () => {
     expect(
       doc.querySelector('body .body p:nth-of-type(3)')?.textContent
     ).toMatch(/^\[difficult hand; transcription still in progress\]/);
+  });
+});
+
+describe('translation routes /zacynthius/:page', () => {
+  test('zacynthius translation', async () => {
+    const html =
+      '<!DOCTYPE html><html lang="en"><head><title>foo</title></head><body></body></html>';
+    mockGetResponder.mockResolvedValueOnce({
+      status: 200,
+      type: 'text/html',
+      text: html,
+      body: Buffer.from(html, 'utf8'),
+      ok: true,
+      serverError: false,
+    });
+
+    const response = await request(app).get('/zacynthius/t2v');
+    expect(response.ok).toBeTruthy();
+    expect(get).toHaveBeenCalledTimes(1);
+    expect(get).toHaveBeenLastCalledWith(
+      `${EXAMPLE_ZACYNTHIUS_URL}translation/t2v.html`
+    );
+    expect(response.text).toBe(html);
   });
 });

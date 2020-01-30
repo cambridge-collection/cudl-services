@@ -1,13 +1,13 @@
 import Debugger from 'debug';
 import util from 'util';
 import { App } from './app';
-import { Config, loadConfigFromEnvar } from './config';
+import { loadConfigFromEnvar, StrictConfig } from './config';
 import { using } from './resources';
 
 const debug = Debugger('cudl-services');
 
 async function runAsync() {
-  let config: Config;
+  let config: StrictConfig;
   try {
     config = loadConfigFromEnvar();
   } catch (e) {

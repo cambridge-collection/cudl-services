@@ -20,20 +20,34 @@ describe('response handlers', () => {
   describe('HTML resource URL rewriting', () => {
     test.each<[Parameters<typeof createDefaultResourceURLRewriter>[0], string]>(
       [
-        [undefined, 'resources/foo/css/foo.css'],
+        [undefined, 'resources/things/css/foo.css'],
         [
-          { baseResourceURL: '/foo/bar/resources/' },
-          '/foo/bar/resources/foo/css/foo.css',
+          { baseResourceURL: '/a/b/resources/' },
+          '/a/b/resources/things/css/foo.css',
+        ],
+        [
+          {
+            baseResourceURL: '/a/b/resources/',
+            upstreamRootURL: new URL('http://example.com/'),
+          },
+          '/a/b/resources/things/css/foo.css',
+        ],
+        [
+          {
+            baseResourceURL: '/a/b/resources/',
+            upstreamRootURL: new URL('http://example.com/things/'),
+          },
+          '/a/b/resources/css/foo.css',
         ],
       ]
     )('createDefaultResourceURLRewriter(%s)', (createOptions, expected) => {
       const rewriterFn = createDefaultResourceURLRewriter(createOptions);
       expect(
         rewriterFn({
-          baseURL: 'http://example.com/foo/bar',
-          rawURL: 'css/foo.css',
-          resolvedURL: 'http://example.com/foo/css/foo.css',
-          relativeURL: 'css/foo.css',
+          baseURL: 'http://example.com/things/foo/bar',
+          rawURL: '../css/foo.css',
+          resolvedURL: 'http://example.com/things/css/foo.css',
+          relativeURL: '../css/foo.css',
         })
       ).toBe(expected);
     });

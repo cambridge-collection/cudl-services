@@ -6,7 +6,7 @@ import {
   CompareValue,
   isEnumMember,
   Lazy,
-  NonNullable,
+  NonOptional,
   OmittableOptional,
   pickDefined,
   PickOptional,
@@ -226,7 +226,7 @@ test.each<[Options, Required<Options>]>([
     { a: 'abc', b: 'foo', c: 54 },
   ],
 ])('applyDefaults()', (options, expected) => {
-  const defaults: NonNullable<PickOptional<Options>> = { b: 'def', c: 42 };
+  const defaults: NonOptional<PickOptional<Options>> = { b: 'def', c: 42 };
   const actual = applyDefaults(options, defaults);
   expect(actual).toEqual(expected);
 });
@@ -248,7 +248,7 @@ test.each<[Options, Required<Options>, { b: boolean; c: boolean }]>([
     { b: false, c: false },
   ],
 ])('applyLazyDefaults()', (options, expected, defaultCalls) => {
-  const defaults: Lazy<NonNullable<PickOptional<Options>>> = {
+  const defaults: Lazy<NonOptional<PickOptional<Options>>> = {
     b: jest.fn(() => 'def'),
     c: jest.fn(() => 42),
   };

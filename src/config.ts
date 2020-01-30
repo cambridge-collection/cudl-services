@@ -1,12 +1,17 @@
 import Ajv from 'ajv';
+import { URL } from 'url';
 import * as util from 'util';
 
 import configSchema from './config.schema.json';
+import { applyDefaults, NonOptional } from './util';
 
 export const CONFIG_ENVAR = 'CUDL_SERVICES_CONFIG';
 const configValidator = new Ajv().compile(configSchema);
 
-export function loadConfigFromEnvar(): Config {
+const DEFAULT_ZACYNTHIUS_SERVICE_URL =
+  'http://codex-zacynthius-transcription.cudl.lib.cam.ac.uk';
+
+export function loadConfigFromEnvar(): StrictConfig {
   const configModulePath = process.env[CONFIG_ENVAR];
   if (!configModulePath) {
     throw new Error(`\
@@ -25,7 +30,10 @@ config module to load`);
       }`
     );
   }
-  return config;
+  return applyDefaults(config, {
+    postPort: 5432,
+    zacynthiusServiceURL: DEFAULT_ZACYNTHIUS_SERVICE_URL,
+  });
 }
 
 function validateObjectIsConfig(config: any): asserts config is Config {
@@ -48,8 +56,10 @@ export interface Config extends XTFConfig {
   postUser: string;
   postPass: string;
   postDatabase: string;
-  [index: string]: unknown;
+  zacynthiusServiceURL?: string;
 }
+
+export type StrictConfig = NonOptional<Config>;
 
 export interface XTFConfig {
   xtfBase: string;

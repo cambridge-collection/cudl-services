@@ -9,9 +9,11 @@ const EXAMPLE_CONFIG: Config = {
   postPass: 'example',
   postUser: 'example',
   postHost: 'example',
+  postPort: 1234,
   postDatabase: 'example',
   xtfBase: 'example',
   xtfIndexPath: 'example',
+  zacynthiusServiceURL: 'http://example.com/',
 };
 
 describe('config', () => {

@@ -1,57 +1,28 @@
-import { XSLTExecutor } from '@lib.cam/xslt-nailgun';
 import express from 'express';
 import * as fs from 'fs';
 import { JSDOM } from 'jsdom';
 import path from 'path';
-import { get, Response } from 'superagent';
+import { get } from 'superagent';
 import request from 'supertest';
+import { mocked } from 'ts-jest/utils';
 import { promisify } from 'util';
-import {
-  LegacyDarwinMetadataRepository,
-  CUDLMetadataRepository,
-} from '../../src/metadata';
+import { parseHTML } from '../../src/html';
 import {
   getRoutes,
-  NewtonProjectTranscriptionService,
   rewriteHtmlResourceUrls,
 } from '../../src/routes/transcription';
-import { TEST_DATA_PATH } from '../constants';
+import { EXAMPLE_ZACYNTHIUS_URL, TEST_DATA_PATH } from '../constants';
+import { mockGetResponder } from '../mocking/superagent-mocking';
 import {
-  getTestDataMetadataRepository,
   getTestDataLegacyDarwinMetadataRepository,
-  normaliseSpace,
+  getTestDataMetadataRepository,
   getTestXSLTExecutor,
+  normaliseSpace,
 } from '../utils';
 
-type PartialResponse = Pick<Response, 'status' | 'text' | 'ok' | 'serverError'>;
-let getMockGetResponse: ((url: string) => Promise<PartialResponse>) | undefined;
-
-jest.mock('superagent', () => ({
-  get: jest.fn(
-    async (url: string): Promise<PartialResponse> => {
-      if (getMockGetResponse === undefined) {
-        throw new Error('mockGetResponse is undefined');
-      }
-      return getMockGetResponse(url);
-    }
-  ),
-}));
-const mockGet = get as jest.MockedFunction<typeof get>;
-
-function getTestApp(
-  metadataRepository: CUDLMetadataRepository,
-  legacyDarwinMetadataRepository: LegacyDarwinMetadataRepository,
-  xsltExecutor: XSLTExecutor
-) {
+function getTestApp(options: Parameters<typeof getRoutes>[0]) {
   const app = express();
-  app.use(
-    '/',
-    getRoutes({
-      metadataRepository,
-      legacyDarwinMetadataRepository,
-      xsltExecutor,
-    })
-  );
+  app.use('/', getRoutes(options));
   return app;
 }
 
@@ -59,74 +30,16 @@ describe('transcription routes', () => {
   let app: express.Application | undefined;
 
   beforeEach(() => {
-    app = getTestApp(
-      getTestDataMetadataRepository(),
-      getTestDataLegacyDarwinMetadataRepository(),
-      getTestXSLTExecutor()
-    );
-  });
-
-  afterEach(() => {
-    getMockGetResponse = undefined;
-  });
-
-  describe('NewtonProjectTranscriptionService', () => {
-    beforeEach(() => {
-      mockGet.mockClear();
-      getMockGetResponse = async (url: string) => {
-        const type = /\/normalized\//.test(url) ? 'normalized' : 'diplomatic';
-        return {
-          status: 200,
-          ok: true,
-          serverError: false,
-          text: await promisify(fs.readFile)(
-            path.resolve(
-              TEST_DATA_PATH,
-              `transcriptions/newton_${type}_NATP00093.html`
-            ),
-            'utf-8'
-          ),
-        };
-      };
-    });
-
-    test.each([
-      ['diplomatic'],
-      ['normalized'], // note: American spelling
-    ])('gets %s transcription', async type => {
-      const service = new NewtonProjectTranscriptionService({
-        baseUrl: 'http://newton.example.com',
-        baseResourceUrl: '/v1/resources/newton/',
-        httpGet: mockGet,
-      });
-
-      const html = await service.getTranscription({
-        type,
-        id: 'foo',
-        start: 'bar',
-        end: 'baz',
-      });
-      const dom = new JSDOM(html);
-      const doc = dom.window.document;
-
-      expect(mockGet.mock.calls).toEqual([
-        [
-          `http://newton.example.com/view/texts/${type}/foo?skin=minimal&show_header=no&start=bar&end=baz`,
-        ],
-      ]);
-      expect(
-        (doc.querySelector(
-          'head link:nth-of-type(2)'
-        ) as HTMLLinkElement | null)?.href
-      ).toBe('/v1/resources/newton/css/texts-full.css');
+    jest.clearAllMocks();
+    app = getTestApp({
+      metadataRepository: getTestDataMetadataRepository(),
+      legacyDarwinMetadataRepository: getTestDataLegacyDarwinMetadataRepository(),
+      xsltExecutor: getTestXSLTExecutor(),
+      zacynthiusServiceURL: EXAMPLE_ZACYNTHIUS_URL,
     });
   });
 
   describe('external transcription services', () => {
-    beforeEach(() => {
-      mockGet.mockClear();
-    });
-
     afterEach(() => {
       app = undefined;
     });
@@ -153,19 +66,98 @@ describe('transcription routes', () => {
       async (apiPath, externalURL) => {
         const html =
           '<!DOCTYPE html><html lang="en"><head><title>foo</title></head><body></body></html>';
-        getMockGetResponse = async () => ({
+        mockGetResponder.mockResolvedValueOnce({
           status: 200,
+          type: 'text/html',
           text: html,
+          body: Buffer.from(html, 'utf8'),
           ok: true,
           serverError: false,
         });
 
         const response = await request(app).get(apiPath);
         expect(response.ok).toBeTruthy();
-        expect(mockGet.mock.calls).toEqual([[externalURL]]);
+        expect(get).toHaveBeenCalledTimes(1);
+        expect(get).toHaveBeenLastCalledWith(externalURL);
         expect(response.text).toBe(html);
       }
     );
+
+    describe('zacynthius', () => {
+      test.each([
+        [
+          '/zacynthius/overtext/o1r',
+          `${EXAMPLE_ZACYNTHIUS_URL}overtext/o1r.html`,
+          'overtext',
+        ],
+        [
+          '/zacynthius/undertext/u1r',
+          `${EXAMPLE_ZACYNTHIUS_URL}undertext/u1r.html`,
+          'undertext',
+        ],
+      ])(
+        'transcription HTML %s',
+        async (_path, upstreamURL, resourcePrefix) => {
+          mockGetResponder.mockResolvedValueOnce({
+            status: 200,
+            type: 'text/html',
+            body: await promisify(fs.readFile)(
+              path.resolve(TEST_DATA_PATH, 'transcriptions/zacynthius-o1r.html')
+            ),
+            ok: true,
+            serverError: false,
+          });
+
+          const response = await request(app).get(_path);
+          expect(response.ok).toBeTruthy();
+
+          expect(mocked(get)).toHaveBeenCalledTimes(1);
+          expect(mocked(get)).toHaveBeenLastCalledWith(upstreamURL);
+
+          const doc = parseHTML({
+            html: response.text,
+            contentType: response.type,
+            url: 'http://example.com/api/zacynthius/overtext/o1r',
+          }).window.document;
+          const linkEl = doc.querySelector<HTMLLinkElement>(
+            'head link[rel=stylesheet]'
+          );
+          expect(linkEl!.getAttribute('href')).toBe(
+            `../resources/${resourcePrefix}/tooltipster/dist/css/tooltipster.bundle.min.css`
+          );
+          expect(linkEl!.href).toBe(
+            `http://example.com/api/zacynthius/resources/${resourcePrefix}/tooltipster/dist/css/tooltipster.bundle.min.css`
+          );
+          const scriptEl = doc.querySelector<HTMLScriptElement>('head script');
+          expect(scriptEl!.getAttribute('src')).toBe(
+            `../resources/${resourcePrefix}/jquery-3.3.1.min.js`
+          );
+          expect(scriptEl!.src).toBe(
+            `http://example.com/api/zacynthius/resources/${resourcePrefix}/jquery-3.3.1.min.js`
+          );
+        }
+      );
+    });
+
+    test.each([
+      ['overtext/tooltipster/dist/css/tooltipster.bundle.min.css', 'text/css'],
+      ['jquery-3.3.1.min.js', 'application/javascript'],
+    ])('transcription resource %s', async (_path, type) => {
+      mockGetResponder.mockResolvedValueOnce({
+        status: 200,
+        type,
+        body: 'blah',
+        ok: true,
+        serverError: false,
+      });
+
+      const response = await request(app).get(`/zacynthius/resources/${_path}`);
+      expect(response.ok).toBeTruthy();
+      expect(mocked(get)).toHaveBeenCalledTimes(1);
+      expect(mocked(get)).toHaveBeenLastCalledWith(
+        `${EXAMPLE_ZACYNTHIUS_URL}${_path}`
+      );
+    });
   });
 
   describe('XSLT transcriptions', () => {

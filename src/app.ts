@@ -4,8 +4,9 @@ import Debugger from 'debug';
 import express, { NextFunction, Request, Response } from 'express';
 import passport from 'passport';
 import path from 'path';
+import { URL } from 'url';
 import { CollectionDAO, PostgresCollectionDAO } from './collections';
-import { Config, User, Users } from './config';
+import { Config, StrictConfig, User, Users } from './config';
 
 import { DAOPool, PostgresDatabasePool } from './db';
 import {
@@ -38,13 +39,14 @@ const debug = Debugger('cudl-services');
 // fs.ensureDirSync(config.cacheDir+'/translations');
 
 export interface AppOptions {
-  users: Users;
-  metadataRepository: CUDLMetadataRepository;
-  legacyDarwinMetadataRepository: LegacyDarwinMetadataRepository;
   collectionsDAOPool: DAOPool<CollectionDAO>;
-  tagsDAOPool: DAOPool<TagsDAO>;
   darwinXtfUrl: string;
+  legacyDarwinMetadataRepository: LegacyDarwinMetadataRepository;
+  metadataRepository: CUDLMetadataRepository;
+  tagsDAOPool: DAOPool<TagsDAO>;
+  users: Users;
   xtf: XTF;
+  zacynthiusServiceURL: URL;
 }
 
 export class App extends BaseResource {
@@ -59,7 +61,7 @@ export class App extends BaseResource {
     this.expressApp = this.createExpressApp();
   }
 
-  static fromConfig(config: Config): ExternalResources<App> {
+  static fromConfig(config: StrictConfig): ExternalResources<App> {
     const dbPool = PostgresDatabasePool.fromConfig(config);
 
     return new ExternalResources(
@@ -73,6 +75,7 @@ export class App extends BaseResource {
         users: config.users,
         darwinXtfUrl: config.darwinXTF,
         xtf: new DefaultXTF(config),
+        zacynthiusServiceURL: new URL(config.zacynthiusServiceURL),
       }),
       [dbPool]
     );
@@ -139,6 +142,7 @@ export class App extends BaseResource {
         legacyDarwinMetadataRepository: this.options
           .legacyDarwinMetadataRepository,
         xsltExecutor: this.xsltExecutor,
+        zacynthiusServiceURL: this.options.zacynthiusServiceURL,
       })
     );
 
@@ -147,6 +151,7 @@ export class App extends BaseResource {
       translation.getRoutes({
         metadataRepository: this.options.metadataRepository,
         xsltExecutor: this.xsltExecutor,
+        zacynthiusServiceURL: this.options.zacynthiusServiceURL,
       })
     );
 

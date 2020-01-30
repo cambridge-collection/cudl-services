@@ -1,4 +1,7 @@
-jest.mock('superagent');
+import {
+  mockGetResponder,
+  PartialResponse,
+} from './mocking/superagent-mocking';
 
 import superagent, { Response, SuperAgentRequest } from 'superagent';
 import { mocked } from 'ts-jest/utils';
@@ -27,14 +30,11 @@ test('getUrl', () => {
 });
 
 test('search() makes HTTP request to XTF', async () => {
-  const response: Partial<Response> = {
+  mockGetResponder.mockResolvedValueOnce({
     ok: true,
     type: 'text/xml',
     text: '<example/>',
-  };
-  mocked(superagent.get).mockResolvedValueOnce(
-    (response as unknown) as SuperAgentRequest
-  );
+  });
 
   const result = await xtf.search({ identifier: 'foo' });
 
@@ -60,22 +60,17 @@ test.each<[string, Partial<Response>, string]>([
     'Unexpected content type received from XTF: text/plain',
   ],
 ])('search() rejects on %s responses', async (_, response, msg) => {
-  mocked(superagent.get).mockResolvedValueOnce(
-    (response as unknown) as SuperAgentRequest
-  );
+  mockGetResponder.mockResolvedValueOnce(response);
 
   await expect(xtf.search({})).rejects.toThrow(msg);
 });
 
 test('getSimilarItems()', async () => {
-  const response: Partial<Response> = {
+  mockGetResponder.mockResolvedValueOnce({
     ok: true,
     type: 'text/xml',
     text: `<example/>`,
-  };
-  mocked(superagent.get).mockResolvedValueOnce(
-    (response as unknown) as SuperAgentRequest
-  );
+  });
 
   const result = await xtf.getSimilarItems('MS-FOO', 'abcd', 10);
   expect(superagent.get).toHaveBeenCalledTimes(1);

@@ -21,12 +21,30 @@ export type URLRewriter = (options: {
   relativeURL?: string;
 }) => string | undefined;
 
-function ensureURL(url: string | URL): URL {
+export function ensureURL(url: string | URL): URL {
   return typeof url === 'string' ? new URL(url) : url;
 }
 
 export function isSameOrigin(urlA: string | URL, urlB: string | URL) {
   return ensureURL(urlA).origin === ensureURL(urlB).origin;
+}
+
+export function isParent(parent: string | URL, child: string | URL) {
+  parent = ensureURL(parent);
+  child = ensureURL(child);
+
+  if (!isSameOrigin(parent, child)) {
+    return false;
+  }
+  const parentPath = parent.pathname.split('/');
+  if (parentPath[parentPath.length - 1] === '') {
+    parentPath.pop();
+  }
+  const childPath = child.pathname.split('/');
+  return (
+    parentPath.length <= childPath.length &&
+    parentPath.every((seg, i) => seg === childPath[i])
+  );
 }
 
 /**

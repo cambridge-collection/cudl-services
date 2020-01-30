@@ -1,4 +1,5 @@
 import path from 'path';
+import { URL } from 'url';
 
 export const PROJECT_PATH = path.resolve(__dirname, '..');
 export const STATIC_FILES = path.resolve(PROJECT_PATH, './public');
@@ -15,3 +16,7 @@ export const EXAMPLE_STATIC_FILES = {
   NEWTON_FONT: { path: 'newton/fonts/newton.woff', type: 'font/woff' },
   MATHJAX_JS: { path: 'newton/js/MathJax.js', type: 'application/javascript' },
 };
+
+export const EXAMPLE_ZACYNTHIUS_URL = new URL(
+  'http://codex-zacynthius-transcription.example.com/some/path/'
+);

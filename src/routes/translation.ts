@@ -6,22 +6,39 @@ import { BAD_REQUEST, NOT_FOUND } from 'http-status-codes';
 import * as path from 'path';
 import util, { promisify } from 'util';
 import { CUDLFormat, CUDLMetadataRepository } from '../metadata';
-import { isSimplePathSegment } from '../util';
+import { applyLazyDefaults, isSimplePathSegment } from '../util';
+import { delegateToExternalHTML } from './transcription-impl';
+import { URL } from 'url';
 
 export function getRoutes(options: {
   router?: express.Router;
   metadataRepository: CUDLMetadataRepository;
   xsltExecutor: XSLTExecutor;
+  zacynthiusServiceURL: URL;
 }) {
-  const router = options.router || express.Router();
+  const {
+    router,
+    metadataRepository,
+    xsltExecutor,
+    zacynthiusServiceURL,
+  } = applyLazyDefaults(options, {
+    router: () => express.Router(),
+  });
   // Currently the format and language are always tei and EN
   router.get(
     '/tei/EN/:id/:from/:to',
-    createTeiTranslationHandler(
-      options.metadataRepository,
-      options.xsltExecutor
-    )
+    createTeiTranslationHandler(metadataRepository, xsltExecutor)
   );
+
+  router.use(
+    '/zacynthius/',
+    delegateToExternalHTML({
+      pathPattern: '/:page(\\w+)',
+      externalBaseURL: zacynthiusServiceURL,
+      externalPathGenerator: req => `translation/${req.params.page}.html`,
+    })
+  );
+
   return router;
 }
 
