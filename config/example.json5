@@ -1,0 +1,18 @@
+{
+  dataDir: "/mnt/cudl-data",
+  darwinXTF: "https://dcp-public.lib.cam.ac.uk/",
+  legacyDcpDataDir: "/mnt/dcp-data/letters",
+
+  xtfBase: "https://cudl-dev.lib.cam.ac.uk/xtf/",
+  xtfIndexPath: "/usr/local/indices/index-cudl",
+
+  postHost: "localhost",
+  postDatabase: "viewerdev",
+  postUser: "cudlservices",
+  postPass: "secret",
+
+  users: {
+    // The key in the users object is the API key for the user
+    "96ecb691-bdea-4720-8ae0-045875006ef7": { username: 'example', password: 'secret', email: 'admin@example.com' }
+  }
+}

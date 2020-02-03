@@ -9,9 +9,10 @@ const debug = Debugger('cudl-services');
 async function runAsync() {
   let config: StrictConfig;
   try {
-    config = loadConfigFromEnvar();
+    config = await loadConfigFromEnvar();
   } catch (e) {
     console.error(`Error: ${e.message}`);
+    console.error(`Setting envar DEBUG=cudl-services:config may help`);
     process.exit(1);
   }
 

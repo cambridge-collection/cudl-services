@@ -2,12 +2,12 @@
  * This module contains functions for working with Postgres.
  */
 import pg from 'pg';
-import { Config } from './config';
+import { StrictConfig } from './config';
 import { Resource } from './resources';
 import { factory, UnaryConstructorArg } from './util';
 
 export type DatabaseConfig = Pick<
-  Config,
+  StrictConfig,
   'postHost' | 'postPort' | 'postUser' | 'postPass' | 'postDatabase'
 >;
 

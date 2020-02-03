@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "full-config.schema.json",
+  "allOf": [
+    { "$ref": "partial-config.schema.json" },
+    {
+      "properties": {
+        "users": {
+          "additionalProperties": {
+            "required": ["username", "email"]
+          }
+        }
+      },
+      "required": ["darwinXTF", "dataDir", "postDatabase", "postHost", "postPort", "postPass", "postUser", "users", "xtfBase", "xtfIndexPath", "zacynthiusServiceURL"]
+    }
+  ]
+}

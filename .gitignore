@@ -15,7 +15,8 @@
 /node_modules/
 
 # Local configuration
-/config/*-dev.js
+/config/*
+!/config/example.json5
 
 # Build output
 /build/
