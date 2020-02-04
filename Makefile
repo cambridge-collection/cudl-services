@@ -33,6 +33,9 @@ build/dist-root/package.json: FILTER = '\
 build/dist-root/package.json: package.json build/dist-root
 	jq $(FILTER) $< > $@
 
+build/dist-root/npm-shrinkwrap.json: package-lock.json build/dist-root
+	cp $< $@
+
 build/dist-root/README.md: README.md build/dist-root
 	cp $< $@
 
@@ -61,7 +64,8 @@ normalise-permissions:
 	find build -type f -exec chmod u=rw,g=r,o=r {} +
 
 build: compile-typescript copy-files build/dist-root \
-       build/dist-root/src build/dist-root/package.json build/dist-root/README.md \
+       build/dist-root/src build/dist-root/package.json \
+       build/dist-root/npm-shrinkwrap.json build/dist-root/README.md \
        normalise-permissions
 
 lint:
