@@ -42,8 +42,14 @@ build/dist-root/README.md: README.md build/dist-root
 build/dist-root:
 	mkdir -p build/dist-root
 
-build/dist-root/lib:
-	mkdir -p build/dist-root
+build/dist-root/lib: build/dist-root
+	mkdir -p $@
+
+build/dist-root/bin: build/dist-root
+	mkdir -p $@
+
+build/dist-root/bin/cudl-services.js: bin/cudl-services.js build/dist-root/bin
+	cp $< $@
 
 build/dist-root/src: build/dist-root
 	cp -a src build/dist-root/
@@ -66,7 +72,7 @@ normalise-permissions:
 build: compile-typescript copy-files build/dist-root \
        build/dist-root/src build/dist-root/package.json \
        build/dist-root/npm-shrinkwrap.json build/dist-root/README.md \
-       normalise-permissions
+       build/dist-root/bin/cudl-services.js normalise-permissions
 
 lint:
 	npm run check
