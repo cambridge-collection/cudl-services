@@ -1,4 +1,13 @@
 #!/usr/bin/env node
+
+if(process.pid === 1 && !process.env.ALLOW_NO_INIT_PROCESS) {
+  console.error(`\
+Error: node is running as PID 1; this is not allowed as node cannot reap child
+  processes. If you're running with docker, pass --init to the run command to
+  wrap node in a suitable init process.`);
+  process.exit(1);
+}
+
 let run;
 try {
   run = require('cudl-services').run;
