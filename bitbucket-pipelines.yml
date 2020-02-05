@@ -10,6 +10,14 @@ pipelines:
           - docker
         caches:
           - docker
+    - step:
+        name: Build [unpublished] camdl/cudl-services image
+        script:
+          - docker-compose run -T build
+        services:
+          - docker
+        caches:
+          - docker
 definitions:
   services:
     docker:

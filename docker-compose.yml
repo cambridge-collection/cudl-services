@@ -1,6 +1,15 @@
 version: "3"
 
 services:
+  build:
+    build:
+      context: .
+      dockerfile: build.Dockerfile
+    volumes:
+      # Provide access to our docker daemon to the build container so that it
+      # can use it to build the image.
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: make docker-image
   test:
     build:
       context: .
