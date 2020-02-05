@@ -36,5 +36,6 @@ RUN apt-get update && \
   apt-get update && \
   apt-get install -y docker-ce-cli
 
+CMD ["/bin/bash"]
 WORKDIR /code
 COPY . ./
