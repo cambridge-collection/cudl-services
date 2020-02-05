@@ -1,6 +1,10 @@
 SHELL = /bin/bash
 .SHELLFLAGS=-o errexit -c
 NPM_BIN = $(shell npm bin)
+CUDL_SERVICES_VERSION = $(shell jq -r .version < package.json)
+COMMIT_TAG = $(shell git describe --exact-match HEAD 2>/dev/null)
+COMMIT_SHORT_HASH = $(shell git rev-parse --short=4 HEAD)
+DOCKER_IMAGE_NAME=camdl/cudl-services
 
 # When we're building in a CI environment, always re-install dependencies.
 # Otherwise we only do so if the package*.json files are newer than
@@ -59,7 +63,7 @@ ensure-clean-checkout:
 # containing the modifications rather than the committed state.
 	@DIRTY_FILES="$$(git status --porcelain)" ; \
 	if [ "$$DIRTY_FILES" != "" ]; then \
-		echo "Error: git repo has uncommitted changes, refusing to generate package as the contents may not be reproducible:" ; \
+		echo "Error: git repo has uncommitted changes, refusing to build as the result may not be reproducible" ; \
 		echo "$$DIRTY_FILES" ; \
 		exit 1 ; \
 	fi
@@ -94,5 +98,11 @@ npm-ci-unconditional:
 
 clean:
 	rm -rf build
+
+docker-image: clean ensure-clean-checkout pack
+	docker image build \
+		$(if $(COMMIT_TAG), --tag "$(DOCKER_IMAGE_NAME):$(COMMIT_TAG)") \
+		--tag "$(DOCKER_IMAGE_NAME):$(COMMIT_SHORT_HASH)" \
+		--build-arg "CUDL_SERVICES_VERSION=$(CUDL_SERVICES_VERSION)" .
 
 .PHONY: npm-ci-unconditional check clean build clean-java clean-build compile-typescript compile-java ensure-clean-checkout normalise-permissions
