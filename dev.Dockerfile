@@ -15,19 +15,19 @@ RUN npm config set fetch-retry-mintimeout 1000 && \
   npm config set fetch-retry-factor 10 && \
   npm config set fetch-retries 2
 
-ARG CUDL_SERVICES_VERSION
-COPY build/cudl-services-${CUDL_SERVICES_VERSION}.tgz /tmp/cudl-services.tgz
-
-RUN npm install -g /tmp/cudl-services.tgz
-
-FROM node:12.14.1-alpine3.11
-
 # Install a JVM - @lib.cam/xslt-nailgun requires on to run Saxon
 RUN apk add --no-cache openjdk8-jre-base
 
-COPY --from=0 /usr/local/lib/node_modules/cudl-services/ /usr/local/lib/node_modules/cudl-services/
-RUN ln -s ../lib/node_modules/cudl-services/bin/cudl-services.js /usr/local/bin/cudl-services
+WORKDIR /code
 
-USER node
+# First install the dependencies; this layer will be cached and reused unless
+# the package files are modified
+COPY package.json package-lock.json ./
+RUN npm ci
+
+# Then create a separate layer for the files
+COPY . ./
+
 EXPOSE 3000
-CMD ["cudl-services"]
+
+CMD ["npm", "start"]
