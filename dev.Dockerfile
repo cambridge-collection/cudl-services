@@ -29,5 +29,6 @@ RUN npm ci
 COPY . ./
 
 EXPOSE 3000
+USER node
 
 CMD ["npm", "start"]
