@@ -1,4 +1,4 @@
-image: camdl/docker-compose-pipelines:0.0.0
+image: camdl/docker-compose-pipelines:1.0.1
 
 pipelines:
   default:
@@ -14,13 +14,6 @@ pipelines:
       - step:
           name: Build [unpublished] camdl/cudl-services image
           script:
-            # Bitbucket provides a docker daemon on localhost listening on a TCP
-            # port. We need to access it from inside our build container to run
-            # docker commands. The $BITBUCKET_DOCKER_HOST_INTERNAL envar is the
-            # IP of our host, which is accessible from inside containers we
-            # create. See: https://community.atlassian.com/t5/Bitbucket-articles/Changes-to-make-your-containers-more-secure-on-Bitbucket/ba-p/998464
-            # Rewrite $DOCKER_HOST to contain our IP address instead of localhost
-            - if (echo "$DOCKER_HOST" | grep -Pq '^tcp://localhost:[0-9]+$'); then export DOCKER_HOST="tcp://$BITBUCKET_DOCKER_HOST_INTERNAL:$(echo "$DOCKER_HOST" | grep -oP '[0-9]+$')"; fi
             - docker-compose run build
           services:
             - docker
