@@ -1,0 +1,5 @@
+{
+  dataDir: "/mnt/cudl-data",
+  legacyDcpDataDir: "/mnt/dcp-data/letters",
+  darwinXTF: "https://dcp-public.lib.cam.ac.uk/"
+}

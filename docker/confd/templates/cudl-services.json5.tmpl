@@ -1,0 +1,44 @@
+{
+  {{if exists "/cudl/services/data/path"}}
+    dataDir: "{{getv "/cudl/services/data/path" js}}",
+  {{end}}
+  {{if exists "/cudl/services/legacy/darwin/data/path"}}
+    legacyDcpDataDir: "{{getv "/cudl/services/legacy/darwin/data/path" | js}}",
+  {{end}}
+  {{if exists "/cudl/services/legacy/darwin/data/path"}}
+    darwinXTF: "{{getv "/cudl/services/darwin/xtf/url" | js}}",
+  {{end}}
+  {{if exists "/cudl/services/xtf/url"}}
+    xtfBase: "{{getv "/cudl/services/xtf/url" | js}}",
+  {{end}}
+  {{if exists "/cudl/services/xtf/index/path"}}
+    xtfIndexPath: "{{getv "/cudl/services/xtf/index/path" | js}}",
+  {{end}}
+
+  {{if exists "/cudl/services/db/host"}}
+    postHost: "{{getv "/cudl/services/db/host" | js}}",
+  {{end}}
+  {{if exists "/cudl/services/db/name"}}
+    postDatabase: "{{getv "/cudl/services/db/name" | js}}",
+  {{end}}
+  {{if exists "/cudl/services/db/username"}}
+    postUser: "{{getv "/cudl/services/db/username" | js}}",
+  {{end}}
+  {{if exists "/cudl/services/db/password"}}
+    postPass: "{{getv "/cudl/services/db/password" | js}}",
+  {{end}}
+
+  users: {
+    {{range gets "/cudl/services/user/*/key"}}
+      {{$base := printf "/cudl/services/user/%s" (index (split .Key "/") 4)}}
+      "{{.Value | js}}": {
+        {{range (split "username,password,email" ",")}}
+          {{$key := printf "%s/%s" $base .}}
+          {{if exists $key}}
+            "{{. | js}}": "{{getv $key | js}}",
+          {{end}}
+        {{end}}
+      },
+    {{end}}
+  }
+}

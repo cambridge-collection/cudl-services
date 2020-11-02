@@ -1,4 +1,16 @@
-FROM node:12.14.1-alpine3.11
+FROM curlimages/curl:7.73.0 as confd
+
+ENV CONFD_URL 'https://github.com/kelseyhightower/confd/releases/download/v0.16.0/confd-0.16.0-linux-amd64'
+ENV CONFD_URL_SHA512 '68c93fd6db55c7de94d49f596f2e3ce8b2a5de32940b455d40cb05ce832140ebcc79a266c1820da7c172969c72a6d7367b465f21bb16b53fa966892ee2b682f1'
+
+RUN curl -fLS -o /tmp/confd "$CONFD_URL"
+RUN echo "$CONFD_URL_SHA512  /tmp/confd" > /tmp/confd.sha512; sha512sum -c /tmp/confd.sha512
+# Need to have root own the file used by subsequent stages to avoid this bug:
+# https://github.com/moby/moby/issues/34645
+USER root
+RUN chown root:root /tmp/confd
+
+FROM node:12.14.1-alpine3.11 as node-modules
 
 # NPM seems to experience network issues when running in a docker build. Its
 # requests occasionally hang for long periods of time.
@@ -22,12 +34,18 @@ RUN npm install -g /tmp/cudl-services.tgz
 
 FROM node:12.14.1-alpine3.11
 
-# Install a JVM - @lib.cam/xslt-nailgun requires on to run Saxon
-RUN apk add --no-cache openjdk8-jre-base
+# Install a JVM - @lib.cam/xslt-nailgun requires it to run Saxon
+RUN apk add --no-cache openjdk8-jre-base su-exec
 
-COPY --from=0 /usr/local/lib/node_modules/cudl-services/ /usr/local/lib/node_modules/cudl-services/
+COPY --from=node-modules /usr/local/lib/node_modules/cudl-services/ /usr/local/lib/node_modules/cudl-services/
 RUN ln -s ../lib/node_modules/cudl-services/bin/cudl-services.js /usr/local/bin/cudl-services
 
-USER node
+COPY --from=confd /tmp/confd /usr/local/bin/confd
+COPY ./docker/docker-entrypoint.sh /opt/cudl-services/docker-entrypoint.sh
+RUN chmod a=rx,u=+w /opt/cudl-services/docker-entrypoint.sh /usr/local/bin/confd
+COPY ./docker/confd/ /etc/confd/
+COPY ./docker/0_default-settings.json5 /etc/cudl-services/conf.d/0_default-settings.json5
+
 EXPOSE 3000
+ENTRYPOINT ["/opt/cudl-services/docker-entrypoint.sh"]
 CMD ["cudl-services"]

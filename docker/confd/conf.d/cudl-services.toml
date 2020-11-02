@@ -1,0 +1,6 @@
+[template]
+src = "cudl-services.json5.tmpl"
+dest = "/etc/cudl-services/conf.d/5_docker_confd.json5"
+keys = [
+    "/cudl/services"
+]
