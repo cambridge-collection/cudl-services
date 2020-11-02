@@ -35,7 +35,7 @@ RUN npm install -g /tmp/cudl-services.tgz
 FROM node:12.14.1-alpine3.11
 
 # Install a JVM - @lib.cam/xslt-nailgun requires it to run Saxon
-RUN apk add --no-cache openjdk8-jre-base su-exec
+RUN apk add --no-cache openjdk8-jre-base su-exec tini
 
 COPY --from=node-modules /usr/local/lib/node_modules/cudl-services/ /usr/local/lib/node_modules/cudl-services/
 RUN ln -s ../lib/node_modules/cudl-services/bin/cudl-services.js /usr/local/bin/cudl-services
@@ -47,5 +47,8 @@ COPY ./docker/confd/ /etc/confd/
 COPY ./docker/0_default-settings.json5 /etc/cudl-services/conf.d/0_default-settings.json5
 
 EXPOSE 3000
-ENTRYPOINT ["/opt/cudl-services/docker-entrypoint.sh"]
+# Run under the tini init process to handle reaping zombie processes (which can
+# happen due to JVM processes forked to execute XSLT). Running tini ourselves
+# avoids the need to pass --init when running the image.
+ENTRYPOINT ["tini", "/opt/cudl-services/docker-entrypoint.sh"]
 CMD ["cudl-services"]
