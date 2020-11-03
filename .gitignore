@@ -7,8 +7,14 @@
 *.svn
 *.log
 
+# Ignore dotfiles apart from ones we care about
+**/.*
+!.dockerignore
+!.editorconfig
+!.gitignore
+.jshintrc
+
 # IntelliJ
-.idea
 *.iml
 
 # NodeJS
