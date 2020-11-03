@@ -1,4 +1,4 @@
-FROM node:12.14.1-alpine3.11 as node-base
+FROM node:14.15.0-alpine3.12 as node-base
 FROM node-base as npm-base
 
 # NPM seems to experience network issues when running in a docker build. Its
