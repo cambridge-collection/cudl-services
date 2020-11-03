@@ -1,3 +1,62 @@
+FROM node:12.14.1-alpine3.11 as node-base
+FROM node-base as npm-base
+
+# NPM seems to experience network issues when running in a docker build. Its
+# requests occasionally hang for long periods of time.
+
+# Retry timed out registry requests: after the initial failed request, retry
+# after: 1s, then 10s (3 attempts total: 3 * 15 + 10 + 2 = 56s max).
+RUN npm config set fetch-retry-mintimeout 1000 && \
+  npm config set fetch-retry-maxtimeout 10000 && \
+  npm config set fetch-retry-factor 10 && \
+  npm config set fetch-retries 2
+
+
+FROM npm-base as dev
+
+# Install a JVM - @lib.cam/xslt-nailgun requires on to run Saxon
+RUN apk add --no-cache openjdk8-jre-base
+
+WORKDIR /code
+
+# First install the dependencies; this layer will be cached and reused unless
+# the package files are modified
+COPY package.json package-lock.json ./
+RUN npm ci
+
+# Then create a separate layer for the files
+COPY . ./
+
+EXPOSE 3000
+USER node
+
+CMD ["npm", "start"]
+
+
+# This image is used to run the Makefile on the project (from the `built` stage,
+# and by docker-compose's `build` service). It needs to:
+# - install NPM dependencies
+# - build the project's package
+# - build the project's docker image (the main Dockerfile in this dir)
+FROM npm-base as build
+
+ENV CI true
+WORKDIR /code
+RUN apk add --no-cache jq curl git make docker-cli bash
+
+
+# This image builds the project's release .tgz package for use in the
+# final main image.
+FROM build as built
+
+COPY . ./
+# Create the release .tgz package
+RUN make pack-release
+# Put the release package at a fixed (version-independant) location
+RUN mv build/cudl-services-*.tgz build/cudl-services.tgz
+
+
+# This image contains confd for use in the final main image.
 FROM curlimages/curl:7.73.0 as confd
 
 ENV CONFD_URL 'https://github.com/kelseyhightower/confd/releases/download/v0.16.0/confd-0.16.0-linux-amd64'
@@ -10,29 +69,18 @@ RUN echo "$CONFD_URL_SHA512  /tmp/confd" > /tmp/confd.sha512; sha512sum -c /tmp/
 USER root
 RUN chown root:root /tmp/confd
 
-FROM node:12.14.1-alpine3.11 as node-modules
-
-# NPM seems to experience network issues when running in a docker build. Its
-# requests occasionally hang for long periods of time.
-
-# Set the request timeout to 15 seconds (default should be 30 seconds according
-# to docs, but is actually not set, so probably relies on default OS socket
-# timeouts, which can be very large).
-RUN npm config set timeout 15000
-
-# Retry timed out registry requests: after the initial failed request, retry
-# after: 1s, then 10s (3 attempts total: 3 * 15 + 10 + 2 = 56s max).
-RUN npm config set fetch-retry-mintimeout 1000 && \
-  npm config set fetch-retry-maxtimeout 10000 && \
-  npm config set fetch-retry-factor 10 && \
-  npm config set fetch-retries 2
+# This image contains the installed .tgz package and its dependencies for use in
+# the final main image.
+FROM npm-base as node-modules
 
 ARG CUDL_SERVICES_VERSION
-COPY build/cudl-services-${CUDL_SERVICES_VERSION}.tgz /tmp/cudl-services.tgz
+COPY --from=built /code/build/cudl-services.tgz /tmp/cudl-services.tgz
 
 RUN npm install -g /tmp/cudl-services.tgz
 
-FROM node:12.14.1-alpine3.11
+
+# This is the final image which contains the cudl-services app.
+FROM node-base as main
 
 # Install a JVM - @lib.cam/xslt-nailgun requires it to run Saxon
 RUN apk add --no-cache openjdk8-jre-base su-exec tini

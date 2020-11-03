@@ -99,10 +99,11 @@ npm-ci-unconditional:
 clean:
 	rm -rf build
 
-docker-image: clean ensure-clean-checkout pack
+docker-image:
 	docker image build \
 		$(if $(COMMIT_TAG), --tag "$(DOCKER_IMAGE_NAME):$(COMMIT_TAG)") \
 		--tag "$(DOCKER_IMAGE_NAME):$(COMMIT_SHORT_HASH)" \
-		--build-arg "CUDL_SERVICES_VERSION=$(CUDL_SERVICES_VERSION)" .
+		--target main \
+		.
 
 .PHONY: npm-ci-unconditional check clean build clean-java clean-build compile-typescript compile-java ensure-clean-checkout normalise-permissions

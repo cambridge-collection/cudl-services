@@ -1,10 +1,10 @@
-version: "3"
+version: "3.4"
 
 services:
   build:
     build:
       context: .
-      dockerfile: build.Dockerfile
+      target: build
     environment:
       DOCKER_HOST: ${DOCKER_HOST:-unix:///var/run/docker.sock}
     volumes:
@@ -13,11 +13,12 @@ services:
       # Bitbucket Pipelines DOCKER_HOST specifies a tcp:// URL for the docker
       # daemon.
       - /var/run/docker.sock:/var/run/docker.sock
+      - ./:/code/
     command: make docker-image
   test:
     build:
       context: .
-      dockerfile: dev.Dockerfile
+      target: dev
     environment:
       TEST_DB_HOST: db
       CI: 'true'
