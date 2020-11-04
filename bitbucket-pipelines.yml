@@ -1,4 +1,4 @@
-image: camdl/docker-compose-pipelines:1.0.1
+image: camdl/docker-compose-pipelines:b273
 
 pipelines:
   default:
