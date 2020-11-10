@@ -84,6 +84,9 @@ export class App extends BaseResource {
   private createExpressApp(): express.Application {
     const app = express();
 
+    // Disable parsing of query strings into nested objects
+    app.set('query parser', 'simple');
+
     passport.use(
       new Strategy((token: string, done: (err: any, user: any) => void) => {
         process.nextTick(() => {

@@ -2,16 +2,18 @@ import {
   applyDefaults,
   applyLazyDefaults,
   compare,
-  ComparePrimitive,
   CompareValue,
+  firstQueryValue,
   isEnumMember,
   Lazy,
   NonOptional,
   OmittableOptional,
   pickDefined,
-  PickOptional,
+  PickOptional, requireNotUndefined,
   sorted,
 } from '../src/util';
+import { ParsedQs } from "qs";
+import { AssertionError } from "assert";
 
 test('isEnumMember', () => {
   expect.assertions(1);
@@ -256,4 +258,24 @@ test.each<[Options, Required<Options>, { b: boolean; c: boolean }]>([
   expect(actual).toEqual(expected);
   expect(defaults.b).toHaveBeenCalledTimes(Number(defaultCalls.b));
   expect(defaults.c).toHaveBeenCalledTimes(Number(defaultCalls.c));
+});
+
+test('requireNotUndefined()', () => {
+  expect(requireNotUndefined('abc')).toBe('abc');
+  expect(() => requireNotUndefined(undefined))
+    .toThrow(new AssertionError({message: 'value is undefined'}));
+});
+
+describe('firstQueryValue()', () => {
+  test.each<[undefined | string | string[] | ParsedQs | ParsedQs[], string | undefined]>([
+    [undefined, undefined],
+    ['a', 'a'],
+    [['a', 'b'], 'a']
+  ])('firstQueryValue(%j) returns %j', (queryValue, expected) => {
+    expect(firstQueryValue(queryValue)).toEqual(expected);
+  });
+
+  test('throws on non-simple query values', () => {
+    expect(() => firstQueryValue({})).toThrow('Unexpected request query value: {}');
+  });
 });

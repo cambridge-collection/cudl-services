@@ -1,5 +1,7 @@
 jest.mock('../src/routes/similarity-impl');
 
+import expressAsyncHandler from 'express-async-handler';
+
 import express from 'express';
 import * as fs from 'fs';
 import { StatusCodes } from 'http-status-codes';
@@ -85,6 +87,26 @@ describe('app', () => {
     xtf = getMockXTF();
     application = new App(defaultAppOptions());
     app = application.expressApp;
+  });
+
+  describe('query parsing', () => {
+    test('query strings are parsed with the simple parser', () => {
+      expect(app.get('query parser')).toBe('simple');
+    });
+
+    test('the simple query parser doesn\'t produce nested objects', async () => {
+      let testApp = express();
+      testApp.set('query parser', 'simple');
+      testApp.get('/', expressAsyncHandler(async (req, resp) => {
+        expect(req.query.a).toEqual(['1', '3']);
+        expect(req.query.b).toEqual('2');
+        expect(req.query['foo[bar]']).toEqual('baz');
+        expect(req.query.foo).toBeUndefined();
+        resp.send();
+      }));
+      await request(testApp).get('/?a=1&b=2&a=3&foo[bar]=baz');
+      expect.assertions(4);
+    });
   });
 
   describe('/v1/metadata', () => {

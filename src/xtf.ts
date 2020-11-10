@@ -38,7 +38,7 @@ export class DefaultXTF implements XTF {
     // merge in the indexPath query param
     const parsed = url.parse(resolved, true);
     parsed.query.indexPath = this.xtfIndexPath;
-    delete parsed.search;
+    parsed.search = null;
 
     return url.format(parsed);
   }

@@ -5,6 +5,8 @@ import url from 'url';
 import * as util from 'util';
 import { ValueError } from './errors';
 
+import { ParsedQs } from 'qs';
+
 const CUDL_HOST = 'cudl.lib.cam.ac.uk';
 const CUDL_HOST_REGEX = new RegExp(
   '(?:^|\\.)' + escapeStringRegexp(CUDL_HOST) + '$'
@@ -266,4 +268,25 @@ export function validate(
   if (!condition) {
     throw new AssertionError({ message });
   }
+}
+
+export function requireNotUndefined<T>(value: T | undefined): T {
+  if(value === undefined) {
+    throw new AssertionError({message: 'value is undefined'});
+  }
+  return value;
+}
+
+export function firstQueryValue(
+  queryValue: undefined | string | string[] | ParsedQs | ParsedQs[]
+): string | undefined {
+  if(typeof queryValue === 'string' || queryValue === undefined) {
+    return queryValue;
+  }
+  if(Array.isArray(queryValue) && queryValue.length > 0 &&
+    typeof queryValue[0] === 'string') {
+    return queryValue[0];
+  }
+  throw new ValueError(
+    `Unexpected request query value: ${util.inspect(queryValue)}`);
 }

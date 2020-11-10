@@ -8,7 +8,13 @@ import util from 'util';
 import xml2js from 'xml2js';
 import { DAOPool } from '../db';
 import { ValueError } from '../errors';
-import { compare, isEnumMember, sorted, validateEnumMember } from '../util';
+import {
+  compare,
+  firstQueryValue,
+  isEnumMember,
+  sorted,
+  validateEnumMember
+} from '../util';
 import {
   ItemTags,
   loadTags,
@@ -33,7 +39,7 @@ export function getRoutes(options: {
         req,
         res,
         sources: tagSources,
-        sourceNames: req.query.sources,
+        sourceNames: firstQueryValue(req.query.sources),
         fixedResponseType:
           req.params.ext === undefined
             ? undefined
