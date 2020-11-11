@@ -93,10 +93,6 @@ export class App extends BaseResource {
       })
     );
 
-    // view engine setup
-    app.set('views', path.resolve(__dirname, '../views'));
-    app.set('view engine', 'pug');
-
     app.use(
       favicon(path.resolve(__dirname, '../public/images/brand/favicon.ico'))
     );
