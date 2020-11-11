@@ -104,9 +104,9 @@ export function getReducedMetadata(
   const dmdIndex = indexDescriptiveMetadata(descriptiveMetadata);
 
   // The descriptive metadata related to the structure path nodes
-  const relatedMetadata = Object.assign.apply(
-    Object,
-    structurePath.map(structure => {
+  const relatedMetadata = Object.assign(
+    {},
+    ...structurePath.map(structure => {
       const dmdId = structure.descriptiveMetadataID;
       if (typeof dmdId !== 'string' || !(dmdId in dmdIndex)) {
         throw new Error(

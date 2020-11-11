@@ -21,14 +21,8 @@ import {
   LegacyDarwinMetadataRepository,
 } from '../src/metadata';
 import {TagSourceName} from '../src/routes/tags';
-import {
-  DefaultTagSet,
-  Tag,
-  TagsDAO,
-  TagSet,
-  TagSource,
-} from '../src/routes/tags-impl';
-import {factory, UnaryConstructorArg} from '../src/util';
+import {DefaultTagSet, Tag, TagsDAO, TagSet} from '../src/routes/tags-impl';
+import {asUnknownObject, factory, UnaryConstructorArg} from '../src/util';
 import {XTF} from '../src/xtf';
 import {TEST_DATA_PATH} from './constants';
 
@@ -112,7 +106,7 @@ export class MemoryDatabasePool<Data> implements DatabasePool<Data> {
   }
 
   async getClient<T>(
-    clientFactory: <Client>(client: Data) => Promise<T> | T
+    clientFactory: (client: Data) => Promise<T> | T
   ): Promise<T> {
     return clientFactory(this.data);
   }
@@ -213,7 +207,10 @@ export function product<A, B, C, D>(
   c: C[],
   d: D[]
 ): Iterable<[A, B, C, D]>;
-export function* product<T>(...lists: T[][]): Iterable<T[]> {
+export function product<T>(...lists: T[][]): Iterable<T[]> {
+  return _product(...lists);
+}
+function* _product<T>(...lists: T[][]): Iterable<T[]> {
   if (lists.length === 0) {
     yield [];
     return;
@@ -227,7 +224,7 @@ export function* product<T>(...lists: T[][]): Iterable<T[]> {
     });
   }
 
-  for (const headProduct of product.apply(undefined, head)) {
+  for (const headProduct of _product(...head)) {
     for (const t of tail) {
       yield headProduct.concat([t]);
     }
@@ -249,15 +246,12 @@ export function getAttribute(
     if (!Array.isArray(obj)) {
       throw new Error(`Cannot index ${util.inspect(obj)} with number: ${head}`);
     }
-    return getAttribute.apply(null, [obj[head]].concat(tail));
+    return getAttribute(obj[head], ...tail);
   } else if (typeof head === 'string') {
-    if (typeof obj !== 'object') {
+    if (typeof obj !== 'object' || obj === null) {
       throw new Error(`Cannot index ${util.inspect(obj)} with string: ${head}`);
     }
-    return getAttribute.apply(
-      null,
-      [(obj as Record<string, unknown>)[head]].concat(tail)
-    );
+    return getAttribute(asUnknownObject(obj)[head], ...tail);
   }
   throw new AssertionError();
 }

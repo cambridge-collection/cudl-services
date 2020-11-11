@@ -5,7 +5,10 @@ import {PostgresCollectionDAO} from '../src/collections';
 interface MockPgClient {
   // The actual query() signature has several overloads which prevents the
   // .mockResolvedValueOnce() method typings from working.
-  query<R extends QueryResultRow = any, I extends any[] = any[]>(
+  query<
+    R extends QueryResultRow = QueryResultRow,
+    I extends unknown[] = unknown[]
+  >(
     queryTextOrConfig: string | QueryConfig<I>,
     values?: I
   ): Promise<QueryResult<R>>;
@@ -28,9 +31,11 @@ describe('PostgresCollectionDAO', () => {
   });
 
   test('getItemCollections()', async () => {
-    mocked(mockClient).query.mockResolvedValueOnce({
-      rows: [{title: 'foo', collectionid: 'bar', collectionorder: '42'}],
-    } as any);
+    mocked(mockClient).query.mockResolvedValueOnce(
+      dummyQueryResult([
+        {title: 'foo', collectionid: 'bar', collectionorder: '42'},
+      ])
+    );
 
     await expect(dao.getItemCollections('MS-FOO')).resolves.toEqual([
       {title: 'foo', collectionID: 'bar', collectionOrder: 42},
@@ -39,3 +44,13 @@ describe('PostgresCollectionDAO', () => {
     expect(mocked(mockClient).query.mock.calls[0][1]).toEqual(['MS-FOO']);
   });
 });
+
+function dummyQueryResult(rows: QueryResultRow[]): QueryResult {
+  return {
+    rows,
+    command: '',
+    fields: [],
+    oid: 0,
+    rowCount: rows.length,
+  };
+}

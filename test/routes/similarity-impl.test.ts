@@ -98,9 +98,10 @@ describe('similarity route implementation', () => {
     });
 
     test('embed level PARTIAL returns hits with partial metadata', async () => {
-      const reduceMetadata: typeof getReducedMetadata = jest.fn(
-        (metadata, _) => ({...metadata, reduced: true})
-      );
+      const reduceMetadata: typeof getReducedMetadata = jest.fn(metadata => ({
+        ...metadata,
+        reduced: true,
+      }));
 
       expect(
         await embedMetadata(

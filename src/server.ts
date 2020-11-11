@@ -1,3 +1,7 @@
+// As with bin/cudl-srvices.js (which calls run() here) using process.exit()
+// is fine as we actually want to set the exit status.
+/* eslint-disable no-process-exit */
+
 import Debugger from 'debug';
 import util from 'util';
 import {App} from './app';

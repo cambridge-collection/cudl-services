@@ -16,7 +16,7 @@ export function getRoutes(options: {
 }
 
 function createItemCollectionsHandler(getItemCollections: GetItemCollections) {
-  return expressAsyncHandler(async (req, res, next) => {
+  return expressAsyncHandler(async (req, res) => {
     const itemCollections = await getItemCollections(req.params.id);
 
     res.set('Content-Type', 'text/xml');

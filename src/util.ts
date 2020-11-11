@@ -1,7 +1,7 @@
 import {AssertionError} from 'assert';
 import escapeStringRegexp from 'escape-string-regexp';
 import {Request} from 'express';
-import url from 'url';
+import * as uri from 'uri-js';
 import * as util from 'util';
 import {ValueError} from './errors';
 
@@ -22,11 +22,11 @@ export function isExternalCorsRequest(req: Request) {
     return false;
   }
 
-  const host = url.parse(origin).hostname;
+  const host = uri.parse(origin).host;
 
   // If we have an origin header and it's not cudl, then it's an external cors
   // request.
-  return typeof host === 'string' && !CUDL_HOST_REGEX.test(host);
+  return host && !CUDL_HOST_REGEX.test(host);
 }
 
 export function isSimplePathSegment(value: string): boolean {
@@ -159,7 +159,7 @@ export function sorted<T>(
   }
 
   const indexedItems = index(items);
-  const keys = indexedItems.map(([_, value]) => key(value));
+  const keys = indexedItems.map(([, value]) => key(value));
   indexedItems.sort(([ia], [ib]) => compare(keys[ia], keys[ib]));
 
   // Remove indexes in place
@@ -226,7 +226,7 @@ export function pickDefined<T extends {}>(obj: T): OmittableOptional<T> {
   const result = {} as T;
   for (const key in obj) {
     if (
-      obj.hasOwnProperty(key) &&
+      Object.prototype.hasOwnProperty.call(obj, key) &&
       !(obj[key] === null || obj[key] === undefined)
     ) {
       result[key] = obj[key];
@@ -293,4 +293,11 @@ export function firstQueryValue(
   throw new ValueError(
     `Unexpected request query value: ${util.inspect(queryValue)}`
   );
+}
+
+export type UnknownObject = Readonly<Record<string | number | symbol, unknown>>;
+
+/** Allow accessing arbitrary properties of an object as unknown values. */
+export function asUnknownObject(obj: object): UnknownObject {
+  return obj as UnknownObject;
 }

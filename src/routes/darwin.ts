@@ -1,13 +1,8 @@
 import assert from 'assert';
-import Debugger from 'debug';
 import express from 'express';
 import proxy from 'express-http-proxy';
 import {URL} from 'url';
 import * as util from 'util';
-
-import {CUDLMetadataRepository} from '../metadata';
-
-const debug = Debugger('cudl-services:darwin');
 
 const DEFAULT_TIMEOUT = 20 * 1000;
 

@@ -131,8 +131,6 @@ describe('rewriteResourceURLs()', () => {
   test('url returned by rewriter is substituted in doc', () => {
     const url = 'http://example.com/things/foo';
 
-    const rewriter: URLRewriter = jest.fn();
-
     const dom = parseHTML({html, url});
     rewriteResourceURLs(dom.window.document, ({resolvedURL}) => {
       if (resolvedURL === 'http://example.com/things/js/bar.js') {

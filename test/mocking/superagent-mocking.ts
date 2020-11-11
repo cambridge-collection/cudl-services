@@ -2,7 +2,7 @@ import {Response} from 'superagent';
 
 export type PartialResponse = Partial<Response>;
 export type MockResponder = (url: string) => Promise<PartialResponse>;
-const defaultResponder: MockResponder = _ => {
+const defaultResponder: MockResponder = () => {
   throw new Error(
     'No mock response is set. The mockGetResponder jest mock function must be configured to provide a response (e.g. mockGetResponder.mockImplementation(...))'
   );

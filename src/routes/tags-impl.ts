@@ -313,7 +313,7 @@ export function selectTagSources<T extends {[key: string]: TagSource}>(
   }
 
   return srcList.map(name => {
-    if (!sources.hasOwnProperty(name)) {
+    if (!Object.prototype.hasOwnProperty.call(sources, name)) {
       throw new ValueError(`no tag source exists with name: ${util.inspect(
         name
       )}, available sources: \

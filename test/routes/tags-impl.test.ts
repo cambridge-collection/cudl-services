@@ -173,7 +173,7 @@ describe('MergedTagSet', () => {
 
 describe('FilterTagSet', () => {
   test('tagPredicate is called to filter tags', () => {
-    const predicate = jest.fn((name, value, tagSet) => {
+    const predicate = jest.fn(() => {
       return true;
     });
 
@@ -193,8 +193,8 @@ describe('FilterTagSet', () => {
   test.each<[TagPredicate | undefined, Record<string, number>]>([
     // Default includes all tags
     [undefined, {foo: 42, bar: 24}],
-    [(tag, value, tagSet) => tag === 'foo', {foo: 42}],
-    [(tag, value, tagSet) => value > 40, {foo: 42}],
+    [tag => tag === 'foo', {foo: 42}],
+    [(tag, value) => value > 40, {foo: 42}],
   ])(
     'filters tags according to predicate function',
     (predicateFn, expected) => {
@@ -232,7 +232,10 @@ describe('PostgresTagsDAO', () => {
   interface MockPgClient {
     // The actual query() signature has several overloads which prevents the
     // .mockResolvedValueOnce() method typings from working.
-    query<R extends QueryResultRow = any, I extends any[] = any[]>(
+    query<
+      R extends QueryResultRow = QueryResultRow,
+      I extends unknown[] = unknown[]
+    >(
       queryTextOrConfig: string | QueryConfig<I>,
       values?: I
     ): Promise<QueryResult<R>>;
@@ -279,21 +282,21 @@ describe('PostgresTagsDAO', () => {
 });
 
 class TestTagsDAO implements TagsDAO {
-  async annotationTags(docId: string): Promise<TagSet> {
+  async annotationTags(): Promise<TagSet> {
     return new DefaultTagSet([
       ['foo', 5],
       ['bar', 20],
     ]);
   }
 
-  async removedTags(docId: string): Promise<TagSet> {
+  async removedTags(): Promise<TagSet> {
     return new DefaultTagSet([
       ['foo', -10],
       ['bar', -2],
     ]);
   }
 
-  async thirdPartyTags(docId: string): Promise<TagSet> {
+  async thirdPartyTags(): Promise<TagSet> {
     return new DefaultTagSet([
       ['foo', 10],
       ['bar', 4],

@@ -1,12 +1,11 @@
 import {XSLTExecutor} from '@lib.cam/xslt-nailgun';
 import bodyParser from 'body-parser';
-import Debugger from 'debug';
-import express, {NextFunction, Request, Response} from 'express';
+import express, {Request, Response} from 'express';
 import passport from 'passport';
 import path from 'path';
 import {URL} from 'url';
 import {CollectionDAO, PostgresCollectionDAO} from './collections';
-import {Config, StrictConfig, User, Users} from './config';
+import {StrictConfig, User, Users} from './config';
 
 import {DAOPool, PostgresDatabasePool} from './db';
 import {
@@ -29,8 +28,6 @@ const cookieParser = require('cookie-parser');
 const favicon = require('serve-favicon');
 const logger = require('morgan');
 const Strategy = require('passport-accesstoken').Strategy;
-
-const debug = Debugger('cudl-services');
 
 // FIXME: move this to server?
 //cache directories
@@ -88,12 +85,14 @@ export class App extends BaseResource {
     app.set('query parser', 'simple');
 
     passport.use(
-      new Strategy((token: string, done: (err: any, user: any) => void) => {
-        process.nextTick(() => {
-          const user = findByApiKey(this.options.users, token);
-          return done(null, user || false);
-        });
-      })
+      new Strategy(
+        (token: string, done: (err: unknown, user: unknown) => void) => {
+          process.nextTick(() => {
+            const user = findByApiKey(this.options.users, token);
+            return done(null, user || false);
+          });
+        }
+      )
     );
 
     app.use(
@@ -169,7 +168,7 @@ export class App extends BaseResource {
     );
 
     // 404 if no route matched
-    app.use((req: Request, res: Response, next: NextFunction) => {
+    app.use((req: Request, res: Response) => {
       res.status(404).send('Not Found');
     });
 

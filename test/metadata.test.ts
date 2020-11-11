@@ -6,7 +6,6 @@ import {NotFoundError} from '../src/errors';
 import {
   createLegacyDarwinPathResolver,
   CUDLFormat,
-  CUDLMetadataRepository,
   DefaultCUDLMetadataRepository,
 } from '../src/metadata';
 import {TEST_DATA_PATH} from './constants';

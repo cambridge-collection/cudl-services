@@ -14,7 +14,6 @@ import supertest from 'supertest';
 import request from 'supertest';
 import {mocked} from 'ts-jest/utils';
 import {promisify} from 'util';
-import {DefaultDAOPool} from '../../src/db';
 import {getRoutes, ResponseType, TagSourceName} from '../../src/routes/tags';
 import {DefaultTagSet, loadTags, TagsDAO} from '../../src/routes/tags-impl';
 import {compare, sorted} from '../../src/util';
@@ -80,9 +79,9 @@ async function parseResponseTags(
 
 describe('tag routes /:classmark', () => {
   const dao: TagsDAO = {
-    removedTags: jest.fn(_ => Promise.resolve(EMPTY_TAG_SET)),
-    annotationTags: jest.fn(_ => Promise.resolve(EMPTY_TAG_SET)),
-    thirdPartyTags: jest.fn(_ => Promise.resolve(EMPTY_TAG_SET)),
+    removedTags: jest.fn(() => Promise.resolve(EMPTY_TAG_SET)),
+    annotationTags: jest.fn(() => Promise.resolve(EMPTY_TAG_SET)),
+    thirdPartyTags: jest.fn(() => Promise.resolve(EMPTY_TAG_SET)),
   };
 
   function getTestApp() {

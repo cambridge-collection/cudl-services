@@ -33,7 +33,7 @@ export function getRoutes(options: {
 
   router.get(
     ['/:classmark.:ext(json|xml|txt|csv)', '/:classmark'],
-    expressAsyncHandler(async (req, res, next) => {
+    expressAsyncHandler(async (req, res) => {
       const tagSources = getTagSources(await daoPool.getInstance());
       await sendTagResponse({
         req,
@@ -140,71 +140,67 @@ async function getNegotiatedResponse(options: {
     );
   }
 
-  switch (negotiatedType) {
-    case ResponseType.JSON:
-      const tagObj = itemTags.tags.asObject();
-      const json = {
-        tags: tagObj,
-        count: tagObj.length,
-        id: itemTags.id,
-      };
-      return {
-        type: 'application/json',
-        body: JSON.stringify(json),
-      };
-    case ResponseType.XML:
-      const tags = Array.from(itemTags.tags.getTags());
-      const xml = {
-        tags: {
-          $: {
-            count: tags.length,
-            id: itemTags.id,
-          },
-          tag: tags.map(tagName => {
-            return {
-              $: {
-                value: itemTags.tags.getValue(tagName),
-              },
-              _: tagName,
-            };
-          }),
+  if (negotiatedType === ResponseType.JSON) {
+    const tagObj = itemTags.tags.asObject();
+    const json = {
+      tags: tagObj,
+      count: tagObj.length,
+      id: itemTags.id,
+    };
+    return {
+      type: 'application/json',
+      body: JSON.stringify(json),
+    };
+  } else if (negotiatedType === ResponseType.XML) {
+    const tags = Array.from(itemTags.tags.getTags());
+    const xml = {
+      tags: {
+        $: {
+          count: tags.length,
+          id: itemTags.id,
         },
-      };
+        tag: tags.map(tagName => {
+          return {
+            $: {
+              value: itemTags.tags.getValue(tagName),
+            },
+            _: tagName,
+          };
+        }),
+      },
+    };
 
-      xml.tags.tag = sorted(xml.tags.tag, tag => [
-        [compare.desc, tag.$.value],
-        tag._,
-      ]);
+    xml.tags.tag = sorted(xml.tags.tag, tag => [
+      [compare.desc, tag.$.value],
+      tag._,
+    ]);
 
-      return {
-        type: 'application/xml',
-        body: xmlBuilder.buildObject(xml),
-      };
-    case ResponseType.CSV:
-    /* falls through */
-    case ResponseType.TEXT:
-    /* falls through */
-    default:
-      const rows = sorted(itemTags.tags, ([name, value]) => [
-        [compare.desc, value],
-        name,
-      ]);
+    return {
+      type: 'application/xml',
+      body: xmlBuilder.buildObject(xml),
+    };
+  } else {
+    const rows = sorted(itemTags.tags, ([name, value]) => [
+      [compare.desc, value],
+      name,
+    ]);
 
-      const csv = await util.promisify(
-        csvStringify as CSVStringifyValueOptions
-      )(rows, {
+    const csv = await util.promisify(csvStringify as CSVStringifyValueOptions)(
+      rows,
+      {
         header: true,
         columns: ['tag', 'value'],
-      });
-
-      if (csv === undefined) {
-        throw new Error('failed to generate CSV');
       }
+    );
 
-      return {
-        type: negotiatedType === ResponseType.CSV ? 'text/csv' : 'text/plain',
-        body: csv,
-      };
+    if (csv === undefined) {
+      throw new Error('failed to generate CSV');
+    }
+
+    return {
+      type: negotiatedType === ResponseType.CSV ? 'text/csv' : 'text/plain',
+      body: csv,
+    };
   }
 }
 

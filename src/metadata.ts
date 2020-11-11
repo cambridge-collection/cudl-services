@@ -5,7 +5,7 @@ import path from 'path';
 import * as util from 'util';
 import {promisify} from 'util';
 import {BaseError, NotFoundError} from './errors';
-import {isEnumMember, isSimplePathSegment} from './util';
+import {asUnknownObject, isSimplePathSegment} from './util';
 
 export class MetadataError extends BaseError {}
 
@@ -111,19 +111,23 @@ export interface ItemJSON {
   ];
 }
 
-export function isItemJSON(data: any): data is ItemJSON {
-  if (typeof data !== 'object') {
+export function isItemJSON(data: unknown): data is ItemJSON {
+  if (typeof data !== 'object' || data === null) {
     return false;
   }
+  const _data = asUnknownObject(data);
 
   return (
-    (data.embeddable === undefined || typeof data.embeddable === 'boolean') &&
-    Array.isArray(data.descriptiveMetadata) &&
-    (data.descriptiveMetadata || []).every(
-      (dmd: any) =>
-        (typeof dmd === 'object' && dmd.metadataRights === undefined) ||
-        typeof dmd.metadataRights === 'string'
-    )
+    (_data.embeddable === undefined || typeof _data.embeddable === 'boolean') &&
+    Array.isArray(_data.descriptiveMetadata) &&
+    (_data.descriptiveMetadata || []).every((dmd: unknown) => {
+      return (
+        typeof dmd === 'object' &&
+        dmd !== null &&
+        (asUnknownObject(dmd).metadataRights === undefined ||
+          typeof asUnknownObject(dmd).metadataRights === 'string')
+      );
+    })
   );
 }
 

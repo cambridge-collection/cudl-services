@@ -1,9 +1,6 @@
-import {AssertionError} from 'assert';
 import express from 'express';
-import http from 'http';
 import {StatusCodes} from 'http-status-codes';
 import request from 'supertest';
-import {promisify} from 'util';
 
 import {getRoutes} from '../../src/routes/darwin';
 import {DummyHttpServer} from '../utils';

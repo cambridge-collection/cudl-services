@@ -1,7 +1,6 @@
-import {mockGetResponder, PartialResponse} from './mocking/superagent-mocking';
+import {mockGetResponder} from './mocking/superagent-mocking';
 
-import superagent, {Response, SuperAgentRequest} from 'superagent';
-import {mocked} from 'ts-jest/utils';
+import superagent, {Response} from 'superagent';
 import {XTFConfig} from '../src/config';
 import {expectElementWithTag, expectNodeWithType, NodeType} from '../src/dom';
 import {DefaultXTF, XTF} from '../src/xtf';
