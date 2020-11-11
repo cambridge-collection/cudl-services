@@ -1,8 +1,8 @@
 import pg from 'pg';
-import { PostgresDatabasePool } from '../src/db';
-import { PostgresTagsDAO } from '../src/routes/tags-impl';
-import { factory } from '../src/util';
-import { connectionDetails } from './config';
+import {PostgresDatabasePool} from '../src/db';
+import {PostgresTagsDAO} from '../src/routes/tags-impl';
+import {factory} from '../src/util';
+import {connectionDetails} from './config';
 
 interface TagJSON {
   name: string;
@@ -54,7 +54,7 @@ function userTags<TAG extends TagJSON>(options: {
   documentID: string;
   tags: WithoutRedundantKeys<UserTagsJSON<TAG>>;
 }): UserDocumentTags<UserTagsJSON<TAG>> {
-  const { userID, documentID, tags } = options;
+  const {userID, documentID, tags} = options;
   return {
     userID,
     documentID,
@@ -74,7 +74,7 @@ type AnnotationTagsJSON<T extends TagsJSON<TagJSON>> = Omit<T, 'tags'> & {
 async function insertTestData(client: pg.ClientBase, data: TestData) {
   for (const item of data.tags || []) {
     await client.query(
-      `INSERT INTO "DocumentTags" ("docId", tags) VALUES ($1, $2)`,
+      'INSERT INTO "DocumentTags" ("docId", tags) VALUES ($1, $2)',
       [item.documentID, JSON.stringify(item.tags)]
     );
   }
@@ -87,14 +87,14 @@ async function insertTestData(client: pg.ClientBase, data: TestData) {
     };
 
     await client.query(
-      `INSERT INTO "DocumentAnnotations" (oid, "docId", annos) VALUES ($1, $2, $3)`,
+      'INSERT INTO "DocumentAnnotations" (oid, "docId", annos) VALUES ($1, $2, $3)',
       [item.userID, item.documentID, JSON.stringify(annotationTagsJSON)]
     );
   }
 
   for (const item of data.removedTags || []) {
     await client.query(
-      `INSERT INTO "DocumentRemovedTags" (oid, "docId", removedtags) VALUES ($1, $2, $3)`,
+      'INSERT INTO "DocumentRemovedTags" (oid, "docId", removedtags) VALUES ($1, $2, $3)',
       [item.userID, item.documentID, JSON.stringify(item.tags)]
     );
   }
@@ -107,10 +107,10 @@ const testData: TestData = {
       tags: {
         tags: [
           // Duplicates are summed
-          { name: 'foo', raw: 10 },
-          { name: 'foo', raw: 12 },
-          { name: 'bar', raw: 11 },
-          { name: 'baz', raw: 12 },
+          {name: 'foo', raw: 10},
+          {name: 'foo', raw: 12},
+          {name: 'bar', raw: 11},
+          {name: 'baz', raw: 12},
         ],
       },
     },
@@ -118,10 +118,10 @@ const testData: TestData = {
       documentID: 'MS-BAR',
       tags: {
         tags: [
-          { name: 'foo', raw: 5 },
-          { name: 'bar', raw: 6 },
-          { name: 'baz', raw: 7 },
-          { name: 'boz', raw: 7 },
+          {name: 'foo', raw: 5},
+          {name: 'bar', raw: 6},
+          {name: 'baz', raw: 7},
+          {name: 'boz', raw: 7},
         ],
       },
     },
@@ -138,9 +138,9 @@ const testData: TestData = {
       documentID: 'MS-FOO',
       tags: {
         tags: [
-          { name: 'foo', raw: -1 },
-          { name: 'bar', raw: -1 },
-          { name: 'abc', raw: -1 },
+          {name: 'foo', raw: -1},
+          {name: 'bar', raw: -1},
+          {name: 'abc', raw: -1},
         ],
       },
     }),
@@ -149,8 +149,8 @@ const testData: TestData = {
       documentID: 'MS-FOO',
       tags: {
         tags: [
-          { name: 'foo', raw: -1 },
-          { name: 'abc', raw: -1 },
+          {name: 'foo', raw: -1},
+          {name: 'abc', raw: -1},
         ],
       },
     }),
@@ -159,9 +159,9 @@ const testData: TestData = {
       documentID: 'MS-BAR',
       tags: {
         tags: [
-          { name: 'foo', raw: -1 },
-          { name: 'boz', raw: -1 },
-          { name: 'def', raw: -1 },
+          {name: 'foo', raw: -1},
+          {name: 'boz', raw: -1},
+          {name: 'def', raw: -1},
         ],
       },
     }),
@@ -169,7 +169,7 @@ const testData: TestData = {
       userID: 'bill',
       documentID: 'MS-BAZ',
       tags: {
-        tags: [{ name: 'def', raw: -1 }],
+        tags: [{name: 'def', raw: -1}],
       },
     }),
   ],
@@ -179,8 +179,8 @@ const testData: TestData = {
       documentID: 'MS-FOO',
       tags: {
         tags: [
-          { name: 'a', raw: 1, type: 'date' },
-          { name: 'b', raw: 1, type: 'person' },
+          {name: 'a', raw: 1, type: 'date'},
+          {name: 'b', raw: 1, type: 'person'},
         ],
       },
     }),
@@ -189,8 +189,8 @@ const testData: TestData = {
       documentID: 'MS-BAZ',
       tags: {
         tags: [
-          { name: 'abc', raw: 1, type: 'person' },
-          { name: 'def', raw: 1, type: 'about' },
+          {name: 'abc', raw: 1, type: 'person'},
+          {name: 'def', raw: 1, type: 'about'},
         ],
       },
     }),
@@ -199,8 +199,8 @@ const testData: TestData = {
       documentID: 'MS-BAZ',
       tags: {
         tags: [
-          { name: 'abc', raw: 1, type: 'person' },
-          { name: 'foo', raw: 1, type: 'about' },
+          {name: 'abc', raw: 1, type: 'person'},
+          {name: 'foo', raw: 1, type: 'about'},
         ],
       },
     }),
@@ -209,8 +209,8 @@ const testData: TestData = {
       documentID: 'MS-BAZ',
       tags: {
         tags: [
-          { name: 'abc', raw: 1, type: 'about' },
-          { name: 'def', raw: 1, type: 'about' },
+          {name: 'abc', raw: 1, type: 'about'},
+          {name: 'def', raw: 1, type: 'about'},
         ],
       },
     }),

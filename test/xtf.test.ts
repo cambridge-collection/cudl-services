@@ -1,13 +1,10 @@
-import {
-  mockGetResponder,
-  PartialResponse,
-} from './mocking/superagent-mocking';
+import {mockGetResponder, PartialResponse} from './mocking/superagent-mocking';
 
-import superagent, { Response, SuperAgentRequest } from 'superagent';
-import { mocked } from 'ts-jest/utils';
-import { XTFConfig } from '../src/config';
-import { expectElementWithTag, expectNodeWithType, NodeType } from '../src/dom';
-import { DefaultXTF, XTF } from '../src/xtf';
+import superagent, {Response, SuperAgentRequest} from 'superagent';
+import {mocked} from 'ts-jest/utils';
+import {XTFConfig} from '../src/config';
+import {expectElementWithTag, expectNodeWithType, NodeType} from '../src/dom';
+import {DefaultXTF, XTF} from '../src/xtf';
 
 const exampleConfig: XTFConfig = {
   xtfBase: 'http://xtf.example.com/foo/',
@@ -36,7 +33,7 @@ test('search() makes HTTP request to XTF', async () => {
     text: '<example/>',
   });
 
-  const result = await xtf.search({ identifier: 'foo' });
+  const result = await xtf.search({identifier: 'foo'});
 
   expect(superagent.get).toHaveBeenCalledTimes(1);
   expect(superagent.get).toHaveBeenCalledWith(
@@ -51,12 +48,12 @@ test('search() makes HTTP request to XTF', async () => {
 test.each<[string, Partial<Response>, string]>([
   [
     'non-200',
-    { ok: false, status: 404 },
+    {ok: false, status: 404},
     'Non-200 status code received from XTF: 404',
   ],
   [
     'non-XML',
-    { ok: true, type: 'text/plain' },
+    {ok: true, type: 'text/plain'},
     'Unexpected content type received from XTF: text/plain',
   ],
 ])('search() rejects on %s responses', async (_, response, msg) => {
@@ -69,7 +66,7 @@ test('getSimilarItems()', async () => {
   mockGetResponder.mockResolvedValueOnce({
     ok: true,
     type: 'text/xml',
-    text: `<example/>`,
+    text: '<example/>',
   });
 
   const result = await xtf.getSimilarItems('MS-FOO', 'abcd', 10);

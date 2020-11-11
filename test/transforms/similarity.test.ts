@@ -1,9 +1,9 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { promisify } from 'util';
+import {promisify} from 'util';
 import xmldom from 'xmldom';
-import { transform } from '../../src/transforms/similarity';
-import { TEST_DATA_PATH } from '../constants';
+import {transform} from '../../src/transforms/similarity';
+import {TEST_DATA_PATH} from '../constants';
 
 async function getSimilarityResponse() {
   const xml = await promisify(fs.readFile)(

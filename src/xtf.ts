@@ -1,8 +1,8 @@
 import xmldom from 'xmldom';
 import superagent from 'superagent';
 import url from 'url';
-import { XTFConfig } from './config';
-import { strictDOMParser } from './dom';
+import {XTFConfig} from './config';
+import {strictDOMParser} from './dom';
 
 interface XTFSearchOptions {
   smode?: string;

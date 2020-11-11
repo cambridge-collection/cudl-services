@@ -1,7 +1,7 @@
 import express from 'express';
 import expressAsyncHandler from 'express-async-handler';
 import xmlbuilder from 'xmlbuilder';
-import { Collection, GetItemCollections } from '../collections';
+import {Collection, GetItemCollections} from '../collections';
 
 export function getRoutes(options: {
   router?: express.Router;
@@ -31,13 +31,13 @@ function collectionsToXML(collections: Collection[]): string {
     },
   };
 
-  return xmlbuilder.create(xmlObj, { encoding: 'utf-8' }).end({ pretty: true });
+  return xmlbuilder.create(xmlObj, {encoding: 'utf-8'}).end({pretty: true});
 }
 
 function collectionToXMLObj(collection: Collection) {
   return {
-    title: { '#text': collection.title },
-    collectionid: { '#text': collection.collectionID },
-    collectionorder: { '#text': collection.collectionOrder },
+    title: {'#text': collection.title},
+    collectionid: {'#text': collection.collectionID},
+    collectionorder: {'#text': collection.collectionOrder},
   };
 }

@@ -1,17 +1,17 @@
 jest.mock('../../src/routes/similarity-impl');
 
 import express from 'express';
-import { StatusCodes } from 'http-status-codes';
+import {StatusCodes} from 'http-status-codes';
 import request from 'supertest';
-import { mocked } from 'ts-jest/utils';
-import { CUDLMetadataRepository } from '../../src/metadata';
-import { getRoutes } from '../../src/routes/similarity';
+import {mocked} from 'ts-jest/utils';
+import {CUDLMetadataRepository} from '../../src/metadata';
+import {getRoutes} from '../../src/routes/similarity';
 import {
   embedMetadata,
   mapToJson,
   MetadataEmbedLevel,
 } from '../../src/routes/similarity-impl';
-import { XTF } from '../../src/xtf';
+import {XTF} from '../../src/xtf';
 
 describe('similarity routes /:itemid/:similarityId', () => {
   let metadataRepository: CUDLMetadataRepository;
@@ -19,7 +19,7 @@ describe('similarity routes /:itemid/:similarityId', () => {
 
   function getTestApp() {
     const app = express();
-    app.use('/', getRoutes({ metadataRepository, xtf }));
+    app.use('/', getRoutes({metadataRepository, xtf}));
     return app;
   }
 
@@ -40,7 +40,7 @@ describe('similarity routes /:itemid/:similarityId', () => {
     const response = await request(getTestApp()).get('/MS-FOO/0?embedMeta=foo');
     expect(response.status).toBe(StatusCodes.BAD_REQUEST);
     expect(response.body).toEqual({
-      error: `Invalid embedMeta: available values are full, partial, none`,
+      error: 'Invalid embedMeta: available values are full, partial, none',
     });
   });
 
@@ -50,7 +50,7 @@ describe('similarity routes /:itemid/:similarityId', () => {
     });
     const response = await request(getTestApp()).get('/MS-FOO/0');
     expect(response.status).toBe(StatusCodes.BAD_GATEWAY);
-    expect(response.body).toEqual({ error: 'Unable to get response from XTF' });
+    expect(response.body).toEqual({error: 'Unable to get response from XTF'});
   });
 
   test.each<[string, number | undefined, MetadataEmbedLevel]>([
@@ -74,12 +74,12 @@ describe('similarity routes /:itemid/:similarityId', () => {
       const response = await request(getTestApp()).get(`/MS-FOO/0${query}`);
 
       expect(response.ok).toBeTruthy();
-      expect(response.body).toEqual({ example: 'b' });
+      expect(response.body).toEqual({example: 'b'});
 
       expect(xtf.getSimilarItems).toHaveBeenCalledWith('MS-FOO', '0', count);
       expect(mapToJson).toHaveBeenCalledWith('<example/>');
       expect(embedMetadata).toHaveBeenCalledWith(
-        { example: 'a' },
+        {example: 'a'},
         embedLevel,
         metadataRepository
       );

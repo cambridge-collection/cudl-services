@@ -1,8 +1,8 @@
 import express from 'express';
 import expressAsyncHandler from 'express-async-handler';
-import { StatusCodes } from 'http-status-codes';
+import {StatusCodes} from 'http-status-codes';
 import util from 'util';
-import { CUDLFormat, CUDLMetadataRepository, ItemJSON } from '../metadata';
+import {CUDLFormat, CUDLMetadataRepository, ItemJSON} from '../metadata';
 
 import {
   CORS_HEADERS,

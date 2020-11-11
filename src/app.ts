@@ -1,29 +1,29 @@
-import { XSLTExecutor } from '@lib.cam/xslt-nailgun';
+import {XSLTExecutor} from '@lib.cam/xslt-nailgun';
 import bodyParser from 'body-parser';
 import Debugger from 'debug';
-import express, { NextFunction, Request, Response } from 'express';
+import express, {NextFunction, Request, Response} from 'express';
 import passport from 'passport';
 import path from 'path';
-import { URL } from 'url';
-import { CollectionDAO, PostgresCollectionDAO } from './collections';
-import { Config, StrictConfig, User, Users } from './config';
+import {URL} from 'url';
+import {CollectionDAO, PostgresCollectionDAO} from './collections';
+import {Config, StrictConfig, User, Users} from './config';
 
-import { DAOPool, PostgresDatabasePool } from './db';
+import {DAOPool, PostgresDatabasePool} from './db';
 import {
   CUDLMetadataRepository,
   DefaultCUDLMetadataRepository,
   LegacyDarwinMetadataRepository,
 } from './metadata';
-import { BaseResource, ExternalResources, using } from './resources';
+import {BaseResource, ExternalResources, using} from './resources';
 import * as darwin from './routes/darwin';
 import * as membership from './routes/membership';
 import * as metadata from './routes/metadata';
 import * as similarity from './routes/similarity';
 import * as tags from './routes/tags';
-import { PostgresTagsDAO, TagsDAO } from './routes/tags-impl';
+import {PostgresTagsDAO, TagsDAO} from './routes/tags-impl';
 import * as transcription from './routes/transcription';
 import * as translation from './routes/translation';
-import { DefaultXTF, XTF } from './xtf';
+import {DefaultXTF, XTF} from './xtf';
 
 const cookieParser = require('cookie-parser');
 const favicon = require('serve-favicon');
@@ -56,7 +56,7 @@ export class App extends BaseResource {
 
   constructor(options: AppOptions) {
     super();
-    this.options = Object.freeze({ ...options });
+    this.options = Object.freeze({...options});
     this.xsltExecutor = XSLTExecutor.getInstance();
     this.expressApp = this.createExpressApp();
   }
@@ -101,7 +101,7 @@ export class App extends BaseResource {
     );
     app.use(logger('dev'));
     app.use(bodyParser.json());
-    app.use(bodyParser.urlencoded({ extended: false }));
+    app.use(bodyParser.urlencoded({extended: false}));
     app.use(cookieParser());
     app.use(passport.initialize());
     app.use(express.static(path.resolve(__dirname, '../public')));
@@ -132,7 +132,7 @@ export class App extends BaseResource {
       })
     );
 
-    app.use('/v1/tags', tags.getRoutes({ daoPool: this.options.tagsDAOPool }));
+    app.use('/v1/tags', tags.getRoutes({daoPool: this.options.tagsDAOPool}));
 
     app.use(
       '/v1/transcription',
@@ -164,8 +164,8 @@ export class App extends BaseResource {
 
     app.use(
       '/v1/darwin',
-      passport.authenticate('token', { session: false }),
-      darwin.getRoutes({ darwinXtfUrl: this.options.darwinXtfUrl })
+      passport.authenticate('token', {session: false}),
+      darwin.getRoutes({darwinXtfUrl: this.options.darwinXtfUrl})
     );
 
     // 404 if no route matched

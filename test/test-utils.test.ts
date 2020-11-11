@@ -1,4 +1,4 @@
-import { product } from './utils';
+import {product} from './utils';
 
 test('productn', () => {
   expect(Array.from(product())).toEqual([[]]);

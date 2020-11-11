@@ -3,9 +3,9 @@ import {
   Collection as DBCollection,
   PostgresCollectionDAO,
 } from '../src/collections';
-import { PostgresDatabasePool } from '../src/db';
-import { factory } from '../src/util';
-import { connectionDetails } from './config';
+import {PostgresDatabasePool} from '../src/db';
+import {factory} from '../src/util';
+import {connectionDetails} from './config';
 
 interface Item {
   itemid: string;
@@ -140,13 +140,13 @@ describe('PostgresCollectionDAO', () => {
   describe('getItemCollections()', () => {
     const testData: TestData = {
       items: [
-        { itemid: 'foo' },
-        { itemid: 'bar' },
-        { itemid: 'baz' },
-        { itemid: 'boz' },
+        {itemid: 'foo'},
+        {itemid: 'bar'},
+        {itemid: 'baz'},
+        {itemid: 'boz'},
       ],
       collections: [
-        { collectionid: 'a', title: 'A', collectionorder: 1 },
+        {collectionid: 'a', title: 'A', collectionorder: 1},
         {
           collectionid: 'a.a',
           title: 'A.A',
@@ -165,20 +165,20 @@ describe('PostgresCollectionDAO', () => {
           parentcollectionid: 'a.b',
           collectionorder: 1,
         },
-        { collectionid: 'b', title: 'B', collectionorder: 2 },
+        {collectionid: 'b', title: 'B', collectionorder: 2},
       ],
       itemsInCollections: [
         // in 2 collections, but 1 hidden
-        { itemid: 'foo', collectionid: 'a', visible: false },
-        { itemid: 'foo', collectionid: 'b' },
+        {itemid: 'foo', collectionid: 'a', visible: false},
+        {itemid: 'foo', collectionid: 'b'},
         // bar has no collections
         // in everything apart from a.a
-        { itemid: 'baz', collectionid: 'a.b.c' },
-        { itemid: 'baz', collectionid: 'b' },
+        {itemid: 'baz', collectionid: 'a.b.c'},
+        {itemid: 'baz', collectionid: 'b'},
         // in both nested collections - has common parents which should only be
         // listed once in the results.
-        { itemid: 'boz', collectionid: 'a.a' },
-        { itemid: 'boz', collectionid: 'a.b.c' },
+        {itemid: 'boz', collectionid: 'a.a'},
+        {itemid: 'boz', collectionid: 'a.b.c'},
       ],
     };
 
@@ -187,24 +187,24 @@ describe('PostgresCollectionDAO', () => {
     });
 
     test.each<[string, DBCollection[]]>([
-      ['foo', [{ collectionID: 'b', title: 'B', collectionOrder: 2 }]],
+      ['foo', [{collectionID: 'b', title: 'B', collectionOrder: 2}]],
       ['bar', []],
       [
         'baz',
         [
-          { collectionID: 'a.b.c', title: 'A.B.C', collectionOrder: 1 },
-          { collectionID: 'b', title: 'B', collectionOrder: 2 },
-          { collectionID: 'a.b', title: 'A.B', collectionOrder: 2 },
-          { collectionID: 'a', title: 'A', collectionOrder: 1 },
+          {collectionID: 'a.b.c', title: 'A.B.C', collectionOrder: 1},
+          {collectionID: 'b', title: 'B', collectionOrder: 2},
+          {collectionID: 'a.b', title: 'A.B', collectionOrder: 2},
+          {collectionID: 'a', title: 'A', collectionOrder: 1},
         ],
       ],
       [
         'boz',
         [
-          { collectionID: 'a.a', title: 'A.A', collectionOrder: 1 },
-          { collectionID: 'a.b.c', title: 'A.B.C', collectionOrder: 1 },
-          { collectionID: 'a', title: 'A', collectionOrder: 1 },
-          { collectionID: 'a.b', title: 'A.B', collectionOrder: 2 },
+          {collectionID: 'a.a', title: 'A.A', collectionOrder: 1},
+          {collectionID: 'a.b.c', title: 'A.B.C', collectionOrder: 1},
+          {collectionID: 'a', title: 'A', collectionOrder: 1},
+          {collectionID: 'a.b', title: 'A.B', collectionOrder: 2},
         ],
       ],
     ])('item %s has expected collections', async (itemID, collections) => {

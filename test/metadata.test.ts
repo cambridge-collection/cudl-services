@@ -1,15 +1,15 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { withDir } from 'tmp-promise';
-import { promisify } from 'util';
-import { NotFoundError } from '../src/errors';
+import {withDir} from 'tmp-promise';
+import {promisify} from 'util';
+import {NotFoundError} from '../src/errors';
 import {
   createLegacyDarwinPathResolver,
   CUDLFormat,
   CUDLMetadataRepository,
   DefaultCUDLMetadataRepository,
 } from '../src/metadata';
-import { TEST_DATA_PATH } from './constants';
+import {TEST_DATA_PATH} from './constants';
 
 function getRepo() {
   return new DefaultCUDLMetadataRepository(
@@ -178,7 +178,7 @@ describe('LegacyDarwinPathResolver', () => {
           path.resolve(dir.path, '1a_2a.xml')
         );
       },
-      { unsafeCleanup: true }
+      {unsafeCleanup: true}
     );
   });
 });

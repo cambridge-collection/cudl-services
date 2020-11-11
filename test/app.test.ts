@@ -4,23 +4,23 @@ import expressAsyncHandler from 'express-async-handler';
 
 import express from 'express';
 import * as fs from 'fs';
-import { StatusCodes } from 'http-status-codes';
+import {StatusCodes} from 'http-status-codes';
 import * as path from 'path';
 import request from 'supertest';
-import { mocked } from 'ts-jest/utils';
-import { promisify } from 'util';
+import {mocked} from 'ts-jest/utils';
+import {promisify} from 'util';
 
-import { App, AppOptions } from '../src/app';
-import { embedMetadata } from '../src/routes/similarity-impl';
-import { TagSourceName } from '../src/routes/tags';
-import { SimilaritySearch } from '../src/transforms/similarity';
-import { XTF } from '../src/xtf';
+import {App, AppOptions} from '../src/app';
+import {embedMetadata} from '../src/routes/similarity-impl';
+import {TagSourceName} from '../src/routes/tags';
+import {SimilaritySearch} from '../src/transforms/similarity';
+import {XTF} from '../src/xtf';
 import {
   EXAMPLE_STATIC_FILES,
   EXAMPLE_ZACYNTHIUS_URL,
   STATIC_FILES,
 } from './constants';
-import { mockGetResponder } from './mocking/superagent-mocking';
+import {mockGetResponder} from './mocking/superagent-mocking';
 import {
   DummyHttpServer,
   getMockXTF,
@@ -54,13 +54,13 @@ describe('app', () => {
       metadataRepository: getTestDataMetadataRepository(),
       legacyDarwinMetadataRepository: getTestDataLegacyDarwinMetadataRepository(),
       users: {
-        supersecret: { username: 'foo', email: 'foo@example.com' },
+        supersecret: {username: 'foo', email: 'foo@example.com'},
       },
       collectionsDAOPool: MemoryDatabasePool.createPooledDAO(
         MemoryCollectionsDAO,
         {
           'MS-ADD-03959': [
-            { title: 'Foo', collectionOrder: 42, collectionID: 'foo' },
+            {title: 'Foo', collectionOrder: 42, collectionID: 'foo'},
           ],
         }
       ),
@@ -94,16 +94,19 @@ describe('app', () => {
       expect(app.get('query parser')).toBe('simple');
     });
 
-    test('the simple query parser doesn\'t produce nested objects', async () => {
-      let testApp = express();
+    test("the simple query parser doesn't produce nested objects", async () => {
+      const testApp = express();
       testApp.set('query parser', 'simple');
-      testApp.get('/', expressAsyncHandler(async (req, resp) => {
-        expect(req.query.a).toEqual(['1', '3']);
-        expect(req.query.b).toEqual('2');
-        expect(req.query['foo[bar]']).toEqual('baz');
-        expect(req.query.foo).toBeUndefined();
-        resp.send();
-      }));
+      testApp.get(
+        '/',
+        expressAsyncHandler(async (req, resp) => {
+          expect(req.query.a).toEqual(['1', '3']);
+          expect(req.query.b).toEqual('2');
+          expect(req.query['foo[bar]']).toEqual('baz');
+          expect(req.query.foo).toBeUndefined();
+          resp.send();
+        })
+      );
       await request(testApp).get('/?a=1&b=2&a=3&foo[bar]=baz');
       expect.assertions(4);
     });
@@ -123,9 +126,9 @@ describe('app', () => {
         '/v1/rdb/membership/collections/MS-ADD-03959'
       );
       expect(response.status).toBe(StatusCodes.OK);
-      expect(response.text).toMatch(`<title>Foo</title>`);
-      expect(response.text).toMatch(`<collectionorder>42</collectionorder>`);
-      expect(response.text).toMatch(`<collectionid>foo</collectionid>`);
+      expect(response.text).toMatch('<title>Foo</title>');
+      expect(response.text).toMatch('<collectionorder>42</collectionorder>');
+      expect(response.text).toMatch('<collectionid>foo</collectionid>');
     });
   });
 
@@ -154,7 +157,7 @@ describe('app', () => {
   describe('static files', () => {
     test.each(Object.values(EXAMPLE_STATIC_FILES).map(sf => [sf]))(
       'static file %o is served',
-      async (resource: { path: string; type: string }) => {
+      async (resource: {path: string; type: string}) => {
         const response = await request(app)
           .get(`/${resource.path}`)
           .responseType('blob');
@@ -202,7 +205,7 @@ describe('app', () => {
       } as unknown) as SimilaritySearch);
       const response = await request(app).get('/v1/xtf/similarity/MS-FOO/3');
       expect(response.ok).toBeTruthy();
-      expect(response.body).toEqual({ example: 'example' });
+      expect(response.body).toEqual({example: 'example'});
     });
   });
 

@@ -1,7 +1,7 @@
-import { BasePostgresDAO, PostgresDatabasePool } from '../src/db';
-import { using } from '../src/resources';
-import { factory } from '../src/util';
-import { connectionDetails } from './config';
+import {BasePostgresDAO, PostgresDatabasePool} from '../src/db';
+import {using} from '../src/resources';
+import {factory} from '../src/util';
+import {connectionDetails} from './config';
 
 describe('PostgresDatabasePool', () => {
   test('fromConfig()', async () => {
@@ -20,7 +20,7 @@ describe('PostgresDatabasePool', () => {
           async (db: BasePostgresDAO) => {
             await expect(
               (await db.getClient().query('SELECT 1 AS value')).rows
-            ).toEqual([{ value: 1 }]);
+            ).toEqual([{value: 1}]);
           }
         );
       }
@@ -45,7 +45,7 @@ describe('BasePostgresDAO', () => {
         await using(pool.getInstance(), async dao => {
           await expect(
             (await dao.getClient().query('SELECT 1 AS value')).rows
-          ).toEqual([{ value: 1 }]);
+          ).toEqual([{value: 1}]);
         });
       }
     );

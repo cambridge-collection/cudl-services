@@ -1,4 +1,4 @@
-import { get } from '../mocking/superagent-mocking';
+import {get} from '../mocking/superagent-mocking';
 
 export = {
   ...jest.requireActual('superagent'),

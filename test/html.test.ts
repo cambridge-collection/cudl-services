@@ -1,5 +1,5 @@
-import { mocked } from 'ts-jest/utils';
-import { URL } from 'url';
+import {mocked} from 'ts-jest/utils';
+import {URL} from 'url';
 import {
   ensureURL,
   isParent,
@@ -59,7 +59,7 @@ test('ensureURL()', () => {
 
 describe('parseHTML()', () => {
   test('parseHTML()', () => {
-    const dom = parseHTML({ html });
+    const dom = parseHTML({html});
     const doc = dom.window.document;
     expect(doc.querySelector('script')!.getAttribute('src')).toBe(
       '//other.example.com/js/foo.js'
@@ -68,7 +68,7 @@ describe('parseHTML()', () => {
 
   test('doc knows its URL', () => {
     const url = 'http://example.com/foo/bar';
-    const dom = parseHTML({ html, url });
+    const dom = parseHTML({html, url});
     const doc = dom.window.document;
     expect(doc.URL).toBe(url);
     expect(
@@ -85,7 +85,7 @@ describe('rewriteResourceURLs()', () => {
 
     const rewriter: URLRewriter = jest.fn();
 
-    const dom = parseHTML({ html, url });
+    const dom = parseHTML({html, url});
     rewriteResourceURLs(dom.window.document, rewriter);
 
     expect(mocked(rewriter).mock.calls).toEqual(
@@ -133,8 +133,8 @@ describe('rewriteResourceURLs()', () => {
 
     const rewriter: URLRewriter = jest.fn();
 
-    const dom = parseHTML({ html, url });
-    rewriteResourceURLs(dom.window.document, ({ resolvedURL }) => {
+    const dom = parseHTML({html, url});
+    rewriteResourceURLs(dom.window.document, ({resolvedURL}) => {
       if (resolvedURL === 'http://example.com/things/js/bar.js') {
         return 'http://other.example.com/js/bar.js';
       }

@@ -1,22 +1,22 @@
 import express from 'express';
-import { StatusCodes } from 'http-status-codes';
+import {StatusCodes} from 'http-status-codes';
 import request from 'supertest';
 
 import xml2js from 'xml2js';
-import { Collection, GetItemCollections } from '../../src/collections';
-import { using } from '../../src/resources';
+import {Collection, GetItemCollections} from '../../src/collections';
+import {using} from '../../src/resources';
 
-import { getRoutes } from '../../src/routes/membership';
-import { MemoryCollectionsDAO, MemoryDatabasePool } from '../utils';
+import {getRoutes} from '../../src/routes/membership';
+import {MemoryCollectionsDAO, MemoryDatabasePool} from '../utils';
 
 function getTestApp(getItemCollections: GetItemCollections) {
   const app = express();
-  app.use('/', getRoutes({ getItemCollections }));
+  app.use('/', getRoutes({getItemCollections}));
   return app;
 }
 
 describe('membership routes', () => {
-  const itemCollections: { [itemID: string]: Collection[] } = {
+  const itemCollections: {[itemID: string]: Collection[]} = {
     foo: [],
     bar: [
       {

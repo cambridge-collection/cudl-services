@@ -1,5 +1,5 @@
 import assert from 'assert';
-import { expectElementWithTag, NodeType } from '../dom';
+import {expectElementWithTag, NodeType} from '../dom';
 
 export interface SimilaritySearch {
   queryTime?: number;

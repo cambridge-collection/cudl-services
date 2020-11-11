@@ -5,22 +5,22 @@ import {
   ExecuteOptions,
   XSLTExecutor,
 } from '@lib.cam/xslt-nailgun';
-import { AssertionError } from 'assert';
+import {AssertionError} from 'assert';
 import collapseWhitespace from 'collapse-whitespace';
 import http from 'http';
-import { StatusCodes } from 'http-status-codes';
+import {StatusCodes} from 'http-status-codes';
 import * as path from 'path';
 import * as util from 'util';
-import { promisify } from 'util';
-import { Collection, CollectionDAO } from '../src/collections';
+import {promisify} from 'util';
+import {Collection, CollectionDAO} from '../src/collections';
 
-import { BaseDAO, DAOPool, DatabasePool, DefaultDAOPool } from '../src/db';
+import {BaseDAO, DAOPool, DatabasePool, DefaultDAOPool} from '../src/db';
 import {
   CUDLMetadataRepository,
   DefaultCUDLMetadataRepository,
   LegacyDarwinMetadataRepository,
 } from '../src/metadata';
-import { TagSourceName } from '../src/routes/tags';
+import {TagSourceName} from '../src/routes/tags';
 import {
   DefaultTagSet,
   Tag,
@@ -28,9 +28,9 @@ import {
   TagSet,
   TagSource,
 } from '../src/routes/tags-impl';
-import { factory, UnaryConstructorArg } from '../src/util';
-import { XTF } from '../src/xtf';
-import { TEST_DATA_PATH } from './constants';
+import {factory, UnaryConstructorArg} from '../src/util';
+import {XTF} from '../src/xtf';
+import {TEST_DATA_PATH} from './constants';
 
 /**
  * An HTTP server listening on a random port on the loopback interface which
@@ -120,7 +120,8 @@ export class MemoryDatabasePool<Data> implements DatabasePool<Data> {
   async close(): Promise<void> {}
 }
 
-export class MemoryCollectionsDAO extends BaseDAO<ItemCollections>
+export class MemoryCollectionsDAO
+  extends BaseDAO<ItemCollections>
   implements CollectionDAO {
   async getItemCollections(itemID: string): Promise<Collection[]> {
     return this.db[itemID] || [];
@@ -189,7 +190,7 @@ class TestXSLTExecutor implements Closable {
   }
 
   async execute(options: ExecuteOptions): Promise<Buffer> {
-    return execute({ ...options, ...this.options });
+    return execute({...options, ...this.options});
   }
 
   close() {}

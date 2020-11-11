@@ -1,12 +1,12 @@
-import { Request, RequestHandler, Response, Router } from 'express';
+import {Request, RequestHandler, Response, Router} from 'express';
 import expressAsyncHandler from 'express-async-handler';
-import { PathParams } from 'express-serve-static-core';
-import { getReasonPhrase, StatusCodes } from 'http-status-codes';
+import {PathParams} from 'express-serve-static-core';
+import {getReasonPhrase, StatusCodes} from 'http-status-codes';
 import mime from 'mime';
 import RelateURL from 'relateurl';
 import superagent from 'superagent';
-import url, { URL } from 'url';
-import { ValueError } from '../errors';
+import url, {URL} from 'url';
+import {ValueError} from '../errors';
 import {
   ensureURL,
   isParent,
@@ -14,7 +14,7 @@ import {
   rewriteResourceURLs,
   URLRewriter,
 } from '../html';
-import { applyDefaults, applyLazyDefaults, validate } from '../util';
+import {applyDefaults, applyLazyDefaults, validate} from '../util';
 
 const HTML_TYPE = mime.getType('html');
 const XHTML_TYPE = mime.getType('xhtml');
@@ -256,11 +256,8 @@ const defaultSuperagentResponseTransmitter: ResponseTransmitter<TransformedRespo
     throw err;
   }
 
-  const { status, type, body } = delegateData.currentRes;
-  clientResponse
-    .status(status)
-    .type(type)
-    .send(body);
+  const {status, type, body} = delegateData.currentRes;
+  clientResponse.status(status).type(type).send(body);
 };
 
 type DefaultResponseHandler = ResponseHandler<
@@ -270,7 +267,7 @@ type DefaultResponseHandler = ResponseHandler<
 export const defaultErrorHandler: ResponseHandler<TransformedResponse<
   superagent.Response,
   ResponseData
->> = async ({ originalRes, currentRes }) => {
+>> = async ({originalRes, currentRes}) => {
   let newStatus;
   if (originalRes.status === StatusCodes.NOT_FOUND) {
     newStatus = StatusCodes.NOT_FOUND;
@@ -290,17 +287,17 @@ export const defaultErrorHandler: ResponseHandler<TransformedResponse<
       },
     };
   }
-  return { originalRes, currentRes };
+  return {originalRes, currentRes};
 };
 
 function ignoreErrorResponses(
   responseHandler: DefaultResponseHandler
 ): DefaultResponseHandler {
-  return async ({ originalRes, currentRes }) => {
+  return async ({originalRes, currentRes}) => {
     if (currentRes.isError) {
       return;
     }
-    return responseHandler({ originalRes, currentRes });
+    return responseHandler({originalRes, currentRes});
   };
 }
 
@@ -309,7 +306,7 @@ export function createRewriteHTMLResourceURLsResponseHandler(
 ): DefaultResponseHandler {
   const _urlRewriter = urlRewriter || createDefaultResourceURLRewriter();
 
-  return ignoreErrorResponses(async ({ originalRes, currentRes }) => {
+  return ignoreErrorResponses(async ({originalRes, currentRes}) => {
     if (!HTML_MEDIA_TYPES.has(currentRes.type)) {
       throw new Error('currentRes is not an HTML response');
     }
@@ -347,7 +344,7 @@ export function createRestrictedTypeResponseHandler(options: {
   contentTypeWhitelist: Iterable<string>;
 }): DefaultResponseHandler {
   const permittedTypes = new Set(options.contentTypeWhitelist);
-  return ignoreErrorResponses(async ({ originalRes, currentRes }) => {
+  return ignoreErrorResponses(async ({originalRes, currentRes}) => {
     if (!permittedTypes.has(currentRes.type)) {
       return {
         originalRes,
@@ -370,18 +367,18 @@ export function createDefaultResourceURLRewriter(options?: {
   upstreamRootURL?: URL;
   baseResourceURL?: string;
 }): URLRewriter {
-  const { baseResourceURL } = applyDefaults(
-    { baseResourceURL: options?.baseResourceURL },
+  const {baseResourceURL} = applyDefaults(
+    {baseResourceURL: options?.baseResourceURL},
     {
       baseResourceURL: 'resources/',
     }
   );
-  return ({ baseURL, resolvedURL }) => {
+  return ({baseURL, resolvedURL}) => {
     if (
       options?.upstreamRootURL &&
       !isParent(options.upstreamRootURL, baseURL)
     ) {
-      throw new ValueError(`upstreamRootURL is not a parent of baseURL`);
+      throw new ValueError('upstreamRootURL is not a parent of baseURL');
     }
     const upstreamRoot = options?.upstreamRootURL
       ? String(options?.upstreamRootURL)
@@ -394,7 +391,7 @@ export function createDefaultResourceURLRewriter(options?: {
     const rootRelativeResourceURL = RelateURL.relate(
       upstreamRoot,
       resolvedURL,
-      { output: RelateURL.PATH_RELATIVE }
+      {output: RelateURL.PATH_RELATIVE}
     );
     return url.resolve(baseResourceURL, rootRelativeResourceURL);
   };

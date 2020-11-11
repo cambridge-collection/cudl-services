@@ -1,11 +1,11 @@
 import * as assert from 'assert';
-import { AssertionError } from 'assert';
+import {AssertionError} from 'assert';
 import fs from 'fs';
 import path from 'path';
 import * as util from 'util';
-import { promisify } from 'util';
-import { BaseError, NotFoundError } from './errors';
-import { isEnumMember, isSimplePathSegment } from './util';
+import {promisify} from 'util';
+import {BaseError, NotFoundError} from './errors';
+import {isEnumMember, isSimplePathSegment} from './util';
 
 export class MetadataError extends BaseError {}
 

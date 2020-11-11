@@ -2,10 +2,10 @@ import assert from 'assert';
 import Debugger from 'debug';
 import express from 'express';
 import proxy from 'express-http-proxy';
-import { URL } from 'url';
+import {URL} from 'url';
 import * as util from 'util';
 
-import { CUDLMetadataRepository } from '../metadata';
+import {CUDLMetadataRepository} from '../metadata';
 
 const debug = Debugger('cudl-services:darwin');
 
@@ -62,13 +62,15 @@ function parseUpstreamUrl(url: string): Upstream {
   const parts = new URL(url);
 
   if (parts.username || parts.password || parts.hash || parts.search) {
-    throw new Error(`\
+    throw new Error(
+      '\
 a proxy destination URL must not contain username/password credentials, query \
-parameters or a fragment`);
+parameters or a fragment'
+    );
   }
 
   if (!/^https?:?$/.test(parts.protocol)) {
-    throw new Error(`protocol must be http or https`);
+    throw new Error('protocol must be http or https');
   }
 
   return {

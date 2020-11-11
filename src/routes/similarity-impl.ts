@@ -1,5 +1,5 @@
 import util from 'util';
-import { CUDLMetadataRepository } from '../metadata';
+import {CUDLMetadataRepository} from '../metadata';
 import {
   SimilaritySearch,
   transform as similarityTransform,
@@ -38,7 +38,7 @@ export async function embedMetadata(
     results.hits.map(async hit => {
       const metadata = await metadataRepository.getJSON(hit.ID);
       if (!isMetadata(metadata)) {
-        throw new Error(`Invalid item JSON: top-level is not an object`);
+        throw new Error('Invalid item JSON: top-level is not an object');
       }
 
       const meta =
@@ -46,7 +46,7 @@ export async function embedMetadata(
           ? metadata
           : _reduceMetadata(metadata, hit.structureNodeId);
 
-      return { ...hit, metadata: meta };
+      return {...hit, metadata: meta};
     })
   );
 
@@ -76,19 +76,19 @@ export function getReducedMetadata(
   let structurePath = nthStructureNode(metadata, structureIndex);
   // Strip children from the structure path nodes
   structurePath = structurePath.map(node => {
-    node = { ...node };
+    node = {...node};
     delete node.children;
     return node;
   });
 
   // The first page of the most significant structure
   if (!isMetadataArray(metadata.pages)) {
-    throw new Error(`Invalid item JSON: pages is not an array of objects`);
+    throw new Error('Invalid item JSON: pages is not an array of objects');
   }
   const targetStructureNode = structurePath[structurePath.length - 1];
   const targetNodeStartPage = targetStructureNode.startPagePosition;
   if (typeof targetNodeStartPage !== 'number') {
-    throw new Error(`Invalid item JSON: startPagePosition is not a number`);
+    throw new Error('Invalid item JSON: startPagePosition is not a number');
   }
   const firstPage = metadata.pages[targetNodeStartPage];
 
@@ -97,7 +97,7 @@ export function getReducedMetadata(
   const descriptiveMetadata = metadata.descriptiveMetadata;
   if (!isMetadataArray(descriptiveMetadata)) {
     throw new Error(
-      `Invalid item JSON: descriptiveMetadata is not an array of objects`
+      'Invalid item JSON: descriptiveMetadata is not an array of objects'
     );
   }
 
@@ -113,7 +113,7 @@ export function getReducedMetadata(
           `Invalid item JSON: logicalStructure object contains an invalid descriptiveMetadataID: ${dmdId}`
         );
       }
-      return { [dmdId]: dmdIndex[dmdId] };
+      return {[dmdId]: dmdIndex[dmdId]};
     })
   ) as Metadata;
 
@@ -129,7 +129,7 @@ export function indexDescriptiveMetadata(dmd: Metadata[]) {
   for (const m of dmd) {
     if (typeof m.ID !== 'string') {
       throw new Error(
-        `Invalid item JSON: descriptiveMetadata object has no ID`
+        'Invalid item JSON: descriptiveMetadata object has no ID'
       );
     }
     index[m.ID] = m;
@@ -156,7 +156,7 @@ export function nthStructureNode(metadata: Metadata, n: number) {
   const logicalStructures = metadata.logicalStructures;
   if (!isMetadataArray(logicalStructures)) {
     throw new Error(
-      `Invalid item JSON: logicalStructures is not an array of objects`
+      'Invalid item JSON: logicalStructures is not an array of objects'
     );
   }
   const result = _nthStructureNode(n, logicalStructures as Metadata[], 0, []);

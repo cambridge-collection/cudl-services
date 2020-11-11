@@ -1,5 +1,5 @@
 import xmldom from 'xmldom';
-import { childElements, qualifiedName } from '../src/dom';
+import {childElements, qualifiedName} from '../src/dom';
 
 const domImplementation = new xmldom.DOMImplementation();
 const doc = domImplementation.createDocument(null, null, null);

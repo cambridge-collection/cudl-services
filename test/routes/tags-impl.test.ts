@@ -1,7 +1,7 @@
-import { AssertionError } from 'assert';
-import { PoolClient, QueryConfig, QueryResult, QueryResultRow } from 'pg';
-import { mocked } from 'ts-jest/utils';
-import { NotFoundError } from '../../src/errors';
+import {AssertionError} from 'assert';
+import {PoolClient, QueryConfig, QueryResult, QueryResultRow} from 'pg';
+import {mocked} from 'ts-jest/utils';
+import {NotFoundError} from '../../src/errors';
 import {
   AbstractTagSet,
   DefaultTagSet,
@@ -24,7 +24,7 @@ import {
   ViewTagSet,
   WeightedTagSet,
 } from '../../src/routes/tags-impl';
-import { product } from '../utils';
+import {product} from '../utils';
 
 const tags: Array<[string, number]> = [
   ['foo', 42],
@@ -162,8 +162,8 @@ describe('MergedTagSet', () => {
 
   test.each<[TagMerger | undefined, Record<string, number>]>([
     // Default is to sum tags
-    [undefined, { foo: 84, bar: 48, hi: 100 }],
-    [(a, b) => a + b + 1, { foo: 85, bar: 49, hi: 100 }],
+    [undefined, {foo: 84, bar: 48, hi: 100}],
+    [(a, b) => a + b + 1, {foo: 85, bar: 49, hi: 100}],
   ])('merges values according to merge function', (mergeFn, expected) => {
     expect(new MergedTagSet([tagsA, tagsB, tagsC], mergeFn).asObject()).toEqual(
       expected
@@ -192,9 +192,9 @@ describe('FilterTagSet', () => {
 
   test.each<[TagPredicate | undefined, Record<string, number>]>([
     // Default includes all tags
-    [undefined, { foo: 42, bar: 24 }],
-    [(tag, value, tagSet) => tag === 'foo', { foo: 42 }],
-    [(tag, value, tagSet) => value > 40, { foo: 42 }],
+    [undefined, {foo: 42, bar: 24}],
+    [(tag, value, tagSet) => tag === 'foo', {foo: 42}],
+    [(tag, value, tagSet) => value > 40, {foo: 42}],
   ])(
     'filters tags according to predicate function',
     (predicateFn, expected) => {
@@ -206,7 +206,7 @@ describe('FilterTagSet', () => {
 });
 
 test('isTagResultRow()', () => {
-  const obj = { tagname: 'foo', frequency: 42 };
+  const obj = {tagname: 'foo', frequency: 42};
   if (isTagResultRow(obj)) {
     const trr: TagResultRow = obj;
     expect(trr).toBeTruthy();
@@ -217,8 +217,8 @@ test('isTagResultRow()', () => {
 
 test('isTagResultRowArray()', () => {
   const obj = [
-    { tagname: 'foo', frequency: 42 },
-    { tagname: 'bar', frequency: 24 },
+    {tagname: 'foo', frequency: 42},
+    {tagname: 'bar', frequency: 24},
   ];
   if (isTagResultRowArray(obj)) {
     const trra: TagResultRow[] = obj;
@@ -254,8 +254,8 @@ describe('PostgresTagsDAO', () => {
         [
           [],
           [
-            { tagname: 'foo', frequency: 42 },
-            { tagname: 'bar', frequency: 24 },
+            {tagname: 'foo', frequency: 42},
+            {tagname: 'bar', frequency: 24},
           ],
         ]
       )
@@ -273,7 +273,7 @@ describe('PostgresTagsDAO', () => {
       throw new AssertionError({});
     }
     expect(Array.from(result)).toEqual(
-      resultRows.map(({ tagname, frequency }) => [tagname, frequency])
+      resultRows.map(({tagname, frequency}) => [tagname, frequency])
     );
   });
 });
@@ -311,7 +311,7 @@ describe('TagSource', () => {
     mocked(factory).mockResolvedValue(new DefaultTagSet([['foo', 42]]));
 
     const tags = await new TagSource(factory, 0.5).loadTags('MS-FOO');
-    expect(tags.asObject()).toEqual({ foo: 21 });
+    expect(tags.asObject()).toEqual({foo: 21});
     expect(factory).toHaveBeenCalledTimes(1);
     expect(factory).toHaveBeenNthCalledWith(1, 'MS-FOO');
   });
@@ -322,7 +322,7 @@ describe('TagSource', () => {
       'annotationTags',
       2
     ).loadTags('MS-FOO');
-    expect(tags.asObject()).toEqual({ foo: 10, bar: 40 });
+    expect(tags.asObject()).toEqual({foo: 10, bar: 40});
   });
 });
 

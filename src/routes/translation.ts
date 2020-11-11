@@ -1,14 +1,14 @@
-import { XSLTExecutor } from '@lib.cam/xslt-nailgun';
-import express, { Request, Response } from 'express';
+import {XSLTExecutor} from '@lib.cam/xslt-nailgun';
+import express, {Request, Response} from 'express';
 import expressAsyncHandler from 'express-async-handler';
 import fs from 'fs';
-import { StatusCodes } from 'http-status-codes';
+import {StatusCodes} from 'http-status-codes';
 import * as path from 'path';
-import util, { promisify } from 'util';
-import { CUDLFormat, CUDLMetadataRepository } from '../metadata';
-import { applyLazyDefaults, isSimplePathSegment } from '../util';
-import { delegateToExternalHTML } from './transcription-impl';
-import { URL } from 'url';
+import util, {promisify} from 'util';
+import {CUDLFormat, CUDLMetadataRepository} from '../metadata';
+import {applyLazyDefaults, isSimplePathSegment} from '../util';
+import {delegateToExternalHTML} from './transcription-impl';
+import {URL} from 'url';
 
 export function getRoutes(options: {
   router?: express.Router;
@@ -106,7 +106,7 @@ async function extractTeiPageRange(options: {
     parameters: {
       start: options.start,
       end: options.end,
-      ...(options.type === undefined ? {} : { type: options.type }),
+      ...(options.type === undefined ? {} : {type: options.type}),
     },
   });
 }

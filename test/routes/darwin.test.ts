@@ -1,16 +1,16 @@
-import { AssertionError } from 'assert';
+import {AssertionError} from 'assert';
 import express from 'express';
 import http from 'http';
-import { StatusCodes } from 'http-status-codes';
+import {StatusCodes} from 'http-status-codes';
 import request from 'supertest';
-import { promisify } from 'util';
+import {promisify} from 'util';
 
-import { getRoutes } from '../../src/routes/darwin';
-import { DummyHttpServer } from '../utils';
+import {getRoutes} from '../../src/routes/darwin';
+import {DummyHttpServer} from '../utils';
 
 function getTestApp(routePrefix: string, darwinXtfUrl: string) {
   const app = express();
-  app.use(routePrefix, getRoutes({ darwinXtfUrl }));
+  app.use(routePrefix, getRoutes({darwinXtfUrl}));
   return app;
 }
 
@@ -18,7 +18,7 @@ function getTestApp(routePrefix: string, darwinXtfUrl: string) {
 // /v1/darwin/view?docId=letters/DCP-LETT-10362F.xml;query=Linnean%20Society;brand=default;hit.rank=4
 // /v1/darwin/search?keyword=Linnean%20Society;foo=bar
 
-describe(`darwin proxy /*`, () => {
+describe('darwin proxy /*', () => {
   // We test the proxy by setting up a temporary HTTP server to act as the
   // upstream.
   let dummyUpstream: DummyHttpServer;
@@ -52,7 +52,7 @@ describe(`darwin proxy /*`, () => {
       '/some/path',
       'search?keyword=Foo%20Bar;f1-correspondent=Darwin%2C%20C.%20R.',
     ],
-  ])(`GET /v1/darwin/%s`, async (xtfPathPrefix, requestPath) => {
+  ])('GET /v1/darwin/%s', async (xtfPathPrefix, requestPath) => {
     dummyUpstream.requestHandler.mockClear();
 
     const routePrefix = '/v1/darwin';

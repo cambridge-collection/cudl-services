@@ -1,13 +1,13 @@
 import jsdom from 'jsdom';
 import RelateUrl from 'relateurl';
-import { URL } from 'url';
+import {URL} from 'url';
 
 export function parseHTML(options: {
   html: string | Buffer;
   contentType?: string;
   url?: URL | string;
 }) {
-  const { html, contentType, url } = options;
+  const {html, contentType, url} = options;
   return new jsdom.JSDOM(html, {
     contentType,
     url: url === undefined ? undefined : ensureURL(url).toString(),
@@ -66,9 +66,9 @@ export function rewriteResourceURLs(doc: Document, rewriter: URLRewriter) {
             `HTML element has attribute ${attrName} but no corresponding property`
           );
         }
-        let relativeURL: {} | { relativeURL: string } = {};
+        let relativeURL: {} | {relativeURL: string} = {};
         if (isSameOrigin(baseURL, resolvedURL)) {
-          relativeURL = { relativeURL: RelateUrl.relate(baseURL, resolvedURL) };
+          relativeURL = {relativeURL: RelateUrl.relate(baseURL, resolvedURL)};
         }
         const newValue = rewriter({
           rawURL,

@@ -1,23 +1,23 @@
 import express from 'express';
 import fs from 'fs';
-import { StatusCodes } from 'http-status-codes';
+import {StatusCodes} from 'http-status-codes';
 import path from 'path';
 import request from 'supertest';
-import { promisify } from 'util';
-import { CUDLMetadataRepository } from '../../src/metadata';
+import {promisify} from 'util';
+import {CUDLMetadataRepository} from '../../src/metadata';
 
-import { getRoutes } from '../../src/routes/metadata';
-import { TEST_DATA_PATH } from '../constants';
+import {getRoutes} from '../../src/routes/metadata';
+import {TEST_DATA_PATH} from '../constants';
 
-import { getTestDataMetadataRepository } from '../utils';
+import {getTestDataMetadataRepository} from '../utils';
 
 function getTestApp(metadataRepository: CUDLMetadataRepository) {
   const app = express();
-  app.use('/', getRoutes({ metadataRepository }));
+  app.use('/', getRoutes({metadataRepository}));
   return app;
 }
 
-describe(`metadata routes /:format/:id`, () => {
+describe('metadata routes /:format/:id', () => {
   let repo: CUDLMetadataRepository, app: express.Application;
 
   beforeEach(() => {
@@ -47,7 +47,7 @@ describe(`metadata routes /:format/:id`, () => {
 
   test('/json/:id forbids cross-origin requests for non-embeddable items', async () => {
     const response = await request(app)
-      .get(`/json/non-embeddable-item`)
+      .get('/json/non-embeddable-item')
       .set('Origin', 'https://example.com');
     expect(response.status).toBe(StatusCodes.FORBIDDEN);
     expect(response.body.error).toMatch(
@@ -56,12 +56,12 @@ describe(`metadata routes /:format/:id`, () => {
   });
 
   test('/json/:id responds with 404 for missing ID', async () => {
-    const response = await request(app).get(`/json/MS-MISSING`);
+    const response = await request(app).get('/json/MS-MISSING');
     expect(response.status).toBe(StatusCodes.NOT_FOUND);
   });
 
   test('/json/:id responds with 500 for invalid metadata', async () => {
-    const response = await request(app).get(`/json/INVALID`);
+    const response = await request(app).get('/json/INVALID');
     expect(response.status).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
   });
 
@@ -74,12 +74,12 @@ describe(`metadata routes /:format/:id`, () => {
   });
 
   test('/:format/:id responds with 500 for invalid metadata when requesting non-json metadata', async () => {
-    const response = await request(app).get(`/tei/INVALID`);
+    const response = await request(app).get('/tei/INVALID');
     expect(response.status).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
   });
 
   test('/:format/:id responds with non-JSON metadata', async () => {
-    const response = await request(app).get(`/tei/MS-ADD-03959`);
+    const response = await request(app).get('/tei/MS-ADD-03959');
     expect(response.status).toBe(StatusCodes.OK);
     expect(response.get('content-type')).toBe('text/plain; charset=utf-8');
     expect(response.text).toEqual(
@@ -95,7 +95,7 @@ describe(`metadata routes /:format/:id`, () => {
 
   test('/:format/:id responds with 403 for non-json metadata without a rights statement', async () => {
     const response = await request(app).get(
-      `/tei/item-without-rights-statement`
+      '/tei/item-without-rights-statement'
     );
     expect(response.status).toBe(StatusCodes.FORBIDDEN);
     expect(response.body.error).toBe(

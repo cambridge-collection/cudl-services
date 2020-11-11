@@ -1,5 +1,5 @@
-import { AssertionError } from 'assert';
-import { BaseResource, using } from '../src/resources';
+import {AssertionError} from 'assert';
+import {BaseResource, using} from '../src/resources';
 
 class MyResource extends BaseResource {
   example() {

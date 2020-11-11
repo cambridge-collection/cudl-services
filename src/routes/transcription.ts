@@ -1,12 +1,12 @@
-import { ExecuteOptions, XSLTExecutor } from '@lib.cam/xslt-nailgun';
-import { Request, Router } from 'express';
+import {ExecuteOptions, XSLTExecutor} from '@lib.cam/xslt-nailgun';
+import {Request, Router} from 'express';
 
-import { StatusCodes } from 'http-status-codes';
+import {StatusCodes} from 'http-status-codes';
 
-import { JSDOM } from 'jsdom';
+import {JSDOM} from 'jsdom';
 import path from 'path';
-import { URL } from 'url';
-import { NotFoundError, UpstreamError } from '../errors';
+import {URL} from 'url';
+import {NotFoundError, UpstreamError} from '../errors';
 import {
   CUDLFormat,
   CUDLMetadataRepository,
@@ -19,7 +19,7 @@ import {
   requireRequestParam,
   requireRequestParams,
 } from '../util';
-import { delegateToExternalHTML } from './transcription-impl';
+import {delegateToExternalHTML} from './transcription-impl';
 import expressAsyncHandler = require('express-async-handler');
 
 interface TranscriptionEndpoint<T> {
@@ -28,7 +28,7 @@ interface TranscriptionEndpoint<T> {
   options: (req: Request) => T;
 }
 
-type XSLTOptions<T, F> = T & { id: string; format: F };
+type XSLTOptions<T, F> = T & {id: string; format: F};
 
 function xsltTranscriptionEndpoint<Fmt extends string, Opt>(options: {
   path: string;
@@ -55,7 +55,7 @@ export function getRoutes(options: {
   xsltExecutor: XSLTExecutor;
   zacynthiusServiceURL: URL;
 }) {
-  const { router, zacynthiusServiceURL } = applyLazyDefaults(options, {
+  const {router, zacynthiusServiceURL} = applyLazyDefaults(options, {
     router: () => Router(),
   });
 
@@ -69,9 +69,9 @@ export function getRoutes(options: {
     transforms: [
       {
         xsltPath: PAGE_EXTRACT_XSLT,
-        params: options => ({ start: options.start, end: options.end }),
+        params: options => ({start: options.start, end: options.end}),
       },
-      { xsltPath: MS_TEI_TRANS_XSLT },
+      {xsltPath: MS_TEI_TRANS_XSLT},
     ],
     options: req => ({
       ...extractIDPagesTranscriptionOptions(req),
@@ -89,9 +89,9 @@ export function getRoutes(options: {
     transforms: [
       {
         xsltPath: PAGE_EXTRACT_XSLT,
-        params: options => ({ start: options.start, end: options.end }),
+        params: options => ({start: options.start, end: options.end}),
       },
-      { xsltPath: BEZAE_TRANS_XSLT },
+      {xsltPath: BEZAE_TRANS_XSLT},
     ],
     options: req => {
       return {
@@ -109,7 +109,7 @@ export function getRoutes(options: {
     path: '/dcp/diplomatic/internal/:id',
     xsltExecutor: options.xsltExecutor,
     metadataRepository: options.metadataRepository,
-    transforms: [{ xsltPath: LEGACY_DCP_XSLT }],
+    transforms: [{xsltPath: LEGACY_DCP_XSLT}],
     options: req => ({
       ...extractIDTranscriptionOptions(req),
       format: CUDLFormat.DCP,
@@ -120,7 +120,7 @@ export function getRoutes(options: {
     path: '/dcpfull/diplomatic/internal/:id',
     metadataRepository: options.legacyDarwinMetadataRepository,
     xsltExecutor: options.xsltExecutor,
-    transforms: [{ xsltPath: LEGACY_DCP_XSLT }],
+    transforms: [{xsltPath: LEGACY_DCP_XSLT}],
     options: req => ({
       ...extractIDTranscriptionOptions(req),
       format: LegacyDarwinFormat.DEFAULT,
@@ -225,7 +225,7 @@ function createTranscriptionHandler<T>(
       options = extractOptions(req);
     } catch (e) {
       if (e instanceof InvalidTranscriptionOptionsError) {
-        res.status(StatusCodes.BAD_REQUEST).json({ error: e.message });
+        res.status(StatusCodes.BAD_REQUEST).json({error: e.message});
       }
       throw e;
     }
@@ -246,7 +246,7 @@ function createTranscriptionHandler<T>(
         throw e;
       }
 
-      res.status(status).json({ error: msg });
+      res.status(status).json({error: msg});
       return;
     }
   });
@@ -288,8 +288,8 @@ interface TranscriptionService<Params> {
   getTranscription(options: Params): Promise<string>;
 }
 
-type ElementWithHref = Element & { href: string };
-type ElementWithSrc = Element & { src: string };
+type ElementWithHref = Element & {href: string};
+type ElementWithSrc = Element & {src: string};
 
 function isElementWithHref(el: Element): el is ElementWithHref {
   const maybeElementWithHref = el as Partial<ElementWithHref>;
@@ -301,9 +301,9 @@ function isElementWithSrc(el: Element): el is ElementWithSrc {
   return typeof maybeElementWithSrc.src === 'string';
 }
 
-type UrlRewriterOptions = { url: string } & (
-  | { srcEl: ElementWithSrc }
-  | { hrefEl: ElementWithHref }
+type UrlRewriterOptions = {url: string} & (
+  | {srcEl: ElementWithSrc}
+  | {hrefEl: ElementWithHref}
 );
 export type UrlRewriter = (options: UrlRewriterOptions) => string | undefined;
 
@@ -312,7 +312,7 @@ export function rewriteHtmlResourceUrls(options: {
   baseUrl: string | URL;
   rewrite: UrlRewriter | UrlRewriter[];
 }): string {
-  const dom = new JSDOM(options.html, { url: String(options.baseUrl) });
+  const dom = new JSDOM(options.html, {url: String(options.baseUrl)});
   const doc = dom.window.document;
   const urlRewriters = Array.isArray(options.rewrite)
     ? options.rewrite
@@ -322,9 +322,9 @@ export function rewriteHtmlResourceUrls(options: {
     let rwOptions: UrlRewriterOptions | undefined = undefined;
 
     if (isElementWithHref(el)) {
-      rwOptions = { url: el.href, hrefEl: el };
+      rwOptions = {url: el.href, hrefEl: el};
     } else if (isElementWithSrc(el)) {
-      rwOptions = { url: el.src, srcEl: el };
+      rwOptions = {url: el.src, srcEl: el};
     }
 
     if (!rwOptions) {
@@ -373,7 +373,7 @@ interface TransformStage<Opt> {
 }
 
 class XSLTTranscriptionService<
-  Opt extends { id: string; format: Fmt },
+  Opt extends {id: string; format: Fmt},
   Fmt extends string = string
 > implements TranscriptionService<Opt> {
   protected readonly metadataRepository: MetadataRepository<Fmt>;

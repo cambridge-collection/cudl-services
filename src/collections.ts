@@ -1,5 +1,5 @@
-import { BasePostgresDAO } from './db';
-import { Resource } from './resources';
+import {BasePostgresDAO} from './db';
+import {Resource} from './resources';
 
 export interface Collection {
   title: string;
@@ -13,7 +13,8 @@ export interface CollectionDAO extends Resource {
   getItemCollections: GetItemCollections;
 }
 
-export class PostgresCollectionDAO extends BasePostgresDAO
+export class PostgresCollectionDAO
+  extends BasePostgresDAO
   implements CollectionDAO {
   async getItemCollections(itemID: string): Promise<Collection[]> {
     const sql = `\

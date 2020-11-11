@@ -1,9 +1,9 @@
-import { StatusCodes } from 'http-status-codes';
-import { Response } from 'superagent';
+import {StatusCodes} from 'http-status-codes';
+import {Response} from 'superagent';
 import superagent from 'superagent';
 import * as util from 'util';
-import { ValueError } from '../../src/errors';
-import { URLRewriter } from '../../src/html';
+import {ValueError} from '../../src/errors';
+import {URLRewriter} from '../../src/html';
 import {
   contentTypes,
   createDefaultResourceURLRewriter,
@@ -13,8 +13,8 @@ import {
   ResponseData,
   TransformedResponse,
 } from '../../src/routes/transcription-impl';
-import { URL } from 'url';
-import { validate } from '../../src/util';
+import {URL} from 'url';
+import {validate} from '../../src/util';
 
 describe('response handlers', () => {
   describe('HTML resource URL rewriting', () => {
@@ -22,7 +22,7 @@ describe('response handlers', () => {
       [
         [undefined, 'resources/things/css/foo.css'],
         [
-          { baseResourceURL: '/a/b/resources/' },
+          {baseResourceURL: '/a/b/resources/'},
           '/a/b/resources/things/css/foo.css',
         ],
         [
@@ -63,7 +63,8 @@ describe('response handlers', () => {
     ])(
       'createRewriteHTMLResourceURLsResponseHandler()',
       async (urlRewriter, rewrittenURL) => {
-        const htmlTemplate = `<!DOCTYPE html><html><head><link href="%s" rel="stylesheet"></head><body></body></html>`;
+        const htmlTemplate =
+          '<!DOCTYPE html><html><head><link href="%s" rel="stylesheet"></head><body></body></html>';
 
         const handler = createRewriteHTMLResourceURLsResponseHandler(
           urlRewriter
@@ -80,7 +81,7 @@ describe('response handlers', () => {
         };
         const result = await handler(input);
         validate(result !== undefined);
-        const { currentRes: resultRes } = result;
+        const {currentRes: resultRes} = result;
 
         expect(resultRes).toEqual({
           ...input.currentRes,

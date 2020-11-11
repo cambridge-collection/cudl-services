@@ -2,9 +2,9 @@
  * This module contains functions for working with Postgres.
  */
 import pg from 'pg';
-import { StrictConfig } from './config';
-import { Resource } from './resources';
-import { factory, UnaryConstructorArg } from './util';
+import {StrictConfig} from './config';
+import {Resource} from './resources';
+import {factory, UnaryConstructorArg} from './util';
 
 export type DatabaseConfig = Pick<
   StrictConfig,
@@ -81,7 +81,8 @@ export class BaseDAO<DB> {
   }
 }
 
-export class BasePostgresDAO extends BaseDAO<pg.PoolClient>
+export class BasePostgresDAO
+  extends BaseDAO<pg.PoolClient>
   implements Resource {
   getClient(): pg.PoolClient {
     return this.db;

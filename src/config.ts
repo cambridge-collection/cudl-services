@@ -4,12 +4,12 @@ import deepmerge from 'deepmerge';
 import fs from 'fs';
 import glob from 'glob';
 import json5 from 'json5';
-import util, { promisify } from 'util';
-import { BaseError, InvalidConfigError } from './errors';
+import util, {promisify} from 'util';
+import {BaseError, InvalidConfigError} from './errors';
 
 import fullConfigSchema from './full-config.schema.json';
 import partialConfigSchema from './partial-config.schema.json';
-import { NonOptional, requireNotUndefined } from './util';
+import {NonOptional, requireNotUndefined} from './util';
 
 const debug = Debugger('cudl-services:config');
 
@@ -18,10 +18,13 @@ export const CONFIG_FILE_ENVAR = 'NODE_CONFIG_FILE';
 export const DEFAULT_CONFIG_GLOBS =
   '/etc/cudl-services/config.json?(5):/etc/cudl-services/conf.d/*.json?(5)';
 
-const ajv = new Ajv({ schemas: [fullConfigSchema, partialConfigSchema] });
-const fullConfigValidator = requireNotUndefined(ajv.getSchema('full-config.schema.json'));
-const partialConfigValidator = requireNotUndefined(ajv.getSchema('partial-config.schema.json'));
-
+const ajv = new Ajv({schemas: [fullConfigSchema, partialConfigSchema]});
+const fullConfigValidator = requireNotUndefined(
+  ajv.getSchema('full-config.schema.json')
+);
+const partialConfigValidator = requireNotUndefined(
+  ajv.getSchema('partial-config.schema.json')
+);
 
 const DEFAULT_ZACYNTHIUS_SERVICE_URL =
   'http://codex-zacynthius-transcription.cudl.lib.cam.ac.uk';
@@ -138,7 +141,7 @@ export async function loadConfigFromEnvar(): Promise<StrictConfig> {
   }
 
   if (configSources.filter(s => s !== DEFAULT_CONFIG).length === 0) {
-    throw new Error(`No configuration sources found`);
+    throw new Error('No configuration sources found');
   }
 
   return mergeConfigs(configSources);

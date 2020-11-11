@@ -9,11 +9,12 @@ import {
   NonOptional,
   OmittableOptional,
   pickDefined,
-  PickOptional, requireNotUndefined,
+  PickOptional,
+  requireNotUndefined,
   sorted,
 } from '../src/util';
-import { ParsedQs } from "qs";
-import { AssertionError } from "assert";
+import {ParsedQs} from 'qs';
+import {AssertionError} from 'assert';
 
 test('isEnumMember', () => {
   expect.assertions(1);
@@ -151,31 +152,31 @@ describe('sorting', () => {
       expect(sorted(unsorted, x => [compare.desc, x])).toEqual(expected);
     });
 
-    test.each<[Array<{ thing: number }>, Array<{ thing: number }>]>([
+    test.each<[Array<{thing: number}>, Array<{thing: number}>]>([
       [[], []],
-      [[{ thing: 0 }], [{ thing: 0 }]],
+      [[{thing: 0}], [{thing: 0}]],
       [
-        [{ thing: 0 }, { thing: 1 }],
-        [{ thing: 0 }, { thing: 1 }],
+        [{thing: 0}, {thing: 1}],
+        [{thing: 0}, {thing: 1}],
       ],
       [
-        [{ thing: 1 }, { thing: 0 }],
-        [{ thing: 0 }, { thing: 1 }],
+        [{thing: 1}, {thing: 0}],
+        [{thing: 0}, {thing: 1}],
       ],
     ])("sorted(%j, *key*, 'desc') returns %j", (unsorted, expected) => {
       expect(sorted(unsorted, t => t.thing)).toEqual(expected);
     });
 
-    test.each<[Array<{ thing: number }>, Array<{ thing: number }>]>([
+    test.each<[Array<{thing: number}>, Array<{thing: number}>]>([
       [[], []],
-      [[{ thing: 0 }], [{ thing: 0 }]],
+      [[{thing: 0}], [{thing: 0}]],
       [
-        [{ thing: 0 }, { thing: 1 }],
-        [{ thing: 1 }, { thing: 0 }],
+        [{thing: 0}, {thing: 1}],
+        [{thing: 1}, {thing: 0}],
       ],
       [
-        [{ thing: 1 }, { thing: 0 }],
-        [{ thing: 1 }, { thing: 0 }],
+        [{thing: 1}, {thing: 0}],
+        [{thing: 1}, {thing: 0}],
       ],
     ])("sorted(%j, *key*,s 'desc') returns %j", (unsorted, expected) => {
       expect(sorted(unsorted, t => [compare.desc, t.thing])).toEqual(expected);
@@ -190,18 +191,18 @@ interface Options {
 }
 
 test.each<[Options, OmittableOptional<Options>]>([
-  [{ a: 'abc', b: undefined, c: null }, { a: 'abc' }],
+  [{a: 'abc', b: undefined, c: null}, {a: 'abc'}],
   [
-    { a: 'abc', c: 42 },
-    { a: 'abc', c: 42 },
+    {a: 'abc', c: 42},
+    {a: 'abc', c: 42},
   ],
   [
-    { a: 'abc', b: 'x', c: null },
-    { a: 'abc', b: 'x' },
+    {a: 'abc', b: 'x', c: null},
+    {a: 'abc', b: 'x'},
   ],
   [
-    { a: 'abc', b: 'def', c: 42 },
-    { a: 'abc', b: 'def', c: 42 },
+    {a: 'abc', b: 'def', c: 42},
+    {a: 'abc', b: 'def', c: 42},
   ],
 ])('pickDefined()', (options, expectedDefinedOptions) => {
   const definedOptions = pickDefined(options);
@@ -216,38 +217,38 @@ interface Options {
 
 test.each<[Options, Required<Options>]>([
   [
-    { a: 'abc', c: null },
-    { a: 'abc', b: 'def', c: 42 },
+    {a: 'abc', c: null},
+    {a: 'abc', b: 'def', c: 42},
   ],
   [
-    { a: 'abc', c: 54 },
-    { a: 'abc', b: 'def', c: 54 },
+    {a: 'abc', c: 54},
+    {a: 'abc', b: 'def', c: 54},
   ],
   [
-    { a: 'abc', b: 'foo', c: 54 },
-    { a: 'abc', b: 'foo', c: 54 },
+    {a: 'abc', b: 'foo', c: 54},
+    {a: 'abc', b: 'foo', c: 54},
   ],
 ])('applyDefaults()', (options, expected) => {
-  const defaults: NonOptional<PickOptional<Options>> = { b: 'def', c: 42 };
+  const defaults: NonOptional<PickOptional<Options>> = {b: 'def', c: 42};
   const actual = applyDefaults(options, defaults);
   expect(actual).toEqual(expected);
 });
 
-test.each<[Options, Required<Options>, { b: boolean; c: boolean }]>([
+test.each<[Options, Required<Options>, {b: boolean; c: boolean}]>([
   [
-    { a: 'abc', c: null },
-    { a: 'abc', b: 'def', c: 42 },
-    { b: true, c: true },
+    {a: 'abc', c: null},
+    {a: 'abc', b: 'def', c: 42},
+    {b: true, c: true},
   ],
   [
-    { a: 'abc', c: 54 },
-    { a: 'abc', b: 'def', c: 54 },
-    { b: true, c: false },
+    {a: 'abc', c: 54},
+    {a: 'abc', b: 'def', c: 54},
+    {b: true, c: false},
   ],
   [
-    { a: 'abc', b: 'foo', c: 54 },
-    { a: 'abc', b: 'foo', c: 54 },
-    { b: false, c: false },
+    {a: 'abc', b: 'foo', c: 54},
+    {a: 'abc', b: 'foo', c: 54},
+    {b: false, c: false},
   ],
 ])('applyLazyDefaults()', (options, expected, defaultCalls) => {
   const defaults: Lazy<NonOptional<PickOptional<Options>>> = {
@@ -262,20 +263,25 @@ test.each<[Options, Required<Options>, { b: boolean; c: boolean }]>([
 
 test('requireNotUndefined()', () => {
   expect(requireNotUndefined('abc')).toBe('abc');
-  expect(() => requireNotUndefined(undefined))
-    .toThrow(new AssertionError({message: 'value is undefined'}));
+  expect(() => requireNotUndefined(undefined)).toThrow(
+    new AssertionError({message: 'value is undefined'})
+  );
 });
 
 describe('firstQueryValue()', () => {
-  test.each<[undefined | string | string[] | ParsedQs | ParsedQs[], string | undefined]>([
+  test.each<
+    [undefined | string | string[] | ParsedQs | ParsedQs[], string | undefined]
+  >([
     [undefined, undefined],
     ['a', 'a'],
-    [['a', 'b'], 'a']
+    [['a', 'b'], 'a'],
   ])('firstQueryValue(%j) returns %j', (queryValue, expected) => {
     expect(firstQueryValue(queryValue)).toEqual(expected);
   });
 
   test('throws on non-simple query values', () => {
-    expect(() => firstQueryValue({})).toThrow('Unexpected request query value: {}');
+    expect(() => firstQueryValue({})).toThrow(
+      'Unexpected request query value: {}'
+    );
   });
 });

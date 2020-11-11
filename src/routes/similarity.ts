@@ -1,15 +1,11 @@
 import createDebugger from 'debug';
 import express from 'express';
 import expressAsyncHandler from 'express-async-handler';
-import { StatusCodes } from 'http-status-codes';
-import { CUDLMetadataRepository } from '../metadata';
-import { CORS_HEADERS, isEnumMember, requireRequestParam } from '../util';
-import { XTF } from '../xtf';
-import {
-  embedMetadata,
-  mapToJson,
-  MetadataEmbedLevel,
-} from './similarity-impl';
+import {StatusCodes} from 'http-status-codes';
+import {CUDLMetadataRepository} from '../metadata';
+import {CORS_HEADERS, isEnumMember, requireRequestParam} from '../util';
+import {XTF} from '../xtf';
+import {embedMetadata, mapToJson, MetadataEmbedLevel} from './similarity-impl';
 
 const debug = createDebugger('cudl-services:similarity');
 

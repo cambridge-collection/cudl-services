@@ -3,17 +3,17 @@ import stringify from 'csv-stringify';
 import csvStringify from 'csv-stringify';
 import express from 'express';
 import expressAsyncHandler from 'express-async-handler';
-import { StatusCodes } from 'http-status-codes';
+import {StatusCodes} from 'http-status-codes';
 import util from 'util';
 import xml2js from 'xml2js';
-import { DAOPool } from '../db';
-import { ValueError } from '../errors';
+import {DAOPool} from '../db';
+import {ValueError} from '../errors';
 import {
   compare,
   firstQueryValue,
   isEnumMember,
   sorted,
-  validateEnumMember
+  validateEnumMember,
 } from '../util';
 import {
   ItemTags,
@@ -29,7 +29,7 @@ export function getRoutes(options: {
   daoPool: DAOPool<TagsDAO>;
 }) {
   const router = options.router || express.Router();
-  const { daoPool } = options;
+  const {daoPool} = options;
 
   router.get(
     ['/:classmark.:ext(json|xml|txt|csv)', '/:classmark'],
@@ -92,7 +92,7 @@ async function sendTagResponse(options: {
   sourceNames: string | undefined;
   fixedResponseType?: ResponseType;
 }) {
-  const { req, res, sources, sourceNames, fixedResponseType } = options;
+  const {req, res, sources, sourceNames, fixedResponseType} = options;
   try {
     const selectedSources = selectTagSources(
       sources,
@@ -123,7 +123,7 @@ async function getNegotiatedResponse(options: {
   itemTags: ItemTags;
   fixedResponseType?: ResponseType;
 }): Promise<Response> {
-  const { req, itemTags, fixedResponseType } = options;
+  const {req, itemTags, fixedResponseType} = options;
   const accept = accepts(req);
 
   let negotiatedType =

@@ -1,10 +1,10 @@
-import { AssertionError } from 'assert';
+import {AssertionError} from 'assert';
 import fs from 'fs';
-import { QueryResult } from 'pg';
+import {QueryResult} from 'pg';
 import * as util from 'util';
-import { BasePostgresDAO } from '../db';
-import { NotFoundError, ValueError } from '../errors';
-import { sorted } from '../util';
+import {BasePostgresDAO} from '../db';
+import {NotFoundError, ValueError} from '../errors';
+import {sorted} from '../util';
 
 export type Tag = [string, number];
 
@@ -12,7 +12,7 @@ export interface TagSet extends Iterable<[string, number]> {
   getTags(): Iterable<string>;
   contains(tagName: string): boolean;
   getValue(tagName: string): number;
-  asObject(): { [key: string]: number };
+  asObject(): {[key: string]: number};
 }
 
 export abstract class AbstractTagSet implements TagSet {
@@ -26,7 +26,7 @@ export abstract class AbstractTagSet implements TagSet {
     }
   }
 
-  asObject(): { [p: string]: number } {
+  asObject(): {[p: string]: number} {
     return Object.fromEntries(this);
   }
 
@@ -153,7 +153,7 @@ export class MergedTagSet extends AbstractTagSet {
 
     const value = values.reduce(this.mergeValues);
     if (value === undefined) {
-      throw new AssertionError({ message: 'mergeValues returned undefined' });
+      throw new AssertionError({message: 'mergeValues returned undefined'});
     }
     return value;
   }
@@ -298,9 +298,9 @@ export class TagSource {
   }
 }
 
-export type NamedTagSources<T extends string> = { [key in T]: TagSource };
+export type NamedTagSources<T extends string> = {[key in T]: TagSource};
 
-export function selectTagSources<T extends { [key: string]: TagSource }>(
+export function selectTagSources<T extends {[key: string]: TagSource}>(
   sources: T,
   srcList: Array<keyof T> | string
 ): TagSource[] {

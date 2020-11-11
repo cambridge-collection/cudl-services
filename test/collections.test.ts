@@ -1,6 +1,6 @@
-import { PoolClient, QueryConfig, QueryResult, QueryResultRow } from 'pg';
-import { mocked } from 'ts-jest/utils';
-import { PostgresCollectionDAO } from '../src/collections';
+import {PoolClient, QueryConfig, QueryResult, QueryResultRow} from 'pg';
+import {mocked} from 'ts-jest/utils';
+import {PostgresCollectionDAO} from '../src/collections';
 
 interface MockPgClient {
   // The actual query() signature has several overloads which prevents the
@@ -29,11 +29,11 @@ describe('PostgresCollectionDAO', () => {
 
   test('getItemCollections()', async () => {
     mocked(mockClient).query.mockResolvedValueOnce({
-      rows: [{ title: 'foo', collectionid: 'bar', collectionorder: '42' }],
+      rows: [{title: 'foo', collectionid: 'bar', collectionorder: '42'}],
     } as any);
 
     await expect(dao.getItemCollections('MS-FOO')).resolves.toEqual([
-      { title: 'foo', collectionID: 'bar', collectionOrder: 42 },
+      {title: 'foo', collectionID: 'bar', collectionOrder: 42},
     ]);
     expect(mockClient.query).toBeCalledTimes(1);
     expect(mocked(mockClient).query.mock.calls[0][1]).toEqual(['MS-FOO']);

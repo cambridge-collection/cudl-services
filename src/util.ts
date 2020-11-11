@@ -1,11 +1,11 @@
-import { AssertionError } from 'assert';
+import {AssertionError} from 'assert';
 import escapeStringRegexp from 'escape-string-regexp';
-import { Request } from 'express';
+import {Request} from 'express';
 import url from 'url';
 import * as util from 'util';
-import { ValueError } from './errors';
+import {ValueError} from './errors';
 
-import { ParsedQs } from 'qs';
+import {ParsedQs} from 'qs';
 
 const CUDL_HOST = 'cudl.lib.cam.ac.uk';
 const CUDL_HOST_REGEX = new RegExp(
@@ -40,7 +40,7 @@ export function isSimplePathSegment(value: string): boolean {
  * @param val The value to narrow
  */
 export function isEnumMember<E extends string>(
-  _enum: { [k in string]: E },
+  _enum: {[k in string]: E},
   val: string
 ): val is E {
   const members = Object.values(_enum) as unknown[];
@@ -48,7 +48,7 @@ export function isEnumMember<E extends string>(
 }
 
 export function validateEnumMember<E extends string>(
-  _enum: { [k in string]: E },
+  _enum: {[k in string]: E},
   value: string
 ): E {
   if (isEnumMember(_enum, value)) {
@@ -72,8 +72,8 @@ export function requireRequestParam(req: Request, param: string): string {
 export function requireRequestParams<T extends string>(
   req: Request,
   ...params: T[]
-): { [key in T]: string } {
-  const obj = {} as { [key in T]: string };
+): {[key in T]: string} {
+  const obj = {} as {[key in T]: string};
   for (const param of params) {
     obj[param] = requireRequestParam(req, param);
   }
@@ -115,7 +115,7 @@ got: ${util.inspect(a)}`);
     }
     if (b.length !== 2 || b[0] !== a[0]) {
       throw new Error(
-        `Invalid compare direction modifier: modifiers on both comparison values must use the same direction`
+        'Invalid compare direction modifier: modifiers on both comparison values must use the same direction'
       );
     }
 
@@ -239,10 +239,10 @@ export function applyDefaults<T extends {}>(
   obj: T,
   defaults: NonOptional<PickOptional<T>>
 ): NonOptional<T> {
-  return { ...defaults, ...pickDefined(obj) } as NonOptional<T>;
+  return {...defaults, ...pickDefined(obj)} as NonOptional<T>;
 }
 
-export type Lazy<T> = { [key in keyof T]: () => T[key] };
+export type Lazy<T> = {[key in keyof T]: () => T[key]};
 
 export function applyLazyDefaults<T extends {}>(
   obj: T,
@@ -266,12 +266,12 @@ export function validate(
   message?: string
 ): asserts condition {
   if (!condition) {
-    throw new AssertionError({ message });
+    throw new AssertionError({message});
   }
 }
 
 export function requireNotUndefined<T>(value: T | undefined): T {
-  if(value === undefined) {
+  if (value === undefined) {
     throw new AssertionError({message: 'value is undefined'});
   }
   return value;
@@ -280,13 +280,17 @@ export function requireNotUndefined<T>(value: T | undefined): T {
 export function firstQueryValue(
   queryValue: undefined | string | string[] | ParsedQs | ParsedQs[]
 ): string | undefined {
-  if(typeof queryValue === 'string' || queryValue === undefined) {
+  if (typeof queryValue === 'string' || queryValue === undefined) {
     return queryValue;
   }
-  if(Array.isArray(queryValue) && queryValue.length > 0 &&
-    typeof queryValue[0] === 'string') {
+  if (
+    Array.isArray(queryValue) &&
+    queryValue.length > 0 &&
+    typeof queryValue[0] === 'string'
+  ) {
     return queryValue[0];
   }
   throw new ValueError(
-    `Unexpected request query value: ${util.inspect(queryValue)}`);
+    `Unexpected request query value: ${util.inspect(queryValue)}`
+  );
 }

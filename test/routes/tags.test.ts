@@ -7,18 +7,18 @@ function createMockTagsImpl() {
 }
 jest.mock('../../src/routes/tags-impl', createMockTagsImpl);
 
-import { AssertionError } from 'assert';
+import {AssertionError} from 'assert';
 import express from 'express';
-import { StatusCodes } from 'http-status-codes';
+import {StatusCodes} from 'http-status-codes';
 import supertest from 'supertest';
 import request from 'supertest';
-import { mocked } from 'ts-jest/utils';
-import { promisify } from 'util';
-import { DefaultDAOPool } from '../../src/db';
-import { getRoutes, ResponseType, TagSourceName } from '../../src/routes/tags';
-import { DefaultTagSet, loadTags, TagsDAO } from '../../src/routes/tags-impl';
-import { compare, sorted } from '../../src/util';
-import { getAttribute, product, SingletonDAOPool } from '../utils';
+import {mocked} from 'ts-jest/utils';
+import {promisify} from 'util';
+import {DefaultDAOPool} from '../../src/db';
+import {getRoutes, ResponseType, TagSourceName} from '../../src/routes/tags';
+import {DefaultTagSet, loadTags, TagsDAO} from '../../src/routes/tags-impl';
+import {compare, sorted} from '../../src/util';
+import {getAttribute, product, SingletonDAOPool} from '../utils';
 import xml2js from 'xml2js';
 import neatCsv from 'neat-csv';
 
@@ -75,7 +75,7 @@ async function parseResponseTags(
       tags: tags.map(row => [row.tag, Number(row.value)]),
     };
   }
-  throw new AssertionError({ message: 'Unexpected response type' });
+  throw new AssertionError({message: 'Unexpected response type'});
 }
 
 describe('tag routes /:classmark', () => {
@@ -87,7 +87,7 @@ describe('tag routes /:classmark', () => {
 
   function getTestApp() {
     const app = express();
-    app.use('/', getRoutes({ daoPool: SingletonDAOPool.containing(dao) }));
+    app.use('/', getRoutes({daoPool: SingletonDAOPool.containing(dao)}));
     return app;
   }
 
@@ -99,8 +99,10 @@ describe('tag routes /:classmark', () => {
     const result = await request(getTestApp()).get('/MS-FOO?sources=foo');
     expect(result.status).toBe(StatusCodes.BAD_REQUEST);
     expect(result.type).toBe('text/plain');
-    expect(result.text).toBe(`\
-Bad request: no tag source exists with name: 'foo', available sources: 3rd-party, annotations, user-removes`);
+    expect(result.text).toBe(
+      "\
+Bad request: no tag source exists with name: 'foo', available sources: 3rd-party, annotations, user-removes"
+    );
   });
 
   test.each(
@@ -134,7 +136,7 @@ Bad request: no tag source exists with name: 'foo', available sources: 3rd-party
         `/MS-FOO${extension}?sources=${sources}`
       );
       if (method === 'accept-header') {
-        req = req.set({ accept: MIME_TYPES[format] });
+        req = req.set({accept: MIME_TYPES[format]});
       }
 
       const response = await req;

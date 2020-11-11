@@ -1,5 +1,5 @@
-import { mocked } from 'ts-jest/utils';
-import { CUDLMetadataRepository, ItemJSON } from '../../src/metadata';
+import {mocked} from 'ts-jest/utils';
+import {CUDLMetadataRepository, ItemJSON} from '../../src/metadata';
 import {
   embedMetadata,
   getReducedMetadata,
@@ -15,9 +15,9 @@ describe('similarity route implementation', () => {
   describe('embedMetadata()', () => {
     let mockMetadataRepository: CUDLMetadataRepository;
     const meta = {
-      a: { id: 'a' },
-      b: { id: 'b' },
-    } as { [key: string]: ItemJSON };
+      a: {id: 'a'},
+      b: {id: 'b'},
+    } as {[key: string]: ItemJSON};
 
     const getResults = () => ({
       hits: [
@@ -99,7 +99,7 @@ describe('similarity route implementation', () => {
 
     test('embed level PARTIAL returns hits with partial metadata', async () => {
       const reduceMetadata: typeof getReducedMetadata = jest.fn(
-        (metadata, _) => ({ ...metadata, reduced: true })
+        (metadata, _) => ({...metadata, reduced: true})
       );
 
       expect(
@@ -115,13 +115,13 @@ describe('similarity route implementation', () => {
             ID: 'a',
             score: 42,
             structureNodeId: '3',
-            metadata: { ...meta['a'], reduced: true },
+            metadata: {...meta['a'], reduced: true},
           },
           {
             ID: 'b',
             score: 42,
             structureNodeId: '4',
-            metadata: { ...meta['b'], reduced: true },
+            metadata: {...meta['b'], reduced: true},
           },
         ],
       });
@@ -147,24 +147,24 @@ describe('similarity route implementation', () => {
               startPagePosition: 1,
               descriptiveMetadataID: 'bar',
             },
-            { id: 'd', children: [{ id: 'e' }] },
+            {id: 'd', children: [{id: 'e'}]},
           ],
         },
       ],
-      pages: [{ label: 'page-a' }, { label: 'page-b' }],
-      descriptiveMetadata: [{ ID: 'foo' }, { ID: 'bar' }, { ID: 'baz' }],
+      pages: [{label: 'page-a'}, {label: 'page-b'}],
+      descriptiveMetadata: [{ID: 'foo'}, {ID: 'bar'}, {ID: 'baz'}],
     };
 
     test('getReducedMetadata()', () => {
       expect(getReducedMetadata(meta, '2')).toEqual({
         structurePath: [
-          { id: 'b', descriptiveMetadataID: 'foo' },
-          { id: 'c', startPagePosition: 1, descriptiveMetadataID: 'bar' },
+          {id: 'b', descriptiveMetadataID: 'foo'},
+          {id: 'c', startPagePosition: 1, descriptiveMetadataID: 'bar'},
         ],
-        firstPage: { label: 'page-b' },
+        firstPage: {label: 'page-b'},
         descriptiveMetadata: {
-          foo: { ID: 'foo' },
-          bar: { ID: 'bar' },
+          foo: {ID: 'foo'},
+          bar: {ID: 'bar'},
         },
       });
     });
@@ -172,8 +172,8 @@ describe('similarity route implementation', () => {
 
   test('indexDescriptiveMetadata()', () => {
     const dmd = [
-      { ID: 'a', thing: 1 },
-      { ID: 'b', thing: 2 },
+      {ID: 'a', thing: 1},
+      {ID: 'b', thing: 2},
     ];
 
     const index = indexDescriptiveMetadata(dmd);
@@ -184,7 +184,7 @@ describe('similarity route implementation', () => {
   describe('isMetadata()', () => {
     test.each<[unknown, boolean]>([
       [{}, true],
-      [{ a: 'abc' }, true],
+      [{a: 'abc'}, true],
       [[], false],
       [42, false],
       [undefined, false],
@@ -198,7 +198,7 @@ describe('similarity route implementation', () => {
     test.each<[unknown, boolean]>([
       [[], true],
       [[{}], true],
-      [[{}, { a: 'abc' }], true],
+      [[{}, {a: 'abc'}], true],
       [{}, false],
       [42, false],
       [undefined, false],
@@ -217,8 +217,8 @@ describe('similarity route implementation', () => {
         {
           id: 'b',
           children: [
-            { id: 'c', children: [] },
-            { id: 'd', children: [{ id: 'e' }] },
+            {id: 'c', children: []},
+            {id: 'd', children: [{id: 'e'}]},
           ],
         },
         {

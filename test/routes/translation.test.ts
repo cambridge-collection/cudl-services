@@ -1,16 +1,16 @@
-import { XSLTExecutor } from '@lib.cam/xslt-nailgun';
-import express, { Application } from 'express';
-import { StatusCodes } from 'http-status-codes';
-import { JSDOM } from 'jsdom';
-import { get } from 'superagent';
+import {XSLTExecutor} from '@lib.cam/xslt-nailgun';
+import express, {Application} from 'express';
+import {StatusCodes} from 'http-status-codes';
+import {JSDOM} from 'jsdom';
+import {get} from 'superagent';
 import request from 'supertest';
-import { CUDLMetadataRepository } from '../../src/metadata';
-import { getRoutes } from '../../src/routes/translation';
+import {CUDLMetadataRepository} from '../../src/metadata';
+import {getRoutes} from '../../src/routes/translation';
 
-import { EXAMPLE_STATIC_FILES, EXAMPLE_ZACYNTHIUS_URL } from '../constants';
-import { mockGetResponder } from '../mocking/superagent-mocking';
+import {EXAMPLE_STATIC_FILES, EXAMPLE_ZACYNTHIUS_URL} from '../constants';
+import {mockGetResponder} from '../mocking/superagent-mocking';
 
-import { getTestDataMetadataRepository, getTestXSLTExecutor } from '../utils';
+import {getTestDataMetadataRepository, getTestXSLTExecutor} from '../utils';
 
 // Example translation requests:
 // /v1/translation/tei/EN/MS-LC-II-00077/15r/15r
@@ -46,7 +46,7 @@ afterAll(async () => {
   await xsltExecutor.close();
 });
 
-describe(`translation routes /tei/EN/:id/:from/:to`, () => {
+describe('translation routes /tei/EN/:id/:from/:to', () => {
   test('responds with 404 for missing ID', async () => {
     const response = await request(app).get('/tei/EN/missing/1/2');
     expect(response.status).toBe(StatusCodes.NOT_FOUND);
@@ -67,12 +67,12 @@ describe(`translation routes /tei/EN/:id/:from/:to`, () => {
       );
       expect(response.status).toBe(StatusCodes.BAD_REQUEST);
       expect(response.body.error).toMatch(
-        `Bad ${param}: ${{ id, from, to }[param]}`
+        `Bad ${param}: ${{id, from, to}[param]}`
       );
     }
   );
 
-  type HTMLLinkElement = Element & { href?: string };
+  type HTMLLinkElement = Element & {href?: string};
 
   test('responds with HTML content for valid request', async () => {
     const urlBase = 'https://example.com';
@@ -82,7 +82,7 @@ describe(`translation routes /tei/EN/:id/:from/:to`, () => {
     );
     expect(response.status).toBe(StatusCodes.OK);
     expect(response.type).toBe('text/html');
-    const dom = new JSDOM(response.text, { url: `${urlBase}${urlPath}` });
+    const dom = new JSDOM(response.text, {url: `${urlBase}${urlPath}`});
     const doc = dom.window.document;
 
     expect(doc.querySelector('html > head > title')?.textContent).toBe(

@@ -7,9 +7,9 @@ jest.mock('glob', () => {
 import fs from 'fs';
 import glob from 'glob';
 
-import { file, FileResult, withFile } from 'tmp-promise';
-import { mocked } from 'ts-jest/utils';
-import { promisify } from 'util';
+import {file, FileResult, withFile} from 'tmp-promise';
+import {mocked} from 'ts-jest/utils';
+import {promisify} from 'util';
 import {
   Config,
   CONFIG_FILE_ENVAR,
@@ -22,7 +22,7 @@ import {
   PartialConfig,
   splitEnvarPaths,
 } from '../src/config';
-import { InvalidConfigError } from '../src/errors';
+import {InvalidConfigError} from '../src/errors';
 import ProcessEnv = NodeJS.ProcessEnv;
 
 const EXAMPLE_CONFIG: Config = {
@@ -43,7 +43,7 @@ const EXAMPLE_CONFIG: Config = {
 describe('config', () => {
   describe('mergeConfigs()', () => {
     test('merges 1 config', () => {
-      const config = mergeConfigs([{ source: 'foo', config: EXAMPLE_CONFIG }]);
+      const config = mergeConfigs([{source: 'foo', config: EXAMPLE_CONFIG}]);
       expect(config).toEqual(EXAMPLE_CONFIG);
     });
 
@@ -53,8 +53,8 @@ describe('config', () => {
       };
       delete configA['darwinXTF'];
       const sources: ConfigSource[] = [
-        { source: 'a', config: configA },
-        { source: 'b', config: { darwinXTF: 'example' } },
+        {source: 'a', config: configA},
+        {source: 'b', config: {darwinXTF: 'example'}},
       ];
 
       expect(mergeConfigs(sources)).toEqual(EXAMPLE_CONFIG);
@@ -92,7 +92,7 @@ describe('config', () => {
 
     test('fails when filePath cannot be read', async () => {
       await expect(loadConfigFile('/does/not/exist')).rejects.toThrow(
-        `Failed to load config from file '/does/not/exist': Error: ENOENT: no such file or directory, open '/does/not/exist'`
+        "Failed to load config from file '/does/not/exist': Error: ENOENT: no such file or directory, open '/does/not/exist'"
       );
     });
 
@@ -104,7 +104,7 @@ describe('config', () => {
     });
 
     test.each<[string, PartialConfig]>([
-      [`/* Comment */ {dataDir: 'abcd'}`, { dataDir: 'abcd' }],
+      ["/* Comment */ {dataDir: 'abcd'}", {dataDir: 'abcd'}],
       [JSON.stringify(EXAMPLE_CONFIG), EXAMPLE_CONFIG],
     ])('returns partial config', async (content, expected) => {
       await promisify(fs.writeFile)(tmpFile.fd, content);
@@ -150,8 +150,8 @@ describe('config', () => {
           {},
           true,
         ],
-        [['/foo'], { [CONFIG_FILE_ENVAR]: '/foo' }, false],
-        [['/foo', '/bar/*'], { [CONFIG_FILE_ENVAR]: '/foo:/bar/*' }, false],
+        [['/foo'], {[CONFIG_FILE_ENVAR]: '/foo'}, false],
+        [['/foo', '/bar/*'], {[CONFIG_FILE_ENVAR]: '/foo:/bar/*'}, false],
       ])(
         'Expands glob patterns %s when environment contains %s',
         async (patterns, env, defaultUsed) => {
@@ -198,7 +198,7 @@ describe('config', () => {
           );
           const configBContent: PartialConfig = {
             postPort: 42,
-            users: { foo: { email: 'foo@example.com' } },
+            users: {foo: {email: 'foo@example.com'}},
           };
           await promisify(fs.writeFile)(
             configB.fd,
@@ -206,7 +206,7 @@ describe('config', () => {
           );
 
           const configCContent: PartialConfig = {
-            users: { foo: { username: 'foo1' } },
+            users: {foo: {username: 'foo1'}},
             dataDir: '/other',
           };
 
@@ -218,7 +218,7 @@ describe('config', () => {
             ...{
               postPort: 42,
               dataDir: '/other',
-              users: { foo: { email: 'foo@example.com', username: 'foo1' } },
+              users: {foo: {email: 'foo@example.com', username: 'foo1'}},
             },
           });
         });

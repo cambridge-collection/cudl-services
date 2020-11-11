@@ -1,4 +1,4 @@
-import { Response } from 'superagent';
+import {Response} from 'superagent';
 
 export type PartialResponse = Partial<Response>;
 export type MockResponder = (url: string) => Promise<PartialResponse>;
@@ -20,7 +20,7 @@ export class MockRequest implements PromiseLike<PartialResponse> {
     this.then = this.response.then.bind(this.response);
 
     for (const methodName of MockRequest.MOCKED_METHODS) {
-      (this as { [key in string]: unknown })[methodName] = jest.fn(() => this);
+      (this as {[key in string]: unknown})[methodName] = jest.fn(() => this);
     }
   }
 }

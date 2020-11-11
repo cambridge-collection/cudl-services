@@ -1,8 +1,8 @@
 import Debugger from 'debug';
 import util from 'util';
-import { App } from './app';
-import { loadConfigFromEnvar, StrictConfig } from './config';
-import { using } from './resources';
+import {App} from './app';
+import {loadConfigFromEnvar, StrictConfig} from './config';
+import {using} from './resources';
 
 const debug = Debugger('cudl-services');
 
@@ -12,14 +12,16 @@ async function runAsync() {
     config = await loadConfigFromEnvar();
   } catch (e) {
     console.error(`Error: ${e.message}`);
-    console.error(`Setting envar DEBUG=cudl-services:config may help`);
+    console.error('Setting envar DEBUG=cudl-services:config may help');
     process.exit(1);
   }
 
   if ((config && 'user' in config) || 'group' in config) {
-    console.error(`\
+    console.error(
+      '\
   Error: config.user and config.group are no longer supported. Remove them from the \
-  config and start this process with the desired user.`);
+  config and start this process with the desired user.'
+    );
     process.exit(1);
   }
   if (process.getuid && process.getuid() === 0) {
@@ -27,7 +29,7 @@ async function runAsync() {
     process.exit(1);
   }
 
-  await using(App.fromConfig(config), async ({ value: application }) => {
+  await using(App.fromConfig(config), async ({value: application}) => {
     application.expressApp.set('port', process.env.PORT || 3000);
 
     const server = application.expressApp.listen(
@@ -42,7 +44,7 @@ async function runAsync() {
 
     await new Promise((resolve, reject) => {
       function shutdown() {
-        process.stdout.write(` Shutting down gracefully... `);
+        process.stdout.write(' Shutting down gracefully... ');
         server.close(err => {
           if (err) {
             reject(err);
@@ -58,12 +60,12 @@ async function runAsync() {
       server.once('close', resolve);
     });
   });
-  console.log(`server stopped.`);
+  console.log('server stopped.');
 }
 
 export function run() {
   runAsync().catch(e => {
-    console.error(`Error: Server exited with an uncaught exception:\n\n`, e);
+    console.error('Error: Server exited with an uncaught exception:\n\n', e);
     process.exit(1);
   });
 }

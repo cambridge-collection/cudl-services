@@ -1,23 +1,15 @@
 module.exports = {
   globals: {
     'ts-jest': {
-      tsconfig: 'tsconfig.json'
-    }
+      tsconfig: 'tsconfig.json',
+    },
   },
-  moduleFileExtensions: [
-    'ts',
-    'js',
-    'json'
-  ],
+  moduleFileExtensions: ['ts', 'js', 'json'],
   transform: {
-    '^.+\\.(ts|tsx)$': 'ts-jest'
+    '^.+\\.(ts|tsx)$': 'ts-jest',
   },
   testEnvironment: 'node',
-  roots: [
-    "<rootDir>/src/",
-    "<rootDir>/test/",
-    "<rootDir>/integration_test/"
-  ],
+  roots: ['<rootDir>/src/', '<rootDir>/test/', '<rootDir>/integration_test/'],
   // The 5 second default is often not enough in slow CI environments
-  testTimeout: 1000 * 30
+  testTimeout: 1000 * 30,
 };
