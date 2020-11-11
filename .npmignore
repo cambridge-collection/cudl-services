@@ -1,0 +1,10 @@
+# We need to explicitly mark our test code as not published (even though it's not
+# published due to our Makefile's logic) to avoid eslint reporting
+# no-unpublished-require warning because the `devDependencies` imported by tests
+# are not in our package.json's `dependencies`.
+#
+# To be clear - .npmignore does not need to be copied into build/ for packaging,
+# it only exists to make eslint happy.
+
+test/
+integration_test/
