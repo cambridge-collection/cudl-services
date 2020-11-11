@@ -1,12 +1,6 @@
 import express from 'express';
 import fs from 'fs';
-import {
-  BAD_REQUEST,
-  FORBIDDEN,
-  INTERNAL_SERVER_ERROR,
-  NOT_FOUND,
-  OK,
-} from 'http-status-codes';
+import { StatusCodes } from 'http-status-codes';
 import path from 'path';
 import request from 'supertest';
 import { promisify } from 'util';
@@ -37,7 +31,7 @@ describe(`metadata routes /:format/:id`, () => {
     ['item-without-rights-statement'],
   ])('/json/%s reponds with JSON metadata', async id => {
     const response = await request(app).get(`/json/${id}`);
-    expect(response.status).toBe(OK);
+    expect(response.status).toBe(StatusCodes.OK);
     expect(response.get('content-type')).toBe(
       'application/json; charset=utf-8'
     );
@@ -55,7 +49,7 @@ describe(`metadata routes /:format/:id`, () => {
     const response = await request(app)
       .get(`/json/non-embeddable-item`)
       .set('Origin', 'https://example.com');
-    expect(response.status).toBe(FORBIDDEN);
+    expect(response.status).toBe(StatusCodes.FORBIDDEN);
     expect(response.body.error).toMatch(
       'This item is only available from cudl.lib.cam.ac.uk'
     );
@@ -63,12 +57,12 @@ describe(`metadata routes /:format/:id`, () => {
 
   test('/json/:id responds with 404 for missing ID', async () => {
     const response = await request(app).get(`/json/MS-MISSING`);
-    expect(response.status).toBe(NOT_FOUND);
+    expect(response.status).toBe(StatusCodes.NOT_FOUND);
   });
 
   test('/json/:id responds with 500 for invalid metadata', async () => {
     const response = await request(app).get(`/json/INVALID`);
-    expect(response.status).toBe(INTERNAL_SERVER_ERROR);
+    expect(response.status).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
   });
 
   test.each([
@@ -76,17 +70,17 @@ describe(`metadata routes /:format/:id`, () => {
     ['id', `/foo/${encodeURIComponent('abc/def')}`],
   ])('%s param cannot contain slashes', async (param, url) => {
     const response = await request(app).get(url);
-    expect(response.status).toBe(BAD_REQUEST);
+    expect(response.status).toBe(StatusCodes.BAD_REQUEST);
   });
 
   test('/:format/:id responds with 500 for invalid metadata when requesting non-json metadata', async () => {
     const response = await request(app).get(`/tei/INVALID`);
-    expect(response.status).toBe(INTERNAL_SERVER_ERROR);
+    expect(response.status).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
   });
 
   test('/:format/:id responds with non-JSON metadata', async () => {
     const response = await request(app).get(`/tei/MS-ADD-03959`);
-    expect(response.status).toBe(OK);
+    expect(response.status).toBe(StatusCodes.OK);
     expect(response.get('content-type')).toBe('text/plain; charset=utf-8');
     expect(response.text).toEqual(
       await promisify(fs.readFile)(
@@ -103,7 +97,7 @@ describe(`metadata routes /:format/:id`, () => {
     const response = await request(app).get(
       `/tei/item-without-rights-statement`
     );
-    expect(response.status).toBe(FORBIDDEN);
+    expect(response.status).toBe(StatusCodes.FORBIDDEN);
     expect(response.body.error).toBe(
       'Access not allowed to requested metadata'
     );

@@ -1,7 +1,7 @@
 import { ExecuteOptions, XSLTExecutor } from '@lib.cam/xslt-nailgun';
 import { Request, Router } from 'express';
 
-import { BAD_GATEWAY, BAD_REQUEST, NOT_FOUND } from 'http-status-codes';
+import { StatusCodes } from 'http-status-codes';
 
 import { JSDOM } from 'jsdom';
 import path from 'path';
@@ -225,7 +225,7 @@ function createTranscriptionHandler<T>(
       options = extractOptions(req);
     } catch (e) {
       if (e instanceof InvalidTranscriptionOptionsError) {
-        res.status(BAD_REQUEST).json({ error: e.message });
+        res.status(StatusCodes.BAD_REQUEST).json({ error: e.message });
       }
       throw e;
     }
@@ -237,10 +237,10 @@ function createTranscriptionHandler<T>(
     } catch (e) {
       let status, msg;
       if (e instanceof NotFoundError) {
-        status = NOT_FOUND;
+        status = StatusCodes.NOT_FOUND;
         msg = 'Transcription not found';
       } else if (e instanceof UpstreamError) {
-        status = BAD_GATEWAY;
+        status = StatusCodes.BAD_GATEWAY;
         msg = 'The external transcription provider is temporarily unavailable';
       } else {
         throw e;

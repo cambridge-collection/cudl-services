@@ -1,5 +1,5 @@
 import express from 'express';
-import { OK } from 'http-status-codes';
+import { StatusCodes } from 'http-status-codes';
 import request from 'supertest';
 
 import xml2js from 'xml2js';
@@ -62,7 +62,7 @@ describe('membership routes', () => {
         expect(getItemCollections.mock.calls).toEqual([[id]]);
 
         // no 404 for missing items, just 0 collections returned...
-        expect(response.status).toBe(OK);
+        expect(response.status).toBe(StatusCodes.OK);
         expect(response.get('content-type')).toBe('text/xml; charset=utf-8');
 
         const parsedResponse = await xml2js.parseStringPromise(response.text, {

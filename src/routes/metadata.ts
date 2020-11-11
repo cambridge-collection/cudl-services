@@ -1,11 +1,6 @@
 import express from 'express';
 import expressAsyncHandler from 'express-async-handler';
-import {
-  BAD_REQUEST,
-  FORBIDDEN,
-  NOT_FOUND,
-  UNAUTHORIZED,
-} from 'http-status-codes';
+import { StatusCodes } from 'http-status-codes';
 import util from 'util';
 import { CUDLFormat, CUDLMetadataRepository, ItemJSON } from '../metadata';
 
@@ -24,7 +19,7 @@ export function getRoutes(options: {
 
   /* GET home page. */
   router.get('/', (req, res) => {
-    res.status(UNAUTHORIZED).send('Unathorised');
+    res.status(StatusCodes.UNAUTHORIZED).send('Unathorised');
   });
 
   router.get('/:format/:id', createMetadataHandler(options.metadataRepository));
@@ -48,14 +43,14 @@ function createMetadataHandler(metadataRepository: CUDLMetadataRepository) {
       const id = req.params.id;
       const format = req.params.format;
       if (!isSimplePathSegment(id)) {
-        res.status(BAD_REQUEST).json({
+        res.status(StatusCodes.BAD_REQUEST).json({
           error: util.format(`Bad id: ${id}`),
         });
         return;
       }
 
       if (!isEnumMember(CUDLFormat, format)) {
-        res.status(BAD_REQUEST).json({
+        res.status(StatusCodes.BAD_REQUEST).json({
           error: util.format(`Bad format: ${format}`),
         });
         return;
@@ -66,7 +61,7 @@ function createMetadataHandler(metadataRepository: CUDLMetadataRepository) {
         item = await metadataRepository.getJSON(id);
       } catch (e) {
         if (e?.nested?.code === 'ENOENT') {
-          res.status(NOT_FOUND).json({
+          res.status(StatusCodes.NOT_FOUND).json({
             error: `ID does not exist: ${id}`,
           });
           return;
@@ -87,7 +82,7 @@ function createMetadataHandler(metadataRepository: CUDLMetadataRepository) {
           typeof item.embeddable === 'boolean' &&
           !item.embeddable
         ) {
-          res.status(FORBIDDEN).json({
+          res.status(StatusCodes.FORBIDDEN).json({
             error: 'This item is only available from ' + 'cudl.lib.cam.ac.uk',
           });
           return;
@@ -102,7 +97,7 @@ function createMetadataHandler(metadataRepository: CUDLMetadataRepository) {
           res.contentType('text/plain');
           res.sendFile(await metadataRepository.getPath(format, id));
         } else {
-          res.status(FORBIDDEN).json({
+          res.status(StatusCodes.FORBIDDEN).json({
             error: util.format('Access not allowed to requested metadata'),
           });
         }

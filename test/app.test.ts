@@ -2,7 +2,7 @@ jest.mock('../src/routes/similarity-impl');
 
 import express from 'express';
 import * as fs from 'fs';
-import { IM_A_TEAPOT, OK, UNAUTHORIZED } from 'http-status-codes';
+import { StatusCodes } from 'http-status-codes';
 import * as path from 'path';
 import request from 'supertest';
 import { mocked } from 'ts-jest/utils';
@@ -90,7 +90,7 @@ describe('app', () => {
   describe('/v1/metadata', () => {
     test('route is registered', async () => {
       const response = await request(app).get('/v1/metadata/json/MS-ADD-03959');
-      expect(response.status).toBe(OK);
+      expect(response.status).toBe(StatusCodes.OK);
       expect(response.get('content-type')).toMatch('application/json');
     });
   });
@@ -100,7 +100,7 @@ describe('app', () => {
       const response = await request(app).get(
         '/v1/rdb/membership/collections/MS-ADD-03959'
       );
-      expect(response.status).toBe(OK);
+      expect(response.status).toBe(StatusCodes.OK);
       expect(response.text).toMatch(`<title>Foo</title>`);
       expect(response.text).toMatch(`<collectionorder>42</collectionorder>`);
       expect(response.text).toMatch(`<collectionid>foo</collectionid>`);
@@ -110,21 +110,21 @@ describe('app', () => {
   describe('/v1/darwin', () => {
     test('unauthenticated requests are rejected', async () => {
       const response = await request(app).get('/v1/darwin/foo?bar=baz');
-      expect(response.status).toBe(UNAUTHORIZED);
+      expect(response.status).toBe(StatusCodes.UNAUTHORIZED);
     });
 
     test('authenticated requests with bad credentials are rejected', async () => {
       const response = await request(app)
         .get('/v1/darwin/foo?bar=baz')
         .set('x-token', 'not-a-valid-key');
-      expect(response.status).toBe(UNAUTHORIZED);
+      expect(response.status).toBe(StatusCodes.UNAUTHORIZED);
     });
 
     test('authenticated requests with valid credentials are accepted', async () => {
       const response = await request(app)
         .get('/v1/darwin/foo?bar=baz')
         .set('x-token', 'supersecret');
-      expect(response.status).toBe(IM_A_TEAPOT);
+      expect(response.status).toBe(StatusCodes.IM_A_TEAPOT);
       expect(response.text).toBe('foobar');
     });
   });
@@ -136,7 +136,7 @@ describe('app', () => {
         const response = await request(app)
           .get(`/${resource.path}`)
           .responseType('blob');
-        expect(response.status).toBe(OK);
+        expect(response.status).toBe(StatusCodes.OK);
         expect(response.type).toBe(resource.type);
 
         expect(response.body).toEqual(

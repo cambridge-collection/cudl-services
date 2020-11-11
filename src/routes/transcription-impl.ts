@@ -1,7 +1,7 @@
 import { Request, RequestHandler, Response, Router } from 'express';
 import expressAsyncHandler from 'express-async-handler';
 import { PathParams } from 'express-serve-static-core';
-import { BAD_GATEWAY, getStatusText, NOT_FOUND } from 'http-status-codes';
+import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 import mime from 'mime';
 import RelateURL from 'relateurl';
 import superagent from 'superagent';
@@ -272,10 +272,10 @@ export const defaultErrorHandler: ResponseHandler<TransformedResponse<
   ResponseData
 >> = async ({ originalRes, currentRes }) => {
   let newStatus;
-  if (originalRes.status === NOT_FOUND) {
-    newStatus = NOT_FOUND;
+  if (originalRes.status === StatusCodes.NOT_FOUND) {
+    newStatus = StatusCodes.NOT_FOUND;
   } else if (originalRes.serverError) {
-    newStatus = BAD_GATEWAY;
+    newStatus = StatusCodes.BAD_GATEWAY;
   }
 
   if (newStatus !== undefined) {
@@ -285,7 +285,7 @@ export const defaultErrorHandler: ResponseHandler<TransformedResponse<
         url: currentRes.url,
         status: newStatus,
         type: 'text/html',
-        body: getStatusText(newStatus),
+        body: getReasonPhrase(newStatus),
         isError: true,
       },
     };
@@ -353,10 +353,10 @@ export function createRestrictedTypeResponseHandler(options: {
         originalRes,
         currentRes: {
           url: currentRes.url,
-          status: BAD_GATEWAY,
+          status: StatusCodes.BAD_GATEWAY,
           type: 'text/html',
-          body: `${getStatusText(
-            BAD_GATEWAY
+          body: `${getReasonPhrase(
+            StatusCodes.BAD_GATEWAY
           )}: Unexpected response from upstream server`,
           isError: true,
         },

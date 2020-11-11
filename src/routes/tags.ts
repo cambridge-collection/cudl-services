@@ -3,7 +3,7 @@ import stringify from 'csv-stringify';
 import csvStringify from 'csv-stringify';
 import express from 'express';
 import expressAsyncHandler from 'express-async-handler';
-import { BAD_REQUEST } from 'http-status-codes';
+import { StatusCodes } from 'http-status-codes';
 import util from 'util';
 import xml2js from 'xml2js';
 import { DAOPool } from '../db';
@@ -220,7 +220,7 @@ function sendResponse(res: express.Response, responseData: Response) {
 function handleErrors(res: express.Response, error: unknown) {
   if (error instanceof ValueError) {
     res
-      .status(BAD_REQUEST)
+      .status(StatusCodes.BAD_REQUEST)
       .type('text/plain')
       .send(`Bad request: ${error.message}`);
   } else {

@@ -1,4 +1,4 @@
-import { BAD_GATEWAY } from 'http-status-codes';
+import { StatusCodes } from 'http-status-codes';
 import { Response } from 'superagent';
 import superagent from 'superagent';
 import * as util from 'util';
@@ -131,7 +131,7 @@ describe('response handlers', () => {
         currentRes: {
           url: currentRes.url,
           type: 'text/html',
-          status: BAD_GATEWAY,
+          status: StatusCodes.BAD_GATEWAY,
           body: 'Bad Gateway: Unexpected response from upstream server',
           isError: true,
         },

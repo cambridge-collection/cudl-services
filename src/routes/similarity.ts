@@ -1,7 +1,7 @@
 import createDebugger from 'debug';
 import express from 'express';
 import expressAsyncHandler from 'express-async-handler';
-import { BAD_GATEWAY, BAD_REQUEST } from 'http-status-codes';
+import { StatusCodes } from 'http-status-codes';
 import { CUDLMetadataRepository } from '../metadata';
 import { CORS_HEADERS, isEnumMember, requireRequestParam } from '../util';
 import { XTF } from '../xtf';
@@ -44,7 +44,7 @@ function createSimilarityHandler(
         if (isEnumMember(MetadataEmbedLevel, req.query.embedMeta)) {
           metadataEmbedLevel = req.query.embedMeta as MetadataEmbedLevel;
         } else {
-          res.status(BAD_REQUEST).json({
+          res.status(StatusCodes.BAD_REQUEST).json({
             error: `Invalid embedMeta: available values are ${Object.values(
               MetadataEmbedLevel
             ).join(', ')}`,
@@ -63,7 +63,7 @@ function createSimilarityHandler(
         resultXml = await xtf.getSimilarItems(item, similarityId, count);
       } catch (e) {
         debug(`Failed to get response from XTF: ${e}`);
-        res.status(BAD_GATEWAY).json({
+        res.status(StatusCodes.BAD_GATEWAY).json({
           error: 'Unable to get response from XTF',
         });
         return;

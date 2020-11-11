@@ -1,7 +1,7 @@
 import { AssertionError } from 'assert';
 import express from 'express';
 import http from 'http';
-import { IM_A_TEAPOT } from 'http-status-codes';
+import { StatusCodes } from 'http-status-codes';
 import request from 'supertest';
 import { promisify } from 'util';
 
@@ -62,7 +62,7 @@ describe(`darwin proxy /*`, () => {
     );
 
     const response = await request(app).get(`${routePrefix}/${requestPath}`);
-    expect(response.status).toBe(IM_A_TEAPOT);
+    expect(response.status).toBe(StatusCodes.IM_A_TEAPOT);
     expect(response.text).toBe('foobar');
     expect(dummyUpstream.requestHandler.mock.calls.length).toBe(1);
     const [req] = dummyUpstream.requestHandler.mock.calls[0];

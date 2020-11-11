@@ -9,7 +9,7 @@ jest.mock('../../src/routes/tags-impl', createMockTagsImpl);
 
 import { AssertionError } from 'assert';
 import express from 'express';
-import { BAD_REQUEST } from 'http-status-codes';
+import { StatusCodes } from 'http-status-codes';
 import supertest from 'supertest';
 import request from 'supertest';
 import { mocked } from 'ts-jest/utils';
@@ -97,7 +97,7 @@ describe('tag routes /:classmark', () => {
 
   test('requesting an unknown source results in HTTP BAD REQUEST', async () => {
     const result = await request(getTestApp()).get('/MS-FOO?sources=foo');
-    expect(result.status).toBe(BAD_REQUEST);
+    expect(result.status).toBe(StatusCodes.BAD_REQUEST);
     expect(result.type).toBe('text/plain');
     expect(result.text).toBe(`\
 Bad request: no tag source exists with name: 'foo', available sources: 3rd-party, annotations, user-removes`);

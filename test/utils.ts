@@ -8,7 +8,7 @@ import {
 import { AssertionError } from 'assert';
 import collapseWhitespace from 'collapse-whitespace';
 import http from 'http';
-import { IM_A_TEAPOT } from 'http-status-codes';
+import { StatusCodes } from 'http-status-codes';
 import * as path from 'path';
 import * as util from 'util';
 import { promisify } from 'util';
@@ -72,7 +72,7 @@ export class DummyHttpServer {
   }
 
   handleRequest(req: http.IncomingMessage, res: http.ServerResponse) {
-    res.writeHead(IM_A_TEAPOT);
+    res.writeHead(StatusCodes.IM_A_TEAPOT);
     res.end('foobar');
   }
 }

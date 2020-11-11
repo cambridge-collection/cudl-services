@@ -1,7 +1,7 @@
 jest.mock('../../src/routes/similarity-impl');
 
 import express from 'express';
-import { BAD_GATEWAY, BAD_REQUEST } from 'http-status-codes';
+import { StatusCodes } from 'http-status-codes';
 import request from 'supertest';
 import { mocked } from 'ts-jest/utils';
 import { CUDLMetadataRepository } from '../../src/metadata';
@@ -38,7 +38,7 @@ describe('similarity routes /:itemid/:similarityId', () => {
 
   test('invalid embedMeta results in BAD REQUEST', async () => {
     const response = await request(getTestApp()).get('/MS-FOO/0?embedMeta=foo');
-    expect(response.status).toBe(BAD_REQUEST);
+    expect(response.status).toBe(StatusCodes.BAD_REQUEST);
     expect(response.body).toEqual({
       error: `Invalid embedMeta: available values are full, partial, none`,
     });
@@ -49,7 +49,7 @@ describe('similarity routes /:itemid/:similarityId', () => {
       throw new Error('boom');
     });
     const response = await request(getTestApp()).get('/MS-FOO/0');
-    expect(response.status).toBe(BAD_GATEWAY);
+    expect(response.status).toBe(StatusCodes.BAD_GATEWAY);
     expect(response.body).toEqual({ error: 'Unable to get response from XTF' });
   });
 

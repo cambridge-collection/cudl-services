@@ -1,6 +1,6 @@
 import { XSLTExecutor } from '@lib.cam/xslt-nailgun';
 import express, { Application } from 'express';
-import { BAD_REQUEST, NOT_FOUND, OK } from 'http-status-codes';
+import { StatusCodes } from 'http-status-codes';
 import { JSDOM } from 'jsdom';
 import { get } from 'superagent';
 import request from 'supertest';
@@ -49,7 +49,7 @@ afterAll(async () => {
 describe(`translation routes /tei/EN/:id/:from/:to`, () => {
   test('responds with 404 for missing ID', async () => {
     const response = await request(app).get('/tei/EN/missing/1/2');
-    expect(response.status).toBe(NOT_FOUND);
+    expect(response.status).toBe(StatusCodes.NOT_FOUND);
     expect(response.body.error).toMatch('ID does not exist: missing');
   });
 
@@ -65,7 +65,7 @@ describe(`translation routes /tei/EN/:id/:from/:to`, () => {
           from
         )}/${encodeURIComponent(to)}`
       );
-      expect(response.status).toBe(BAD_REQUEST);
+      expect(response.status).toBe(StatusCodes.BAD_REQUEST);
       expect(response.body.error).toMatch(
         `Bad ${param}: ${{ id, from, to }[param]}`
       );
@@ -80,7 +80,7 @@ describe(`translation routes /tei/EN/:id/:from/:to`, () => {
     const response = await request(app).get(
       '/tei/EN/MS-LC-II-00077/viii%20recto/viii%20recto'
     );
-    expect(response.status).toBe(OK);
+    expect(response.status).toBe(StatusCodes.OK);
     expect(response.type).toBe('text/html');
     const dom = new JSDOM(response.text, { url: `${urlBase}${urlPath}` });
     const doc = dom.window.document;

@@ -2,7 +2,7 @@ import { XSLTExecutor } from '@lib.cam/xslt-nailgun';
 import express, { Request, Response } from 'express';
 import expressAsyncHandler from 'express-async-handler';
 import fs from 'fs';
-import { BAD_REQUEST, NOT_FOUND } from 'http-status-codes';
+import { StatusCodes } from 'http-status-codes';
 import * as path from 'path';
 import util, { promisify } from 'util';
 import { CUDLFormat, CUDLMetadataRepository } from '../metadata';
@@ -58,7 +58,7 @@ function createTeiTranslationHandler(
   return expressAsyncHandler(async (req: Request, res: Response) => {
     for (const prop of ['id', 'from', 'to']) {
       if (!isSimplePathSegment(req.params[prop])) {
-        res.status(BAD_REQUEST).json({
+        res.status(StatusCodes.BAD_REQUEST).json({
           error: util.format(`Bad ${prop}: ${req.params[prop]}`),
         });
         return;
@@ -72,7 +72,7 @@ function createTeiTranslationHandler(
     try {
       await promisify(fs.access)(teiPath);
     } catch (e) {
-      res.status(NOT_FOUND).json({
+      res.status(StatusCodes.NOT_FOUND).json({
         error: `ID does not exist: ${req.params.id}`,
       });
       return;
