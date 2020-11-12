@@ -52,7 +52,6 @@
     "serve-favicon": "^2.5.0",
     "superagent": "^6.1.0",
     "uri-js": "^4.4.0",
-    "uri-template": "^1",
     "xml2js": "^0.4.23",
     "xmlbuilder": "^15.1.1",
     "xmldom": "^0.4.0"
