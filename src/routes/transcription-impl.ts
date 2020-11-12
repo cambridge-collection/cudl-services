@@ -5,7 +5,7 @@ import {getReasonPhrase, StatusCodes} from 'http-status-codes';
 import mime from 'mime';
 import RelateURL from 'relateurl';
 import superagent from 'superagent';
-import url, {URL} from 'url';
+import {URL} from 'url';
 import {ValueError} from '../errors';
 import {
   ensureURL,
@@ -15,6 +15,7 @@ import {
   URLRewriter,
 } from '../html';
 import {applyDefaults, applyLazyDefaults, validate} from '../util';
+import {relativeResolve} from '../uri';
 
 const HTML_TYPE = mime.getType('html');
 const XHTML_TYPE = mime.getType('xhtml');
@@ -63,18 +64,13 @@ export function delegateToExternalHTML(options: {
       `Invalid resourceExtensions: ${resourceExtensions.join(', ')}`
     );
   }
-  const resourceContentTypeWhitelist = contentTypes.apply(
-    undefined,
-    _resourceExtensions
-  );
+  const resourceContentTypeWhitelist = contentTypes(..._resourceExtensions);
   const resourcePath = `/resources/:path(*.(${resourceExtensions.join('|')}))`;
 
   const htmlEndpoint = ExternalResourceDelegator.create({
     pathPattern,
     urlGenerator: async req =>
-      new URL(
-        url.resolve(`${externalBaseURL}`, await externalPathGenerator(req))
-      ),
+      new URL(await externalPathGenerator(req), externalBaseURL),
     responseHandler: [
       defaultErrorHandler,
       createRestrictedTypeResponseHandler({
@@ -91,8 +87,7 @@ export function delegateToExternalHTML(options: {
 
   const resourceEndpoint = ExternalResourceDelegator.create({
     pathPattern: resourcePath,
-    urlGenerator: req =>
-      new URL(url.resolve(`${externalBaseURL}`, req.params.path)),
+    urlGenerator: req => new URL(req.params.path, externalBaseURL),
     responseHandler: [
       defaultErrorHandler,
       createRestrictedTypeResponseHandler({
@@ -393,6 +388,6 @@ export function createDefaultResourceURLRewriter(options?: {
       resolvedURL,
       {output: RelateURL.PATH_RELATIVE}
     );
-    return url.resolve(baseResourceURL, rootRelativeResourceURL);
+    return relativeResolve(baseResourceURL, rootRelativeResourceURL);
   };
 }

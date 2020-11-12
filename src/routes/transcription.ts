@@ -260,11 +260,6 @@ function extractIDTranscriptionOptions(req: Request): IDTranscriptionOptions {
   return requireRequestParams(req, 'id');
 }
 
-interface IDPageTranscriptionOptions extends IDTranscriptionOptions {
-  id: string;
-  page: string;
-}
-
 interface IDPagesTranscriptionOptions extends IDTranscriptionOptions {
   start: string;
   end: string;
@@ -274,14 +269,6 @@ function extractIDPagesTranscriptionOptions(
   req: Request
 ): IDPagesTranscriptionOptions {
   return requireRequestParams(req, 'id', 'start', 'end');
-}
-
-interface TranscriptionOptions extends IDPagesTranscriptionOptions {
-  type: string;
-}
-
-function extractTranscriptionOptions(req: Request): TranscriptionOptions {
-  return requireRequestParams(req, 'id', 'start', 'end', 'type');
 }
 
 interface TranscriptionService<Params> {
