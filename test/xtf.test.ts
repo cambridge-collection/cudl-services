@@ -18,7 +18,7 @@ beforeEach(() => {
 });
 
 test('getUrl', () => {
-  expect(xtf['getUrl']('search?smode=123&abc=foo')).toEqual(
+  expect(xtf['getUrl']('search?smode=123&abc=foo').toString()).toEqual(
     `http://xtf.example.com/foo/search?smode=123&abc=foo&indexPath=${encodeURIComponent(
       exampleConfig.xtfIndexPath
     )}`
@@ -36,9 +36,9 @@ test('search() makes HTTP request to XTF', async () => {
 
   expect(superagent.get).toHaveBeenCalledTimes(1);
   expect(superagent.get).toHaveBeenCalledWith(
-    `http://xtf.example.com/foo/search?normalizeScores=true&identifier=foo&raw=true&indexPath=${encodeURIComponent(
+    `http://xtf.example.com/foo/search?indexPath=${encodeURIComponent(
       exampleConfig.xtfIndexPath
-    )}`
+    )}&normalizeScores=true&identifier=foo&raw=true`
   );
   expectNodeWithType(result.firstChild, NodeType.ELEMENT_NODE);
   expectElementWithTag(result.firstChild, null, 'example');
@@ -71,9 +71,9 @@ test('getSimilarItems()', async () => {
   const result = await xtf.getSimilarItems('MS-FOO', 'abcd', 10);
   expect(superagent.get).toHaveBeenCalledTimes(1);
   expect(superagent.get).toHaveBeenCalledWith(
-    `http://xtf.example.com/foo/search?normalizeScores=true&smode=moreLike&identifier=MS-FOO%2Fabcd&docsPerPage=10&raw=true&indexPath=${encodeURIComponent(
+    `http://xtf.example.com/foo/search?indexPath=${encodeURIComponent(
       exampleConfig.xtfIndexPath
-    )}`
+    )}&normalizeScores=true&smode=moreLike&identifier=MS-FOO%2Fabcd&docsPerPage=10&raw=true`
   );
   expectNodeWithType(result.firstChild, NodeType.ELEMENT_NODE);
   expectElementWithTag(result.firstChild, null, 'example');

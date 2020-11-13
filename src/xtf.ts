@@ -1,8 +1,8 @@
-import xmldom from 'xmldom';
 import superagent from 'superagent';
-import url from 'url';
+import {URL} from 'url';
 import {XTFConfig} from './config';
 import {strictDOMParser} from './dom';
+import {ValueError} from './errors';
 
 interface XTFSearchOptions {
   smode?: string;
@@ -28,35 +28,35 @@ export class DefaultXTF implements XTF {
   private readonly xtfIndexPath: string;
 
   constructor(options: XTFConfig) {
+    try {
+      new URL(options.xtfBase);
+    } catch (e) {
+      throw new ValueError(`xtfBase is not a valid URL: ${options.xtfBase}`);
+    }
     this.xtfBase = options.xtfBase;
     this.xtfIndexPath = options.xtfIndexPath;
   }
 
-  private getUrl(relative: string): string {
-    const resolved = url.resolve(this.xtfBase, relative);
-
+  private getUrl(relative: string): URL {
+    const resolved = new URL(relative, this.xtfBase);
     // merge in the indexPath query param
-    const parsed = url.parse(resolved, true);
-    parsed.query.indexPath = this.xtfIndexPath;
-    parsed.search = null;
-
-    return url.format(parsed);
+    resolved.searchParams.set('indexPath', this.xtfIndexPath);
+    return resolved;
   }
 
   async search(options: XTFSearchOptions): Promise<Document> {
-    const searchUrl = this.getUrl(
-      url.format({
-        pathname: 'search',
-        query: {
-          normalizeScores: true,
-          ...options,
-          // raw has to be true to get XML output
-          raw: true,
-        },
-      })
+    const searchUrl = this.getUrl('search');
+    const searchOptions: XTFSearchOptions = {
+      normalizeScores: true,
+      ...options,
+      // raw has to be true to get XML output
+      raw: true,
+    };
+    Object.entries(searchOptions).forEach(([param, value]) =>
+      searchUrl.searchParams.set(param, value)
     );
 
-    const response = await superagent.get(searchUrl);
+    const response = await superagent.get(searchUrl.toString());
 
     if (!response.ok) {
       throw new Error(
