@@ -145,7 +145,7 @@ export class MergedTagSet extends AbstractTagSet {
   getValue(tagName: string) {
     const values = this.tagSources
       .map(ts => (ts.contains(tagName) ? ts.getValue(tagName) : undefined))
-      .filter(val => val !== undefined);
+      .filter((val): val is number => val !== undefined);
 
     if (values.length === 0) {
       this.tagNotFound(tagName);

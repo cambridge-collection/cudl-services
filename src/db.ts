@@ -4,7 +4,7 @@
 import pg from 'pg';
 import {StrictConfig} from './config';
 import {Resource} from './resources';
-import {factory, UnaryConstructorArg} from './util';
+import {factory} from './util';
 
 export type DatabaseConfig = Pick<
   StrictConfig,
@@ -73,10 +73,10 @@ export class BaseDAO<DB> {
     this.db = db;
   }
 
-  static createPool<DAO extends new (db: unknown) => InstanceType<DAO>>(
-    this: DAO,
-    pool: DatabasePool<UnaryConstructorArg<DAO>>
-  ): DAOPool<InstanceType<DAO>> {
+  static createPool<DB, DAO>(
+    this: new (db: DB) => DAO,
+    pool: DatabasePool<DB>
+  ): DAOPool<DAO> {
     return new DefaultDAOPool(pool, factory(this));
   }
 }

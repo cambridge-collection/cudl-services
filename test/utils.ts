@@ -22,7 +22,7 @@ import {
 } from '../src/metadata';
 import {TagSourceName} from '../src/routes/tags';
 import {DefaultTagSet, Tag, TagsDAO, TagSet} from '../src/routes/tags-impl';
-import {asUnknownObject, factory, UnaryConstructorArg} from '../src/util';
+import {asUnknownObject, factory} from '../src/util';
 import {XTF} from '../src/xtf';
 import {TEST_DATA_PATH} from './constants';
 
@@ -37,7 +37,7 @@ export class DummyHttpServer {
     void,
     [http.IncomingMessage, http.ServerResponse]
   >;
-  private started: Promise<void>;
+  private started?: Promise<void>;
 
   constructor() {
     this.requestHandler = jest.fn(this.handleRequest.bind(this));
@@ -98,10 +98,10 @@ export class MemoryDatabasePool<Data> implements DatabasePool<Data> {
     this.data = data;
   }
 
-  static createPooledDAO<DAO extends new (db: unknown) => InstanceType<DAO>>(
-    dao: DAO,
-    data: UnaryConstructorArg<DAO>
-  ): DAOPool<InstanceType<DAO>> {
+  static createPooledDAO<Data, DAO>(
+    dao: new (db: Data) => DAO,
+    data: Data
+  ): DAOPool<DAO> {
     return new DefaultDAOPool(new MemoryDatabasePool(data), factory(dao));
   }
 

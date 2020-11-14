@@ -53,13 +53,13 @@ describe('translation routes /tei/EN/:id/:from/:to', () => {
     expect(response.body.error).toMatch('ID does not exist: missing');
   });
 
-  test.each([
+  test.each<['id' | 'from' | 'to', string, string, string]>([
     ['id', 'foo../blah', 'bar', 'baz'],
     ['from', 'foo', 'bar../blah', 'baz'],
     ['to', 'foo', 'bar', 'baz../blah'],
   ])(
     'responds with 500 for invalid %s parameter',
-    async (param: 'id' | 'from' | 'to', id, from, to) => {
+    async (param, id, from, to) => {
       const response = await request(app).get(
         `/tei/EN/${encodeURIComponent(id)}/${encodeURIComponent(
           from

@@ -53,7 +53,7 @@ async function runAsync() {
           if (err) {
             reject(err);
           } else {
-            resolve();
+            resolve(undefined);
           }
         });
       }

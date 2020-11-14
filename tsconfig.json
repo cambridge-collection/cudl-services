@@ -1,12 +1,8 @@
 {
+  "extends": "@tsconfig/node14/tsconfig.json",
   "compilerOptions": {
     "declaration": true,
-    "allowSyntheticDefaultImports": true,
     "baseUrl": ".",
-    "esModuleInterop": true,
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "noImplicitAny": true,
     "outDir": "build/dist-root/lib",
     "paths": {
       "*": [
@@ -17,10 +13,7 @@
     "rootDirs": ["src", "lib"],
     "resolveJsonModule": true,
     "sourceMap": true,
-    "sourceRoot": "../src",
-    "strictNullChecks": true,
-    "target": "es2017",
-    "lib": ["es2019"]
+    "sourceRoot": "../src"
   },
   "include": [
     "src/**/*",

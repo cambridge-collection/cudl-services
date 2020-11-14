@@ -1,5 +1,3 @@
-jest.mock('../src/routes/similarity-impl');
-
 import expressAsyncHandler from 'express-async-handler';
 
 import express from 'express';
@@ -30,6 +28,8 @@ import {
   MemoryDatabasePool,
   MemoryTagsDAO,
 } from './utils';
+
+jest.mock('../src/routes/similarity-impl');
 
 describe('app', () => {
   let mockDarwinUpstream: DummyHttpServer;
