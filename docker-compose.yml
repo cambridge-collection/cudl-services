@@ -22,7 +22,7 @@ services:
     environment:
       TEST_DB_HOST: db
       CI: 'true'
-    command: npm test --runInBand
+    command: npm test
     depends_on:
       - db
       - flyway
