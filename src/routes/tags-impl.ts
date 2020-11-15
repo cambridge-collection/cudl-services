@@ -5,6 +5,7 @@ import * as util from 'util';
 import {BasePostgresDAO} from '../db';
 import {NotFoundError, ValueError} from '../errors';
 import {sorted} from '../util';
+import {Resource} from '../resources';
 
 export type Tag = [string, number];
 
@@ -230,7 +231,7 @@ function tagSetFromRows(queryResult: QueryResult<TagResultRow>) {
   return new DefaultTagSet(pairs);
 }
 
-export interface TagsDAO {
+export interface TagsDAO extends Resource {
   removedTags(docId: string): Promise<TagSet>;
   thirdPartyTags(docId: string): Promise<TagSet>;
   annotationTags(docId: string): Promise<TagSet>;
@@ -286,7 +287,7 @@ export class TagSource {
 
   static fromTagsDAO(
     dao: TagsDAO,
-    method: keyof TagsDAO,
+    method: Exclude<keyof TagsDAO, 'close'>,
     weight: number
   ): TagSource {
     return new TagSource(dao[method].bind(dao), weight);
