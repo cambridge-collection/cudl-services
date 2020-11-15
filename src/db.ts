@@ -58,6 +58,9 @@ export class PostgresDatabasePool implements DatabasePool<pg.PoolClient> {
   }
 }
 
+// TODO: I think implementing DAOs backed by a connection pool with a specific
+//   type was a mistake. Look into refactoring this to see if we can simplify
+//   Resource freeing, possibly via reference counting.
 export interface DAOPool<DAO> {
   getInstance(): DAO | Promise<DAO>;
 }
