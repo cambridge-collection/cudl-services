@@ -17,6 +17,8 @@ export interface DatabasePool<Client> extends Resource {
 
 type ClientFactory<C, T> = (client: C) => T | Promise<T>;
 
+const PG_TIMEOUT = 1000 * 10;
+
 export class PostgresDatabasePool implements DatabasePool<pg.PoolClient> {
   private readonly pool: pg.Pool;
 
@@ -32,6 +34,14 @@ export class PostgresDatabasePool implements DatabasePool<pg.PoolClient> {
         port: config.postPort,
         password: config.postPass,
         database: config.postDatabase,
+
+        // By default pg allows operations to continue indefinitely. We don't do
+        // anything which should take a long time, so the timeout can be
+        // reasonably short to catch problems/bugs etc.
+        statement_timeout: PG_TIMEOUT,
+        query_timeout: PG_TIMEOUT,
+        connectionTimeoutMillis: PG_TIMEOUT,
+        idle_in_transaction_session_timeout: PG_TIMEOUT,
       })
     );
   }
