@@ -23,6 +23,7 @@ import {
   TagsDAO,
   TagSource,
 } from './tags-impl';
+import {using} from '../resources';
 
 export function getRoutes(options: {
   router?: express.Router;
@@ -34,16 +35,18 @@ export function getRoutes(options: {
   router.get(
     ['/:classmark.:ext(json|xml|txt|csv)', '/:classmark'],
     expressAsyncHandler(async (req, res) => {
-      const tagSources = getTagSources(await daoPool.getInstance());
-      await sendTagResponse({
-        req,
-        res,
-        sources: tagSources,
-        sourceNames: firstQueryValue(req.query.sources),
-        fixedResponseType:
-          req.params.ext === undefined
-            ? undefined
-            : validateEnumMember(ResponseType, req.params.ext),
+      await using(await daoPool.getInstance(), async tagsDao => {
+        const tagSources = getTagSources(tagsDao);
+        await sendTagResponse({
+          req,
+          res,
+          sources: tagSources,
+          sourceNames: firstQueryValue(req.query.sources),
+          fixedResponseType:
+            req.params.ext === undefined
+              ? undefined
+              : validateEnumMember(ResponseType, req.params.ext),
+        });
       });
     })
   );
