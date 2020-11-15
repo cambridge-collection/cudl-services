@@ -53,7 +53,7 @@ export class ExternalResources<T> extends BaseResource {
   }
 
   async close(): Promise<void> {
-    super.close();
+    await super.close();
     await Promise.all(this.resources.map(r => r.close()));
   }
 }
