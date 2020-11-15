@@ -19,6 +19,39 @@ services:
     build:
       context: .
       target: dev
+    volumes:
+      # Mount everything except node_modules and package*.json (docker-compose
+      # doesn't provide a way to exclude part of a directory).
+      #
+      # This (horrible) list can be generated with:
+      #   $ git ls-files | cut -d / -f 1 - | uniq | grep -vE 'node_modules|package.*\.json' | xargs -I '{}' printf '- ./%s:/code/%s\n' '{}' '{}'
+      - ./.dockerignore:/code/.dockerignore
+      - ./.editorconfig:/code/.editorconfig
+      - ./.eslintignore:/code/.eslintignore
+      - ./.eslintrc.json:/code/.eslintrc.json
+      - ./.gitignore:/code/.gitignore
+      - ./.npmignore:/code/.npmignore
+      - ./.prettierrc.js:/code/.prettierrc.js
+      - ./Dockerfile:/code/Dockerfile
+      - ./Makefile:/code/Makefile
+      - ./README.md:/code/README.md
+      - ./bin:/code/bin
+      - ./bitbucket-pipelines.yml:/code/bitbucket-pipelines.yml
+      - ./config:/code/config
+      - ./docker-compose.adminer.yml:/code/docker-compose.adminer.yml
+      - ./docker-compose.yml:/code/docker-compose.yml
+      - ./docker:/code/docker
+      - ./docs:/code/docs
+      - ./integration_test:/code/integration_test
+      - ./jest.config.js:/code/jest.config.js
+      - ./public:/code/public
+      - ./saxon:/code/saxon
+      - ./sql:/code/sql
+      - ./src:/code/src
+      - ./test:/code/test
+      - ./transforms:/code/transforms
+      - ./tsconfig.build.json:/code/tsconfig.build.json
+      - ./tsconfig.json:/code/tsconfig.json
     environment:
       TEST_DB_HOST: db
       CI: 'true'

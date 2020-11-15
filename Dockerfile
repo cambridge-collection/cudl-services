@@ -24,9 +24,6 @@ WORKDIR /code
 COPY package.json package-lock.json ./
 RUN npm ci
 
-# Then create a separate layer for the files
-COPY . ./
-
 EXPOSE 3000
 USER node
 
