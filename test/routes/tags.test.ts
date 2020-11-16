@@ -82,6 +82,7 @@ describe('tag routes /:classmark', () => {
     removedTags: jest.fn(() => Promise.resolve(EMPTY_TAG_SET)),
     annotationTags: jest.fn(() => Promise.resolve(EMPTY_TAG_SET)),
     thirdPartyTags: jest.fn(() => Promise.resolve(EMPTY_TAG_SET)),
+    async close() {},
   };
 
   function getTestApp() {

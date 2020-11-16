@@ -25,6 +25,7 @@ import {
   WeightedTagSet,
 } from '../../src/routes/tags-impl';
 import {product} from '../utils';
+import {BaseResource} from '../../src/resources';
 
 const tags: Array<[string, number]> = [
   ['foo', 42],
@@ -281,7 +282,7 @@ describe('PostgresTagsDAO', () => {
   });
 });
 
-class TestTagsDAO implements TagsDAO {
+class TestTagsDAO extends BaseResource implements TagsDAO {
   async annotationTags(): Promise<TagSet> {
     return new DefaultTagSet([
       ['foo', 5],

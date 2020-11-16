@@ -25,6 +25,7 @@ import {DefaultTagSet, Tag, TagsDAO, TagSet} from '../src/routes/tags-impl';
 import {asUnknownObject, factory} from '../src/util';
 import {XTF} from '../src/xtf';
 import {TEST_DATA_PATH} from './constants';
+import {Resource} from '../src/resources';
 
 /**
  * An HTTP server listening on a random port on the loopback interface which
@@ -75,14 +76,14 @@ interface ItemCollections {
   [itemID: string]: Collection[];
 }
 
-export class SingletonDAOPool<DAO> implements DAOPool<DAO> {
+export class SingletonDAOPool<DAO extends Resource> implements DAOPool<DAO> {
   private readonly dao: DAO;
 
   constructor(dao: DAO) {
     this.dao = dao;
   }
 
-  static containing<DAO>(dao: DAO): SingletonDAOPool<DAO> {
+  static containing<DAO extends Resource>(dao: DAO): SingletonDAOPool<DAO> {
     return new SingletonDAOPool(dao);
   }
 
@@ -98,7 +99,7 @@ export class MemoryDatabasePool<Data> implements DatabasePool<Data> {
     this.data = data;
   }
 
-  static createPooledDAO<Data, DAO>(
+  static createPooledDAO<Data, DAO extends Resource>(
     dao: new (db: Data) => DAO,
     data: Data
   ): DAOPool<DAO> {

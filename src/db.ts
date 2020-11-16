@@ -3,7 +3,7 @@
  */
 import pg from 'pg';
 import {StrictConfig} from './config';
-import {Resource} from './resources';
+import {BaseResource, Resource} from './resources';
 import {factory} from './util';
 
 export type DatabaseConfig = Pick<
@@ -61,11 +61,12 @@ export class PostgresDatabasePool implements DatabasePool<pg.PoolClient> {
 // TODO: I think implementing DAOs backed by a connection pool with a specific
 //   type was a mistake. Look into refactoring this to see if we can simplify
 //   Resource freeing, possibly via reference counting.
-export interface DAOPool<DAO> {
+export interface DAOPool<DAO extends Resource> {
   getInstance(): DAO | Promise<DAO>;
 }
 
-export class DefaultDAOPool<DAO, Client> implements DAOPool<DAO> {
+export class DefaultDAOPool<DAO extends Resource, Client>
+  implements DAOPool<DAO> {
   private readonly pool: DatabasePool<Client>;
   private readonly factory: ClientFactory<Client, DAO>;
 
@@ -79,14 +80,15 @@ export class DefaultDAOPool<DAO, Client> implements DAOPool<DAO> {
   }
 }
 
-export class BaseDAO<DB> {
+export class BaseDAO<DB> extends BaseResource {
   protected readonly db: DB;
 
   constructor(db: DB) {
+    super();
     this.db = db;
   }
 
-  static createPool<DB, DAO>(
+  static createPool<DB, DAO extends Resource>(
     this: new (db: DB) => DAO,
     pool: DatabasePool<DB>
   ): DAOPool<DAO> {
