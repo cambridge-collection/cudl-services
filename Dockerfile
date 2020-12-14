@@ -15,7 +15,7 @@ RUN npm config set fetch-retry-mintimeout 1000 && \
 FROM npm-base as dev
 
 # Install a JVM - @lib.cam/xslt-nailgun requires on to run Saxon
-RUN apk add --no-cache openjdk8-jre-base
+RUN apk add --no-cache openjdk11-jre
 
 WORKDIR /code
 
@@ -80,7 +80,7 @@ RUN npm install -g /tmp/cudl-services.tgz
 FROM node-base as main
 
 # Install a JVM - @lib.cam/xslt-nailgun requires it to run Saxon
-RUN apk add --no-cache openjdk8-jre-base su-exec tini
+RUN apk add --no-cache openjdk11-jre su-exec tini
 
 COPY --from=node-modules /usr/local/lib/node_modules/cudl-services/ /usr/local/lib/node_modules/cudl-services/
 RUN ln -s ../lib/node_modules/cudl-services/bin/cudl-services.js /usr/local/bin/cudl-services
