@@ -10,7 +10,7 @@ import {getRoutes} from '../../src/routes/translation';
 import {EXAMPLE_STATIC_FILES, EXAMPLE_ZACYNTHIUS_URL} from '../constants';
 import {mockGetResponder} from '../mocking/superagent-mocking';
 
-import {getTestDataMetadataRepository, getTestXSLTExecutor} from '../utils';
+import {getTestDataMetadataRepository} from '../utils';
 
 // Example translation requests:
 // /v1/translation/tei/EN/MS-LC-II-00077/15r/15r
@@ -37,7 +37,7 @@ let xsltExecutor: XSLTExecutor;
 let app: Application;
 
 beforeAll(() => {
-  xsltExecutor = getTestXSLTExecutor();
+  xsltExecutor = XSLTExecutor.getInstance();
   metadataRepository = getTestDataMetadataRepository();
   app = getTestApp(metadataRepository, xsltExecutor);
 });

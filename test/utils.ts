@@ -1,10 +1,3 @@
-import {
-  Closable,
-  CreateOptions,
-  execute,
-  ExecuteOptions,
-  XSLTExecutor,
-} from '@lib.cam/xslt-nailgun';
 import {AssertionError} from 'assert';
 import collapseWhitespace from 'collapse-whitespace';
 import http from 'http';
@@ -171,31 +164,6 @@ export function normaliseSpace(value?: Node | null): string {
   value = value.cloneNode(true);
   collapseWhitespace(value);
   return value.textContent || '';
-}
-
-/**
- * An XSLTExecutor implementation that doesn't need to be closed() after use.
- * It doesn't actually hold open a JVM process.
- */
-class TestXSLTExecutor implements Closable {
-  private readonly options: CreateOptions;
-
-  constructor(options?: CreateOptions) {
-    this.options = options || {};
-  }
-
-  async execute(options: ExecuteOptions): Promise<Buffer> {
-    return execute({...options, ...this.options});
-  }
-
-  close() {}
-}
-
-/**
- * Get an XSLTExecutor that doesn't need to be close()d to avoid leaking.
- */
-export function getTestXSLTExecutor(options?: CreateOptions): XSLTExecutor {
-  return (new TestXSLTExecutor(options) as unknown) as XSLTExecutor;
 }
 
 export function product(): Iterable<[]>;

@@ -16,9 +16,10 @@ import {mockGetResponder} from '../mocking/superagent-mocking';
 import {
   getTestDataLegacyDarwinMetadataRepository,
   getTestDataMetadataRepository,
-  getTestXSLTExecutor,
   normaliseSpace,
 } from '../utils';
+import {XSLTExecutor} from '@lib.cam/xslt-nailgun';
+import assert from 'assert';
 
 function getTestApp(options: Parameters<typeof getRoutes>[0]) {
   const app = express();
@@ -28,13 +29,25 @@ function getTestApp(options: Parameters<typeof getRoutes>[0]) {
 
 describe('transcription routes', () => {
   let app: express.Application | undefined;
+  let executor: XSLTExecutor | undefined;
+
+  beforeAll(() => {
+    executor = XSLTExecutor.getInstance();
+  });
+
+  afterAll(async () => {
+    if (executor) {
+      await executor.close();
+    }
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
+    assert(executor);
     app = getTestApp({
       metadataRepository: getTestDataMetadataRepository(),
       legacyDarwinMetadataRepository: getTestDataLegacyDarwinMetadataRepository(),
-      xsltExecutor: getTestXSLTExecutor(),
+      xsltExecutor: executor,
       zacynthiusServiceURL: EXAMPLE_ZACYNTHIUS_URL,
     });
   });
