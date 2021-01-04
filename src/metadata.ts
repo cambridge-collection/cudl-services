@@ -135,9 +135,7 @@ export enum LegacyDarwinFormat {
   DEFAULT = 'dcpfull',
 }
 
-export class LegacyDarwinMetadataRepository extends BaseMetadataRepository<
-  LegacyDarwinFormat.DEFAULT
-> {
+export class LegacyDarwinMetadataRepository extends BaseMetadataRepository<LegacyDarwinFormat.DEFAULT> {
   private readonly pathResolver: PathResolver;
 
   constructor(dataDir: string) {

@@ -237,10 +237,9 @@ function defaultSuperagentResponseDataGenerator(
   };
 }
 
-const defaultSuperagentResponseTransmitter: ResponseTransmitter<TransformedResponse<
-  superagent.Response,
-  ResponseData
->> = (
+const defaultSuperagentResponseTransmitter: ResponseTransmitter<
+  TransformedResponse<superagent.Response, ResponseData>
+> = (
   err: unknown,
   delegateData:
     | TransformedResponse<superagent.Response, ResponseData>
@@ -259,10 +258,9 @@ type DefaultResponseHandler = ResponseHandler<
   TransformedResponse<superagent.Response, ResponseData>
 >;
 
-export const defaultErrorHandler: ResponseHandler<TransformedResponse<
-  superagent.Response,
-  ResponseData
->> = async ({originalRes, currentRes}) => {
+export const defaultErrorHandler: ResponseHandler<
+  TransformedResponse<superagent.Response, ResponseData>
+> = async ({originalRes, currentRes}) => {
   let newStatus;
   if (originalRes.status === StatusCodes.NOT_FOUND) {
     newStatus = StatusCodes.NOT_FOUND;
