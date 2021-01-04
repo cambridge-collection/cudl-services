@@ -4,9 +4,12 @@
   "allOf": [
     { "$ref": "partial-config.schema.json" },
     {
+      "type": "object",
       "properties": {
         "users": {
+          "type": "object",
           "additionalProperties": {
+            "type": "object",
             "required": ["username", "email"]
           }
         }
