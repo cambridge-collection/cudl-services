@@ -27,5 +27,5 @@ jobs:
           COMPOSE_FILE: "docker-compose.yml:docker/docker-compose_image-smoke-test.yml"
         run: |
           docker-compose up -d smoke-test-cudl-services
-          docker-compose run wait
+          docker-compose run wait-smoke-test-cudl-services
           docker-compose run smoke-test

@@ -3,10 +3,9 @@
 version: "3.4"
 
 services:
-  wait:
+  wait-smoke-test-cudl-services:
     image: dokku/wait
-    links:
-      - smoke-test-cudl-services
+    command: "-c smoke-test-cudl-services:3000"
 
   smoke-test-cudl-services:
     image: camdl/cudl-services:$SMOKE_TEST_IMAGE_VERSION
