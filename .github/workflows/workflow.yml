@@ -14,7 +14,6 @@ jobs:
       - name: Unit & integration tests
         run: docker-compose run --rm test
   docker-image:
-    needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
