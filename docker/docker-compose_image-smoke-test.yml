@@ -3,6 +3,11 @@
 version: "3.4"
 
 services:
+  wait:
+    image: dokku/wait
+    links:
+      - smoke-test-cudl-services
+
   smoke-test-cudl-services:
     image: camdl/cudl-services:$SMOKE_TEST_IMAGE_VERSION
     depends_on:
@@ -14,13 +19,14 @@ services:
       CUDL_SERVICES_DB_PASSWORD: password
       CUDL_SERVICES_XTF_URL: http://xtf.example/
       CUDL_SERVICES_XTF_INDEX_PATH: /example
+
   smoke-test:
     image: curlimages/curl:7.74.0
     command: |
       sh -c '
         echo -e "\nSmoke test: Expecting HTTP 200 response from cudl-services container...\n" && \
         curl --silent --verbose --fail --output /dev/null \
-          http://smoke-test-cudl-services:3000/favicon.icoz
+          http://smoke-test-cudl-services:3000/favicon.ico
       '
     depends_on:
       - smoke-test-cudl-services

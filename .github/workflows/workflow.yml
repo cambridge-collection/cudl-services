@@ -25,7 +25,8 @@ jobs:
         env:
           SMOKE_TEST_IMAGE_VERSION: "${{ steps.build-docker-image.outputs.IMAGE_TAG_COMMIT_SHA }}"
         run: |
-          docker-compose \
-            -f docker-compose.yml \
-            -f docker/docker-compose_image-smoke-test.yml \
-            run smoke-test
+          docker-compose -f docker-compose.yml \
+                         -f docker/docker-compose_image-smoke-test.yml \
+            up -d smoke-test-cudl-services && \
+          docker-compose -f docker/docker-compose_image-smoke-test.yml run wait && \
+          docker-compose -f docker/docker-compose_image-smoke-test.yml run smoke-test
