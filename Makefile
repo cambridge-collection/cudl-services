@@ -103,4 +103,13 @@ docker-image:
 		--target main \
 		.
 
+# Set GitHub Actions output parameters for the tags associated with the image
+# created by the docker-image target.
+github-actions-set-docker-image-tag-outputs:
+	@echo "::set-output name=IMAGE_TAG_COMMIT_SHA::$(COMMIT_SHORT_HASH)"
+	@if [ "$(COMMIT_TAG)" != "" ]; then \
+		echo "::set-output name=IMAGE_TAG_COMMIT_TAG::$(COMMIT_TAG)" ; \
+	fi
+
+
 .PHONY: npm-ci-unconditional check clean build clean-java clean-build compile-typescript compile-java ensure-clean-checkout normalise-permissions

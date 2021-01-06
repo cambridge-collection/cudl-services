@@ -1,0 +1,52 @@
+name: Test and publish Docker image
+
+on: push
+
+env:
+  DOCKER_BUILDKIT: 1
+  COMPOSE_DOCKER_CLI_BUILD: 1
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Unit & integration tests
+        run: docker-compose run --rm test
+  create-docker-image:
+    runs-on: ubuntu-latest
+    outputs:
+      IMAGE_TAG_COMMIT_SHA: ${{ steps.build-docker-image.outputs.IMAGE_TAG_COMMIT_SHA }}
+      IMAGE_TAG_COMMIT_TAG: ${{ steps.build-docker-image.outputs.IMAGE_TAG_COMMIT_TAG }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build & tag image
+        id: build-docker-image
+        run: make docker-image github-actions-set-docker-image-tag-outputs
+      - name: Smoke test image
+        env:
+          SMOKE_TEST_IMAGE_VERSION: "${{ steps.build-docker-image.outputs.IMAGE_TAG_COMMIT_SHA }}"
+          COMPOSE_FILE: "docker-compose.yml:docker/docker-compose_image-smoke-test.yml"
+        run: |
+          docker-compose up -d smoke-test-cudl-services
+          docker-compose run wait-smoke-test-cudl-services
+          docker-compose run smoke-test
+  publish-docker-image:
+    runs-on: ubuntu-latest
+    needs: [test, create-docker-image]
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Push commit SHA image version
+        run: |
+          docker image push \
+            "camdl/cudl-services:${{ needs.create-docker-image.outputs.IMAGE_TAG_COMMIT_SHA }}"
+      - name: Push commit tag image version
+        if: needs.create-docker-image.outputs.IMAGE_TAG_COMMIT_TAG
+        run: |
+          docker image push \
+            "camdl/cudl-services:${{ needs.create-docker-image.outputs.IMAGE_TAG_COMMIT_TAG }}"

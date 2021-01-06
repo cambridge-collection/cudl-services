@@ -1,0 +1,29 @@
+# This Docker Compose file is used to perform a rudimentary test of cudl-services images
+# to check they start and expose an HTTP server.
+version: "3.4"
+
+services:
+  wait-smoke-test-cudl-services:
+    image: dokku/wait
+    command: "-c smoke-test-cudl-services:3000"
+
+  smoke-test-cudl-services:
+    image: camdl/cudl-services:$SMOKE_TEST_IMAGE_VERSION
+    depends_on:
+      - db
+    environment:
+      CUDL_SERVICES_DB_HOST: db
+      CUDL_SERVICES_DB_NAME: cudlservices
+      CUDL_SERVICES_DB_USERNAME: cudlservices
+      CUDL_SERVICES_DB_PASSWORD: password
+      CUDL_SERVICES_XTF_URL: http://xtf.example/
+      CUDL_SERVICES_XTF_INDEX_PATH: /example
+
+  smoke-test:
+    image: curlimages/curl:7.74.0
+    command: |
+      sh -c '
+        echo -e "\nSmoke test: Expecting HTTP 200 response from cudl-services container...\n" && \
+        curl --silent --verbose --fail --output /dev/null \
+          http://smoke-test-cudl-services:3000/favicon.ico
+      '
