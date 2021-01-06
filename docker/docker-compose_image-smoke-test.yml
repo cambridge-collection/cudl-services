@@ -28,5 +28,3 @@ services:
         curl --silent --verbose --fail --output /dev/null \
           http://smoke-test-cudl-services:3000/favicon.ico
       '
-    depends_on:
-      - smoke-test-cudl-services
