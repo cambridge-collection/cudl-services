@@ -78,9 +78,6 @@ build: compile-typescript copy-files build/dist-root \
        build/dist-root/npm-shrinkwrap.json build/dist-root/README.md \
        build/dist-root/bin/cudl-services.js normalise-permissions
 
-lint:
-	npm run check
-
 pack: check build
 	cd build && npm pack ./dist-root
 
