@@ -105,7 +105,7 @@ docker-image:
 
 # Set GitHub Actions output parameters for the tags associated with the image
 # created by the docker-image target.
-github-actions-docker-image-tags:
+github-actions-set-docker-image-tag-outputs:
 	@echo "::set-output name=IMAGE_TAG_COMMIT_SHA::$(DOCKER_IMAGE_NAME):$(COMMIT_SHORT_HASH)"
 	@if [ "$(COMMIT_TAG)" != "" ]; then \
   	echo "::set-output name=IMAGE_TAG_COMMIT_TAG::$(DOCKER_IMAGE_NAME):$(COMMIT_TAG)" ; \
