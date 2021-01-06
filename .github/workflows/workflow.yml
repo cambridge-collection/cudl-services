@@ -13,8 +13,11 @@ jobs:
       - uses: actions/checkout@v2
       - name: Unit & integration tests
         run: docker-compose run --rm test
-  docker-image:
+  create-docker-image:
     runs-on: ubuntu-latest
+    outputs:
+      IMAGE_TAG_COMMIT_SHA: ${{ steps.build-docker-image.outputs.IMAGE_TAG_COMMIT_SHA }}
+      IMAGE_TAG_COMMIT_TAG: ${{ steps.build-docker-image.outputs.IMAGE_TAG_COMMIT_TAG }}
     steps:
       - uses: actions/checkout@v2
       - name: Build & tag image
@@ -28,3 +31,21 @@ jobs:
           docker-compose up -d smoke-test-cudl-services
           docker-compose run wait-smoke-test-cudl-services
           docker-compose run smoke-test
+  publish-docker-image:
+    runs-on: ubuntu-latest
+    needs: [test, create-docker-image]
+    steps:
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Push commit SHA image version
+        run: |
+          echo docker image push \
+            "camdl/cudl-services:${{ needs.create-docker-image.outputs.IMAGE_TAG_COMMIT_SHA }}"
+      - name: Push commit tag image version
+        if: needs.create-docker-image.outputs.IMAGE_TAG_COMMIT_TAG
+        run: |
+          echo docker image push \
+            "camdl/cudl-services:${{ needs.create-docker-image.outputs.IMAGE_TAG_COMMIT_TAG }}"
