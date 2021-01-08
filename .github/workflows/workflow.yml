@@ -34,6 +34,7 @@ jobs:
   publish-docker-image:
     runs-on: ubuntu-latest
     needs: [test, create-docker-image]
+    if: github.ref == 'refs/heads/master'
     steps:
       - name: Login to DockerHub
         uses: docker/login-action@v1
@@ -42,10 +43,10 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Push commit SHA image version
         run: |
-          echo docker image push \
+          docker image push \
             "camdl/cudl-services:${{ needs.create-docker-image.outputs.IMAGE_TAG_COMMIT_SHA }}"
       - name: Push commit tag image version
         if: needs.create-docker-image.outputs.IMAGE_TAG_COMMIT_TAG
         run: |
-          echo docker image push \
+          docker image push \
             "camdl/cudl-services:${{ needs.create-docker-image.outputs.IMAGE_TAG_COMMIT_TAG }}"
