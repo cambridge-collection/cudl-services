@@ -89,5 +89,6 @@
     "tmp-promise": "^3.0.2",
     "ts-jest": "^26.4.4",
     "typescript": "^4.1.3"
-  }
+  },
+  "repository": "github:cambridge-collection/cudl-services"
 }
