@@ -5,6 +5,7 @@ on: push
 env:
   DOCKER_BUILDKIT: 1
   COMPOSE_DOCKER_CLI_BUILD: 1
+  SHELLOPTS: nounset:pipefail
 
 jobs:
   test:
@@ -25,17 +26,37 @@ jobs:
         run: make docker-image github-actions-set-docker-image-tag-outputs
       - name: Smoke test image
         env:
-          SMOKE_TEST_IMAGE_VERSION: "${{ steps.build-docker-image.outputs.IMAGE_TAG_COMMIT_SHA }}"
+          SMOKE_TEST_IMAGE: "${{ steps.build-docker-image.outputs.IMAGE_TAG_COMMIT_SHA }}"
           COMPOSE_FILE: "docker-compose.yml:docker/docker-compose_image-smoke-test.yml"
         run: |
           docker-compose up -d smoke-test-cudl-services
           docker-compose run wait-smoke-test-cudl-services
           docker-compose run smoke-test
+      - name: Save image artefact
+        if: github.ref == 'refs/heads/master'
+        run: |
+          mkdir -p build && \
+          docker image save \
+            ${{ steps.build-docker-image.outputs.IMAGE_TAG_COMMIT_SHA }} \
+            ${{ steps.build-docker-image.outputs.IMAGE_TAG_COMMIT_TAG }} \
+            | gzip > build/docker-image.tar.gz
+      - name: Upload image artefact
+        uses: actions/upload-artifact@v2
+        if: github.ref == 'refs/heads/master'
+        with:
+          name: docker-image
+          path: build/docker-image.tar.gz
   publish-docker-image:
     runs-on: ubuntu-latest
     needs: [test, create-docker-image]
     if: github.ref == 'refs/heads/master'
     steps:
+      - name: Download image artefact
+        uses: actions/download-artifact@v2
+        with:
+          name: docker-image
+          path: build
+      - run: gzip -d --stdout build/docker-image.tar.gz | docker image load
       - name: Login to DockerHub
         uses: docker/login-action@v1
         with:
@@ -44,9 +65,9 @@ jobs:
       - name: Push commit SHA image version
         run: |
           docker image push \
-            "camdl/cudl-services:${{ needs.create-docker-image.outputs.IMAGE_TAG_COMMIT_SHA }}"
+            "${{ needs.create-docker-image.outputs.IMAGE_TAG_COMMIT_SHA }}"
       - name: Push commit tag image version
         if: needs.create-docker-image.outputs.IMAGE_TAG_COMMIT_TAG
         run: |
           docker image push \
-            "camdl/cudl-services:${{ needs.create-docker-image.outputs.IMAGE_TAG_COMMIT_TAG }}"
+            "${{ needs.create-docker-image.outputs.IMAGE_TAG_COMMIT_TAG }}"
