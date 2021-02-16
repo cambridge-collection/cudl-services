@@ -79,15 +79,20 @@ RUN npm install -g /tmp/cudl-services.tgz
 # This is the final image which contains the cudl-services app.
 FROM node-base as main
 
-# Install a JVM - @lib.cam/xslt-nailgun requires it to run Saxon
-RUN apk add --no-cache openjdk11-jre su-exec tini
+# Install a JVM - @lib.cam/xslt-nailgun requires it to run Saxon. curl is used in the healthcheck
+# script.
+RUN apk add --no-cache openjdk11-jre curl su-exec tini
 
 COPY --from=node-modules /usr/local/lib/node_modules/cudl-services/ /usr/local/lib/node_modules/cudl-services/
 RUN ln -s ../lib/node_modules/cudl-services/bin/cudl-services.js /usr/local/bin/cudl-services
 
 COPY --from=confd /tmp/confd /usr/local/bin/confd
 COPY ./docker/docker-entrypoint.sh /opt/cudl-services/docker-entrypoint.sh
-RUN chmod a=rx,u=+w /opt/cudl-services/docker-entrypoint.sh /usr/local/bin/confd
+COPY ./docker/healthcheck.sh /opt/cudl-services/healthcheck.sh
+RUN chmod a=rx,u=+w \
+  /opt/cudl-services/docker-entrypoint.sh \
+  /opt/cudl-services/healthcheck.sh \
+  /usr/local/bin/confd
 COPY ./docker/confd/ /etc/confd/
 COPY ./docker/0_default-settings.json5 /etc/cudl-services/conf.d/0_default-settings.json5
 
