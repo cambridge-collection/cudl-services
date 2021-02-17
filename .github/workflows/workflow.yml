@@ -40,6 +40,13 @@ jobs:
             ${{ steps.build-docker-image.outputs.IMAGE_TAG_COMMIT_SHA }} \
             ${{ steps.build-docker-image.outputs.IMAGE_TAG_COMMIT_TAG }} \
             | gzip > build/docker-image.tar.gz
+      - name: Cleanup old artefacts
+        uses: c-hive/gha-remove-artifacts@v1
+        if: github.ref == 'refs/heads/master'
+        with:
+          # keep 4 most-recent artefacts
+          age: '0 seconds'
+          skip-recent: 4
       - name: Upload image artefact
         uses: actions/upload-artifact@v2
         if: github.ref == 'refs/heads/master'
