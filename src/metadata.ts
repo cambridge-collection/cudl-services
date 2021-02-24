@@ -7,6 +7,16 @@ import {promisify} from 'util';
 import {BaseError, NotFoundError} from './errors';
 import {asUnknownObject, isSimplePathSegment} from './util';
 
+export interface MetadataResponse {
+  getBytes(): Promise<Buffer>;
+}
+
+export interface MetadataProvider<
+  ResponseType extends MetadataResponse = MetadataResponse
+> {
+  query(id: string): Promise<ResponseType>;
+}
+
 export class MetadataError extends BaseError {}
 
 export interface MetadataRepository<F extends string = string> {
@@ -136,7 +146,7 @@ export enum LegacyDarwinFormat {
 }
 
 export class LegacyDarwinMetadataRepository extends BaseMetadataRepository<LegacyDarwinFormat.DEFAULT> {
-  private readonly pathResolver: PathResolver;
+  private readonly pathResolver: LocationResolver;
 
   constructor(dataDir: string) {
     super();
@@ -158,7 +168,7 @@ export class LegacyDarwinMetadataRepository extends BaseMetadataRepository<Legac
   }
 }
 
-type PathResolver = (id: string) => Promise<string>;
+export type LocationResolver = (id: string) => Promise<string>;
 
 interface CachedIDMap {
   seq: number;
@@ -167,7 +177,9 @@ interface CachedIDMap {
   expirationTime: number;
 }
 
-export function createLegacyDarwinPathResolver(dataDir: string): PathResolver {
+export function createLegacyDarwinPathResolver(
+  dataDir: string
+): LocationResolver {
   const cacheTTL = 60 * 1000;
   let seq = 0;
   let cachedIDMap: CachedIDMap | undefined;
@@ -232,4 +244,40 @@ async function getLegacyDarwinMetadataPaths(
   }
 
   return paths;
+}
+
+export interface DataStore {
+  read(location: string): Promise<Buffer>;
+}
+
+type DataProvider = () => Promise<Buffer>;
+
+export interface MetadataResponseGenerator<ResponseType> {
+  generateResponse(
+    id: string,
+    dataProvider: DataProvider
+  ): Promise<ResponseType>;
+}
+
+export class DefaultMetadataProvider<ResponseType extends MetadataResponse>
+  implements MetadataProvider<ResponseType> {
+  readonly metadataStore: DataStore;
+  readonly locationResolver: LocationResolver;
+  readonly responseGenerator: MetadataResponseGenerator<ResponseType>;
+
+  constructor(
+    metadataStore: DataStore,
+    locationResolver: LocationResolver,
+    responseGenerator: MetadataResponseGenerator<ResponseType>
+  ) {
+    this.metadataStore = metadataStore;
+    this.locationResolver = locationResolver;
+    this.responseGenerator = responseGenerator;
+  }
+
+  query(id: string): Promise<ResponseType> {
+    return this.responseGenerator.generateResponse(id, async () =>
+      this.metadataStore.read(await this.locationResolver(id))
+    );
+  }
 }

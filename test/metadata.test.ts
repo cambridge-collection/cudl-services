@@ -6,9 +6,15 @@ import {NotFoundError} from '../src/errors';
 import {
   createLegacyDarwinPathResolver,
   CUDLFormat,
+  DataStore,
   DefaultCUDLMetadataRepository,
+  DefaultMetadataProvider,
+  LocationResolver,
+  MetadataResponse,
+  MetadataResponseGenerator,
 } from '../src/metadata';
 import {TEST_DATA_PATH} from './constants';
+import {mocked} from 'ts-jest/utils';
 
 function getRepo() {
   return new DefaultCUDLMetadataRepository(
@@ -185,3 +191,51 @@ describe('LegacyDarwinPathResolver', () => {
 function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+describe('DefaultMetadataProvider', () => {
+  const data = Buffer.from('data');
+  let dataStore: DataStore;
+  let locationResolver: LocationResolver;
+  let responseGenerator: MetadataResponseGenerator<MetadataResponse>;
+  let provider: DefaultMetadataProvider<MetadataResponse>;
+
+  beforeEach(() => {
+    dataStore = {read: jest.fn().mockReturnValue(Promise.resolve(data))};
+    locationResolver = jest.fn().mockReturnValue(Promise.resolve('/path'));
+    const generateResponse: MetadataResponseGenerator<MetadataResponse>['generateResponse'] = async (
+      id,
+      dataProvider
+    ) => {
+      return {getBytes: () => dataProvider()};
+    };
+    responseGenerator = {
+      generateResponse: jest.fn().mockImplementation(generateResponse),
+    };
+    provider = new DefaultMetadataProvider(
+      dataStore,
+      locationResolver,
+      responseGenerator
+    );
+  });
+
+  test('query() returns MetadataResponse from the ResponseGenerator', async () => {
+    await provider.query('foo');
+    expect(mocked(responseGenerator.generateResponse).mock.calls).toHaveLength(
+      1
+    );
+    expect(mocked(responseGenerator.generateResponse).mock.calls[0][0]).toBe(
+      'foo'
+    );
+  });
+
+  test('MetadataResponse returned from query() can load Buffers', async () => {
+    const response = await provider.query('foo');
+    await expect(response.getBytes()).resolves.toBe(data);
+  });
+
+  test('LocationResolver is used to create paths', async () => {
+    await (await provider.query('foo')).getBytes();
+    await expect(mocked(locationResolver).mock.calls).toEqual([['foo']]);
+    await expect(mocked(dataStore.read).mock.calls).toEqual([['/path']]);
+  });
+});
