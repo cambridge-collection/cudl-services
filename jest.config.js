@@ -1,4 +1,7 @@
 module.exports = {
+  // the default jasmine runner ignores errors in teardown hooks
+  // https://github.com/facebook/jest/issues/6692
+  testRunner: 'jest-circus/runner',
   globals: {
     'ts-jest': {
       tsconfig: 'tsconfig.json',
