@@ -1,6 +1,7 @@
 {
   "extends": "@tsconfig/node14/tsconfig.json",
   "compilerOptions": {
+    "experimentalDecorators": true,
     "declaration": true,
     "baseUrl": ".",
     "outDir": "build/dist-root/lib",
