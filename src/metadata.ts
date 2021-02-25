@@ -6,8 +6,10 @@ import * as util from 'util';
 import {promisify} from 'util';
 import {BaseError, NotFoundError} from './errors';
 import {asUnknownObject, isSimplePathSegment} from './util';
+import {Memoize} from 'typescript-memoize';
 
 export interface MetadataResponse {
+  getId(): string;
   getBytes(): Promise<Buffer>;
 }
 
@@ -15,6 +17,37 @@ export interface MetadataProvider<
   ResponseType extends MetadataResponse = MetadataResponse
 > {
   query(id: string): Promise<ResponseType>;
+}
+
+export const isExternalEmbedPermitted = Symbol('isExternalEmbedPermitted');
+export interface ExternalEmbedAware {
+  [isExternalEmbedPermitted](): Promise<boolean>;
+}
+export function isExternalEmbedAware(obj: object): obj is ExternalEmbedAware {
+  return (
+    typeof (obj as Partial<ExternalEmbedAware>)[isExternalEmbedPermitted] ===
+    'function'
+  );
+}
+
+export interface ExternalEmbedPermissionArbiter {
+  isEmbeddable(metadataResponse: MetadataResponse): boolean | undefined;
+}
+
+export const isExternalAccessPermitted = Symbol('isExternallyAccessible');
+export interface ExternalAccessAware {
+  [isExternalAccessPermitted](): Promise<boolean>;
+}
+export function isExternalAccessAware(obj: object): obj is ExternalAccessAware {
+  return (
+    typeof (obj as Partial<ExternalAccessAware>)[isExternalAccessPermitted] ===
+    'function'
+  );
+}
+export interface ExternalAccessPermissionArbiter {
+  isExternalAccessPermitted(
+    metadataResponse: MetadataResponse
+  ): boolean | undefined;
 }
 
 export class MetadataError extends BaseError {}
@@ -281,5 +314,53 @@ export class DefaultMetadataProvider<ResponseType extends MetadataResponse>
     return this.responseGenerator.generateResponse(id, async () =>
       this.metadataStore.read(await this.locationResolver(id))
     );
+  }
+}
+
+export class ItemJsonMetadataResponse
+  implements MetadataResponse, ExternalAccessAware, ExternalEmbedAware {
+  private readonly id: string;
+  private readonly dataProvider: DataProvider;
+
+  constructor(id: string, dataProvider: DataProvider) {
+    this.id = id;
+    this.dataProvider = dataProvider;
+  }
+
+  async [isExternalAccessPermitted](): Promise<boolean> {
+    // We only want to allow external access to the metadata if the metadataRights field is present
+    // and non-empty.
+    const item = await this.asJson();
+    return !!item.descriptiveMetadata?.[0]?.metadataRights?.trim();
+  }
+
+  async [isExternalEmbedPermitted](): Promise<boolean> {
+    const embeddable = (await this.asJson()).embeddable;
+    return embeddable === undefined || embeddable;
+  }
+
+  async asJson(): Promise<ItemJSON> {
+    const data = parseJsonMetadata((await this.getBytes()).toString());
+    if (!isItemJSON(data)) {
+      throw new MetadataError('unexpected JSON structure');
+    }
+    return data;
+  }
+
+  @Memoize()
+  async getBytes(): Promise<Buffer> {
+    return this.dataProvider();
+  }
+
+  getId(): string {
+    return this.id;
+  }
+}
+
+function parseJsonMetadata(jsonText: string): unknown {
+  try {
+    return JSON.parse(jsonText);
+  } catch (e) {
+    throw new MetadataError(`data is not valid JSON: ${e}`);
   }
 }

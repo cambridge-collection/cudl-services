@@ -21,6 +21,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.6.0",
     "@lib.cam/xslt-nailgun": "^0.3.1",
+    "Simple-Cache": "~1.0.0",
     "accepts": "^1.3.0",
     "ajv": "^7.0.3",
     "body-parser": "^1.19.0",
@@ -49,9 +50,9 @@
     "relateurl": "^0.2.7",
     "request": "^2.88.2",
     "serve-favicon": "^2.5.0",
-    "Simple-Cache": "~1.0.0",
     "stream-to-promise": "^3.0.0",
     "superagent": "^6.1.0",
+    "typescript-memoize": "^1.0.0",
     "uri-js": "^4.4.1",
     "xml2js": "^0.4.23",
     "xmlbuilder": "^15.1.1",

@@ -9,7 +9,13 @@ import {
   DataStore,
   DefaultCUDLMetadataRepository,
   DefaultMetadataProvider,
+  isExternalAccessAware,
+  isExternalAccessPermitted,
+  isExternalEmbedAware,
+  isExternalEmbedPermitted,
   isItemJSON,
+  ItemJSON,
+  ItemJsonMetadataResponse,
   LocationResolver,
   MetadataResponse,
   MetadataResponseGenerator,
@@ -221,7 +227,12 @@ describe('DefaultMetadataProvider', () => {
       id,
       dataProvider
     ) => {
-      return {getBytes: () => dataProvider()};
+      return {
+        getBytes: () => dataProvider(),
+        getId() {
+          return id;
+        },
+      };
     };
     responseGenerator = {
       generateResponse: jest.fn().mockImplementation(generateResponse),
@@ -252,5 +263,109 @@ describe('DefaultMetadataProvider', () => {
     await (await provider.query('foo')).getBytes();
     await expect(mocked(locationResolver).mock.calls).toEqual([['foo']]);
     await expect(mocked(dataStore.read).mock.calls).toEqual([['/path']]);
+  });
+});
+
+describe('ItemJsonMetadataResponse', () => {
+  test.each([
+    [true, true],
+    [false, false],
+    [undefined, true],
+  ])(
+    'isExternalEmbedPermitted() where embeddable is %s returns %s',
+    async (itemEmbeddableValue, result) => {
+      const item: ItemJSON = {
+        embeddable: itemEmbeddableValue,
+      };
+      const response = new ItemJsonMetadataResponse('test', async () =>
+        Buffer.from(JSON.stringify(item))
+      );
+
+      await expect(response[isExternalEmbedPermitted]()).resolves.toBe(result);
+    }
+  );
+
+  test.each([
+    ['something', true],
+    ['', false],
+    [undefined, false],
+  ])(
+    'isExternalAccessPermitted() where metadataRights is %s returns %s',
+    async (metadataRights, result) => {
+      const item: ItemJSON = {
+        descriptiveMetadata: [{metadataRights}],
+      };
+      const response = new ItemJsonMetadataResponse('test', async () =>
+        Buffer.from(JSON.stringify(item))
+      );
+
+      await expect(response[isExternalAccessPermitted]()).resolves.toBe(result);
+    }
+  );
+
+  test('isExternalEmbedAware', async () => {
+    const response = new ItemJsonMetadataResponse('example', async () =>
+      Buffer.from('{}')
+    );
+
+    expect(isExternalEmbedAware(response)).toBeTruthy();
+  });
+
+  test('isExternalAccessAware', async () => {
+    const response = new ItemJsonMetadataResponse('example', async () =>
+      Buffer.from('{}')
+    );
+
+    expect(isExternalAccessAware(response)).toBeTruthy();
+  });
+
+  test('asJson returns valid item JSON data', async () => {
+    const item: ItemJSON = {
+      embeddable: true,
+      descriptiveMetadata: [{metadataRights: 'foo'}],
+    };
+    const response = new ItemJsonMetadataResponse('example', async () =>
+      Buffer.from(JSON.stringify(item))
+    );
+
+    await expect(response.asJson()).resolves.toEqual(item);
+  });
+
+  test('asJson throws MetadataError on syntactically invalid JSON data', async () => {
+    const response = new ItemJsonMetadataResponse('example', async () =>
+      Buffer.from('invalid')
+    );
+
+    await expect(response.asJson()).rejects.toThrowErrorMatchingInlineSnapshot(
+      '"data is not valid JSON: SyntaxError: Unexpected token i in JSON at position 0"'
+    );
+  });
+
+  test('asJson throws MetadataError on malformed item JSON data', async () => {
+    const badItem = {descriptiveMetadata: 123};
+    const response = new ItemJsonMetadataResponse('example', async () =>
+      Buffer.from(JSON.stringify(badItem))
+    );
+
+    await expect(response.asJson()).rejects.toThrowErrorMatchingInlineSnapshot(
+      '"unexpected JSON structure"'
+    );
+  });
+
+  test('getBytes throws MetadataError on DataProvider error', async () => {
+    const response = new ItemJsonMetadataResponse('example', async () => {
+      throw new Error('DataProvider failed');
+    });
+
+    await expect(
+      response.getBytes()
+    ).rejects.toThrowErrorMatchingInlineSnapshot('"DataProvider failed"');
+  });
+
+  test('getId', async () => {
+    const response = new ItemJsonMetadataResponse('example', async () =>
+      Buffer.from('')
+    );
+    expect(response.getId()).toBe('example');
   });
 });
