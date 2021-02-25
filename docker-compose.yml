@@ -54,11 +54,13 @@ services:
       - ./tsconfig.json:/code/tsconfig.json
     environment:
       TEST_DB_HOST: db
+      TEST_AWS_ENDPOINT_URL: 'http://localstack:4566'
       CI: 'true'
     command: npm test
     depends_on:
       - db
       - flyway
+      - localstack
 
   db:
     image: postgres:12
@@ -81,3 +83,12 @@ services:
       FLYWAY_USER: cudlservices
       FLYWAY_PASSWORD: ${TEST_DB_PASSWORD:-password}
     command: migrate -connectRetries=60
+
+  # Provide local Amazon S3 for integration tests
+  localstack:
+    image: localstack/localstack
+    environment:
+      SERVICES: iam,s3
+    ports:
+      - "4566:4566"
+      - "4571:4571"

@@ -5,3 +5,6 @@ export const connectionDetails = {
   password: process.env.TEST_DB_PASSWORD || 'password',
   database: process.env.TEST_DB_DATABASE || 'cudlservices',
 };
+
+export const awsEndpointUrl =
+  process.env.TEST_AWS_ENDPOINT_URL || 'http://localhost:4566';
