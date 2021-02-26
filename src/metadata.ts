@@ -317,8 +317,7 @@ export class DefaultMetadataProvider<ResponseType extends MetadataResponse>
   }
 }
 
-export class ItemJsonMetadataResponse
-  implements MetadataResponse, ExternalAccessAware, ExternalEmbedAware {
+export class DefaultMetadataResponse implements MetadataResponse {
   private readonly id: string;
   private readonly dataProvider: DataProvider;
 
@@ -327,6 +326,19 @@ export class ItemJsonMetadataResponse
     this.dataProvider = dataProvider;
   }
 
+  @Memoize()
+  async getBytes(): Promise<Buffer> {
+    return this.dataProvider();
+  }
+
+  getId(): string {
+    return this.id;
+  }
+}
+
+export class ItemJsonMetadataResponse
+  extends DefaultMetadataResponse
+  implements ExternalAccessAware, ExternalEmbedAware {
   async [isExternalAccessPermitted](): Promise<boolean> {
     // We only want to allow external access to the metadata if the metadataRights field is present
     // and non-empty.
@@ -345,15 +357,6 @@ export class ItemJsonMetadataResponse
       throw new MetadataError('unexpected JSON structure');
     }
     return data;
-  }
-
-  @Memoize()
-  async getBytes(): Promise<Buffer> {
-    return this.dataProvider();
-  }
-
-  getId(): string {
-    return this.id;
   }
 }
 

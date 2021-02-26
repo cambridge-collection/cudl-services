@@ -9,6 +9,7 @@ import {
   DataStore,
   DefaultCUDLMetadataRepository,
   DefaultMetadataProvider,
+  DefaultMetadataResponse,
   isExternalAccessAware,
   isExternalAccessPermitted,
   isExternalEmbedAware,
@@ -266,6 +267,33 @@ describe('DefaultMetadataProvider', () => {
   });
 });
 
+describe('DefaultMetadataResponse', () => {
+  test('getBytes returns buffer from DataProvider', async () => {
+    const response = new DefaultMetadataResponse('example', async () =>
+      Buffer.from('data\n')
+    );
+
+    await expect(response.getBytes()).resolves.toEqual(Buffer.from('data\n'));
+  });
+
+  test('getBytes throws MetadataError on DataProvider error', async () => {
+    const response = new DefaultMetadataResponse('example', async () => {
+      throw new Error('DataProvider failed');
+    });
+
+    await expect(
+      response.getBytes()
+    ).rejects.toThrowErrorMatchingInlineSnapshot('"DataProvider failed"');
+  });
+
+  test('getId', async () => {
+    const response = new DefaultMetadataResponse('example', async () =>
+      Buffer.from('')
+    );
+    expect(response.getId()).toBe('example');
+  });
+});
+
 describe('ItemJsonMetadataResponse', () => {
   test.each([
     [true, true],
@@ -350,6 +378,14 @@ describe('ItemJsonMetadataResponse', () => {
     await expect(response.asJson()).rejects.toThrowErrorMatchingInlineSnapshot(
       '"unexpected JSON structure"'
     );
+  });
+
+  test('getBytes returns buffer from DataProvider', async () => {
+    const response = new ItemJsonMetadataResponse('example', async () =>
+      Buffer.from('data\n')
+    );
+
+    await expect(response.getBytes()).resolves.toEqual(Buffer.from('data\n'));
   });
 
   test('getBytes throws MetadataError on DataProvider error', async () => {
