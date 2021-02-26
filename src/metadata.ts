@@ -114,11 +114,9 @@ export class DefaultCUDLMetadataRepository
 
 export interface ItemJSON {
   embeddable?: boolean;
-  descriptiveMetadata?: [
-    {
-      metadataRights?: string;
-    }
-  ];
+  descriptiveMetadata?: Array<{
+    metadataRights?: string;
+  }>;
 }
 
 export function isItemJSON(data: unknown): data is ItemJSON {
@@ -127,17 +125,21 @@ export function isItemJSON(data: unknown): data is ItemJSON {
   }
   const _data = asUnknownObject(data);
 
-  return (
-    (_data.embeddable === undefined || typeof _data.embeddable === 'boolean') &&
+  const descMetaIsPresentAsArray =
     Array.isArray(_data.descriptiveMetadata) &&
     (_data.descriptiveMetadata || []).every((dmd: unknown) => {
       return (
         typeof dmd === 'object' &&
         dmd !== null &&
+        !Array.isArray(dmd) &&
         (asUnknownObject(dmd).metadataRights === undefined ||
           typeof asUnknownObject(dmd).metadataRights === 'string')
       );
-    })
+    });
+
+  return (
+    (_data.embeddable === undefined || typeof _data.embeddable === 'boolean') &&
+    (_data.descriptiveMetadata === undefined || descMetaIsPresentAsArray)
   );
 }
 

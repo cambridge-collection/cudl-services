@@ -9,6 +9,7 @@ import {
   DataStore,
   DefaultCUDLMetadataRepository,
   DefaultMetadataProvider,
+  isItemJSON,
   LocationResolver,
   MetadataResponse,
   MetadataResponseGenerator,
@@ -111,17 +112,17 @@ describe('CUDLMetadataRepository', () => {
     }
   });
 
-  test('getJSON() reports JSON without required attributes', async () => {
+  test('getJSON() reports JSON with invalid properties', async () => {
     expect.assertions(1);
 
     const repo = getRepo();
     try {
-      await repo.getJSON('EMPTY');
+      await repo.getJSON('INVALID_PROPERTIES');
     } catch (e) {
       expect(`${e}`).toMatch(
         `MetadataError: Failed to load metadata from ${await repo.getPath(
           CUDLFormat.JSON,
-          'EMPTY'
+          'INVALID_PROPERTIES'
         )}: unexpected JSON structure`
       );
     }
@@ -191,6 +192,20 @@ describe('LegacyDarwinPathResolver', () => {
 function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+test.each([
+  [true, {}],
+  [true, {embeddable: true}],
+  [true, {descriptiveMetadata: []}],
+  [true, {descriptiveMetadata: [{}]}],
+  [true, {descriptiveMetadata: [{metadataRights: ''}]}],
+  [false, {embeddable: 123}],
+  [false, {descriptiveMetadata: {}}],
+  [false, {descriptiveMetadata: [[]]}],
+  [false, {descriptiveMetadata: [{metadataRights: 123}]}],
+])('isItemJSON returns %p for example %#', (expected, value) => {
+  expect(isItemJSON(value)).toBe(expected);
+});
 
 describe('DefaultMetadataProvider', () => {
   const data = Buffer.from('data');
