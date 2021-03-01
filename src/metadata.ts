@@ -19,6 +19,12 @@ export interface MetadataProvider<
   query(id: string): Promise<ResponseType>;
 }
 
+export interface MetadataPredicate<
+  MetadataResponseType extends MetadataResponse = MetadataResponse
+> {
+  (metadataResponse: MetadataResponseType): Promise<boolean | undefined>;
+}
+
 export const isExternalEmbedPermitted = Symbol('isExternalEmbedPermitted');
 export interface ExternalEmbedAware {
   [isExternalEmbedPermitted](): Promise<boolean>;
@@ -366,4 +372,47 @@ function parseJsonMetadata(jsonText: string): unknown {
   } catch (e) {
     throw new MetadataError(`data is not valid JSON: ${e}`);
   }
+}
+
+/**
+ * Creates a MetadataResponse function that delegates its answer to the MetadataResponse provided
+ * by a MetadataProvider if the actual input MetadataResponse has no result.
+ *
+ * @param metadataPredicate The function whose result will be returned
+ * @param delegatedMetadataProvider The provider of the delegated response
+ * @return A MetadataPredicate function
+ */
+export function DelegatingMetadataPredicate<
+  MetadataResponseType extends MetadataResponse = MetadataResponse
+>(
+  metadataPredicate: MetadataPredicate<MetadataResponseType>,
+  delegatedMetadataProvider: MetadataProvider<MetadataResponseType>
+): MetadataPredicate<MetadataResponseType> {
+  return async function DelegatingMetadataPredicate(
+    metadataResponse: MetadataResponseType
+  ) {
+    const result = await metadataPredicate(metadataResponse);
+    if (result !== undefined) {
+      return result;
+    }
+    return await metadataPredicate(
+      await delegatedMetadataProvider.query(metadataResponse.getId())
+    );
+  };
+}
+
+export async function IsExternalEmbedPermitted(
+  metadataResponse: MetadataResponse
+) {
+  return isExternalEmbedAware(metadataResponse)
+    ? await metadataResponse[isExternalEmbedPermitted]()
+    : undefined;
+}
+
+export async function IsExternalAccessPermitted(
+  metadataResponse: MetadataResponse
+) {
+  return isExternalAccessAware(metadataResponse)
+    ? await metadataResponse[isExternalAccessPermitted]()
+    : undefined;
 }

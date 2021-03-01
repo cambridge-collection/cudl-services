@@ -10,19 +10,27 @@ import {
   DefaultCUDLMetadataRepository,
   DefaultMetadataProvider,
   DefaultMetadataResponse,
+  DelegatingMetadataPredicate,
+  ExternalAccessAware,
+  ExternalEmbedAware,
   isExternalAccessAware,
+  IsExternalAccessPermitted,
   isExternalAccessPermitted,
   isExternalEmbedAware,
+  IsExternalEmbedPermitted,
   isExternalEmbedPermitted,
   isItemJSON,
   ItemJSON,
   ItemJsonMetadataResponse,
   LocationResolver,
+  MetadataPredicate,
+  MetadataProvider,
   MetadataResponse,
   MetadataResponseGenerator,
 } from '../src/metadata';
 import {TEST_DATA_PATH} from './constants';
 import {mocked} from 'ts-jest/utils';
+import {applyLazyDefaults} from '../src/util';
 
 function getRepo() {
   return new DefaultCUDLMetadataRepository(
@@ -405,3 +413,124 @@ describe('ItemJsonMetadataResponse', () => {
     expect(response.getId()).toBe('example');
   });
 });
+
+describe('MetadataPredicates', () => {
+  describe('DelegatingMetadataPredicate', () => {
+    let innerPredicate: MetadataPredicate;
+    let delegatedProvider: MetadataProvider;
+    let delegatingPredicate: MetadataPredicate;
+    const responseA = new DefaultMetadataResponse('example', () => {
+      throw new Error('not implemented');
+    });
+    const responseB = new DefaultMetadataResponse('example', () => {
+      throw new Error('not implemented');
+    });
+
+    beforeEach(() => {
+      innerPredicate = jest.fn();
+      delegatedProvider = {query: jest.fn()};
+      delegatingPredicate = DelegatingMetadataPredicate(
+        innerPredicate,
+        delegatedProvider
+      );
+    });
+
+    test.each([true, false])(
+      'a %s response from the predicate results in no delegation',
+      async predicateResponse => {
+        mocked(innerPredicate).mockReturnValue(
+          Promise.resolve(predicateResponse)
+        );
+
+        await expect(delegatingPredicate(responseA)).resolves.toBe(
+          predicateResponse
+        );
+      }
+    );
+
+    test('an undefined response from the predicate results in delegation', async () => {
+      mocked(innerPredicate).mockImplementation(async response => {
+        if (response === responseA) return undefined;
+        if (response === responseB) return true;
+        throw new Error();
+      });
+      mocked(delegatedProvider.query).mockImplementation(async id => {
+        if (id === 'example') return responseB;
+        throw new Error();
+      });
+
+      await expect(delegatingPredicate(responseA)).resolves.toBe(true);
+    });
+  });
+
+  describe('IsXxxPermitted', () => {
+    let decisionMethod: jest.Mock;
+    let metadataResponse: MetadataResponse;
+
+    beforeEach(() => {
+      decisionMethod = jest.fn();
+      metadataResponse = testMetadataResponse();
+    });
+
+    describe('IsExternalEmbedPermitted', () => {
+      test('returns undefined if MetadataResponse is not ExternalEmbedAware', async () => {
+        expect(isExternalEmbedAware(metadataResponse)).toBeFalsy();
+        await expect(
+          IsExternalEmbedPermitted(metadataResponse)
+        ).resolves.toBeUndefined();
+      });
+
+      test('returns result of isExternalEmbedPermitted method if available', async () => {
+        ((metadataResponse as unknown) as ExternalEmbedAware)[
+          isExternalEmbedPermitted
+        ] = decisionMethod;
+        decisionMethod.mockReturnValue(true);
+
+        expect(isExternalEmbedAware(metadataResponse)).toBeTruthy();
+        await expect(
+          IsExternalEmbedPermitted(metadataResponse)
+        ).resolves.toBeTruthy();
+        expect(decisionMethod.mock.calls).toHaveLength(1);
+      });
+    });
+
+    describe('IsExternalAccessPermitted', () => {
+      test('returns undefined if MetadataResponse is not ExternalAccessAware', async () => {
+        expect(isExternalAccessAware(metadataResponse)).toBeFalsy();
+        await expect(
+          IsExternalAccessPermitted(metadataResponse)
+        ).resolves.toBeUndefined();
+      });
+
+      test('returns result of isExternalAccessPermitted method if available', async () => {
+        ((metadataResponse as unknown) as ExternalAccessAware)[
+          isExternalAccessPermitted
+        ] = decisionMethod;
+        decisionMethod.mockReturnValue(true);
+
+        expect(isExternalAccessAware(metadataResponse)).toBeTruthy();
+        await expect(
+          IsExternalAccessPermitted(metadataResponse)
+        ).resolves.toBeTruthy();
+        expect(decisionMethod.mock.calls).toHaveLength(1);
+      });
+    });
+  });
+});
+
+function testMetadataResponse(options?: {
+  id?: string;
+  buffer?: Buffer;
+}): MetadataResponse {
+  const _options = applyLazyDefaults(options || {}, {
+    id: () => 'example',
+    buffer: () => Buffer.from('example\n'),
+  });
+  const resp: MetadataResponse = {
+    getId: jest.fn(),
+    getBytes: jest.fn(),
+  };
+  mocked(resp.getId).mockReturnValue(_options.id);
+  mocked(resp.getBytes).mockReturnValue(Promise.resolve(_options.buffer));
+  return resp;
+}
