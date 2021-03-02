@@ -16,6 +16,57 @@ export const CORS_HEADERS = Object.freeze({
   'Access-Control-Allow-Origin': '*',
 });
 
+export interface RequestMatcher {
+  (req: Request): boolean;
+}
+
+export interface DomainNameMatcher {
+  matches(domainName: string): boolean;
+  describeMatchingDomains(): string;
+}
+
+export interface ExternalCorsRequestMatcher extends RequestMatcher {
+  internalDomainNameMatcher: DomainNameMatcher;
+}
+
+type RequestHeaders = Pick<Request, 'header'>;
+
+export function ExternalCorsRequestMatcher(options: {
+  internalDomains: DomainNameMatcher;
+}): ExternalCorsRequestMatcher {
+  function ExternalCorsRequestMatcher(req: RequestHeaders): boolean {
+    // CORS requests always have an Origin header
+    const host = getOriginHostName(req);
+    return host !== undefined && !options.internalDomains.matches(host);
+  }
+  ExternalCorsRequestMatcher.internalDomainNameMatcher =
+    options.internalDomains;
+  return ExternalCorsRequestMatcher;
+}
+
+export function getOriginHostName(req: RequestHeaders): string | undefined {
+  const origin = req.header('origin');
+  return origin && uri.parse(origin).host;
+}
+
+export function DomainNameMatcher(domainName: string): DomainNameMatcher {
+  domainName = domainName.toLowerCase();
+  const pattern = new RegExp(
+    '(?:^|\\.)' + escapeStringRegexp(domainName.toLowerCase()) + '$',
+    'i'
+  );
+  const desc = `[*.]${domainName}`;
+  return {
+    matches(domainName: string): boolean {
+      return pattern.test(domainName);
+    },
+    describeMatchingDomains(): string {
+      return desc;
+    },
+  };
+}
+
+// TODO: rm this once routes/metadata has been deduped
 export function isExternalCorsRequest(req: Request) {
   const origin = req.header('origin');
   if (!origin) {

@@ -3,7 +3,10 @@ import {
   applyLazyDefaults,
   compare,
   CompareValue,
+  DomainNameMatcher,
+  ExternalCorsRequestMatcher,
   firstQueryValue,
+  getOriginHostName,
   isEnumMember,
   Lazy,
   NonOptional,
@@ -15,6 +18,78 @@ import {
 } from '../src/util';
 import {ParsedQs} from 'qs';
 import {AssertionError} from 'assert';
+import {Request} from 'express';
+import {mocked} from 'ts-jest/utils';
+
+describe('HTTP Request things', () => {
+  function mockRequest(
+    headers: Record<string, string>
+  ): Pick<Request, 'header'> {
+    const req: Pick<Request, 'header'> = {
+      header: jest.fn(),
+    };
+    mocked(req.header).mockImplementation(name => headers[name.toLowerCase()]);
+    return req;
+  }
+
+  test.each<[Record<string, string>, string | undefined]>([
+    [{}, undefined],
+    [{origin: 'https://example.com'}, 'example.com'],
+    [{origin: 'https://example.com:1234'}, 'example.com'],
+  ])('getOriginHostName(%j) = %j', (headers, expected) => {
+    expect(getOriginHostName(mockRequest(headers))).toEqual(expected);
+  });
+
+  describe('DomainNameMatcher', () => {
+    test.each([
+      ['example.domain', 'example.domain', true],
+      ['example.domain', 'sub1.example.domain', true],
+      ['example.domain', 'subsub.sub1.example.domain', true],
+      ['example.domain', 'other.domain', false],
+      ['example.domain', 'sub.other.domain', false],
+      ['example.domain', '', false],
+    ])(
+      'DomainNameMatcher(%j).match(%j) = %j',
+      (referenceDomain, queryDomain, expected) => {
+        expect(DomainNameMatcher(referenceDomain).matches(queryDomain)).toBe(
+          expected
+        );
+      }
+    );
+
+    test('describeMatchingDomains', () => {
+      expect(
+        DomainNameMatcher('example.domain').describeMatchingDomains()
+      ).toMatchInlineSnapshot('"[*.]example.domain"');
+    });
+  });
+
+  describe('ExternalCorsRequestMatcher', () => {
+    test('ExternalCorsRequestMatcher().internalDomainNameMatcher', () => {
+      const domainMatcher = DomainNameMatcher('foo');
+      const matcher = ExternalCorsRequestMatcher({
+        internalDomains: domainMatcher,
+      });
+
+      expect(matcher.internalDomainNameMatcher).toBe(domainMatcher);
+    });
+
+    test.each<[Record<string, string>, boolean]>([
+      [{}, false],
+      [{origin: 'https://internal.domain'}, false],
+      [{origin: 'https://external.domain'}, true],
+    ])(
+      'ExternalCorsRequestMatcher(request with headers %j) = %j',
+      (headers, expected) => {
+        expect(
+          ExternalCorsRequestMatcher({
+            internalDomains: DomainNameMatcher('internal.domain'),
+          })(mockRequest(headers) as Request)
+        ).toEqual(expected);
+      }
+    );
+  });
+});
 
 test('isEnumMember', () => {
   expect.assertions(1);
