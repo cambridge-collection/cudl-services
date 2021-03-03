@@ -33,7 +33,7 @@ jobs:
           docker-compose run wait-smoke-test-cudl-services
           docker-compose run smoke-test
       - name: Save image artefact
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/main'
         run: |
           mkdir -p build && \
           docker image save \
@@ -42,21 +42,21 @@ jobs:
             | gzip > build/docker-image.tar.gz
       - name: Cleanup old artefacts
         uses: c-hive/gha-remove-artifacts@v1
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/main'
         with:
           # keep 4 most-recent artefacts
           age: '0 seconds'
           skip-recent: 4
       - name: Upload image artefact
         uses: actions/upload-artifact@v2
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/main'
         with:
           name: docker-image
           path: build/docker-image.tar.gz
   publish-docker-image:
     runs-on: ubuntu-latest
     needs: [test, create-docker-image]
-    if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/main'
     steps:
       - name: Download image artefact
         uses: actions/download-artifact@v2
