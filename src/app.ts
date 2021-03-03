@@ -8,11 +8,6 @@ import {CollectionDAO, PostgresCollectionDAO} from './collections';
 import {StrictConfig, User, Users} from './config';
 
 import {DAOPool, PostgresDatabasePool} from './db';
-import {
-  CUDLMetadataRepository,
-  DefaultCUDLMetadataRepository,
-  LegacyDarwinMetadataRepository,
-} from './metadata';
 import {BaseResource, ExternalResources, using} from './resources';
 import * as darwin from './routes/darwin';
 import * as membership from './routes/membership';
@@ -23,6 +18,11 @@ import {PostgresTagsDAO, TagsDAO} from './routes/tags-impl';
 import * as transcription from './routes/transcription';
 import * as translation from './routes/translation';
 import {DefaultXTF, XTF} from './xtf';
+import {
+  CUDLMetadataRepository,
+  DefaultCUDLMetadataRepository,
+  LegacyDarwinMetadataRepository,
+} from './metadata/cudl';
 
 const cookieParser = require('cookie-parser');
 const favicon = require('serve-favicon');

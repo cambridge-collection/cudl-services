@@ -1,5 +1,5 @@
 import {mocked} from 'ts-jest/utils';
-import {CUDLMetadataRepository, ItemJSON} from '../../src/metadata';
+import {ItemJSON} from '../../src/metadata';
 import {
   embedMetadata,
   getReducedMetadata,
@@ -10,6 +10,7 @@ import {
   MetadataEmbedLevel,
   nthStructureNode,
 } from '../../src/routes/similarity-impl';
+import {CUDLMetadataRepository} from '../../src/metadata/cudl';
 
 describe('similarity route implementation', () => {
   describe('embedMetadata()', () => {

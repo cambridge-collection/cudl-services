@@ -1,9 +1,9 @@
 import util from 'util';
-import {CUDLMetadataRepository} from '../metadata';
 import {
   SimilaritySearch,
   transform as similarityTransform,
 } from '../transforms/similarity';
+import {CUDLMetadataRepository} from '../metadata/cudl';
 
 /**
  * Map the XTF response XML to JSON in node.

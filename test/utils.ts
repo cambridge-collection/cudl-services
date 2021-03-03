@@ -8,17 +8,17 @@ import {promisify} from 'util';
 import {Collection, CollectionDAO} from '../src/collections';
 
 import {BaseDAO, DAOPool, DatabasePool, DefaultDAOPool} from '../src/db';
-import {
-  CUDLMetadataRepository,
-  DefaultCUDLMetadataRepository,
-  LegacyDarwinMetadataRepository,
-} from '../src/metadata';
 import {TagSourceName} from '../src/routes/tags';
 import {DefaultTagSet, Tag, TagsDAO, TagSet} from '../src/routes/tags-impl';
 import {asUnknownObject, factory} from '../src/util';
 import {XTF} from '../src/xtf';
 import {TEST_DATA_PATH} from './constants';
 import {Resource} from '../src/resources';
+import {
+  CUDLMetadataRepository,
+  DefaultCUDLMetadataRepository,
+  LegacyDarwinMetadataRepository,
+} from '../src/metadata/cudl';
 
 /**
  * An HTTP server listening on a random port on the loopback interface which

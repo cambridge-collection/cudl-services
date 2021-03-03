@@ -8,19 +8,19 @@ import path from 'path';
 import {URL} from 'url';
 import {NotFoundError, UpstreamError} from '../errors';
 import {
-  CUDLFormat,
-  CUDLMetadataRepository,
-  LegacyDarwinFormat,
-  LegacyDarwinMetadataRepository,
-  MetadataRepository,
-} from '../metadata';
-import {
   applyLazyDefaults,
   requireRequestParam,
   requireRequestParams,
 } from '../util';
 import {delegateToExternalHTML} from './transcription-impl';
 import expressAsyncHandler = require('express-async-handler');
+import {
+  CUDLFormat,
+  CUDLMetadataRepository,
+  LegacyDarwinFormat,
+  LegacyDarwinMetadataRepository,
+  MetadataRepository,
+} from '../metadata/cudl';
 
 interface TranscriptionEndpoint<T> {
   path: string;

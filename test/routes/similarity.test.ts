@@ -1,10 +1,11 @@
+import {CUDLMetadataRepository} from '../../src/metadata/cudl';
+
 jest.mock('../../src/routes/similarity-impl');
 
 import express from 'express';
 import {StatusCodes} from 'http-status-codes';
 import request from 'supertest';
 import {mocked} from 'ts-jest/utils';
-import {CUDLMetadataRepository} from '../../src/metadata';
 import {getRoutes} from '../../src/routes/similarity';
 import {
   embedMetadata,

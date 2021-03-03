@@ -5,10 +5,10 @@ import fs from 'fs';
 import {StatusCodes} from 'http-status-codes';
 import * as path from 'path';
 import util, {promisify} from 'util';
-import {CUDLFormat, CUDLMetadataRepository} from '../metadata';
 import {applyLazyDefaults, isSimplePathSegment} from '../util';
 import {delegateToExternalHTML} from './transcription-impl';
 import {URL} from 'url';
+import {CUDLFormat, CUDLMetadataRepository} from '../metadata/cudl';
 
 export function getRoutes(options: {
   router?: express.Router;

@@ -5,7 +5,6 @@ import path from 'path';
 import request from 'supertest';
 import {promisify} from 'util';
 import {
-  CUDLMetadataRepository,
   DefaultMetadataResponse,
   MetadataError,
   MetadataProvider,
@@ -26,6 +25,7 @@ import {
   requireNotUndefined,
 } from '../../src/util';
 import {mocked} from 'ts-jest/utils';
+import {CUDLMetadataRepository} from '../../src/metadata/cudl';
 
 function getTestApp(metadataRepository: CUDLMetadataRepository) {
   const app = express();

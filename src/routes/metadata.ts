@@ -3,8 +3,6 @@ import expressAsyncHandler from 'express-async-handler';
 import {StatusCodes} from 'http-status-codes';
 import util from 'util';
 import {
-  CUDLFormat,
-  CUDLMetadataRepository,
   IsExternalAccessPermitted,
   IsExternalEmbedPermitted,
   ItemJSON,
@@ -21,6 +19,7 @@ import {
   isExternalCorsRequest,
   isSimplePathSegment,
 } from '../util';
+import {CUDLFormat, CUDLMetadataRepository} from '../metadata/cudl';
 
 export interface MetadataResponseEmitter {
   canEmit(metadataResponse: MetadataResponse): boolean;

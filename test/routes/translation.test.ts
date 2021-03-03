@@ -4,13 +4,13 @@ import {StatusCodes} from 'http-status-codes';
 import {JSDOM} from 'jsdom';
 import {get} from 'superagent';
 import request from 'supertest';
-import {CUDLMetadataRepository} from '../../src/metadata';
 import {getRoutes} from '../../src/routes/translation';
 
 import {EXAMPLE_STATIC_FILES, EXAMPLE_ZACYNTHIUS_URL} from '../constants';
 import {mockGetResponder} from '../mocking/superagent-mocking';
 
 import {getTestDataMetadataRepository} from '../utils';
+import {CUDLMetadataRepository} from '../../src/metadata/cudl';
 
 // Example translation requests:
 // /v1/translation/tei/EN/MS-LC-II-00077/15r/15r
