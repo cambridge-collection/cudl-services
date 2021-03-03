@@ -171,7 +171,6 @@ export function validateObjectIsFullConfig(
 
 export interface Config<U = Users> extends XTFConfig {
   dataDir: string;
-  legacyDcpDataDir: string;
   users: U;
   darwinXTF: string;
   postHost: string;

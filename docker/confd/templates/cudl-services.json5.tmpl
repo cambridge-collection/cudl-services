@@ -3,9 +3,6 @@
     dataDir: "{{getv "/cudl/services/data/path" js}}",
   {{end}}
   {{if exists "/cudl/services/legacy/darwin/data/path"}}
-    legacyDcpDataDir: "{{getv "/cudl/services/legacy/darwin/data/path" | js}}",
-  {{end}}
-  {{if exists "/cudl/services/legacy/darwin/data/path"}}
     darwinXTF: "{{getv "/cudl/services/darwin/xtf/url" | js}}",
   {{end}}
   {{if exists "/cudl/services/xtf/url"}}

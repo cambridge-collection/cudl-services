@@ -13,14 +13,12 @@ import {
   requireRequestParams,
 } from '../util';
 import {delegateToExternalHTML} from './transcription-impl';
-import expressAsyncHandler = require('express-async-handler');
 import {
   CUDLFormat,
   CUDLMetadataRepository,
-  LegacyDarwinFormat,
-  LegacyDarwinMetadataRepository,
   MetadataRepository,
 } from '../metadata/cudl';
+import expressAsyncHandler = require('express-async-handler');
 
 interface TranscriptionEndpoint<T> {
   path: string;
@@ -49,7 +47,6 @@ function xsltTranscriptionEndpoint<Fmt extends string, Opt>(options: {
 }
 
 export function getRoutes(options: {
-  legacyDarwinMetadataRepository: LegacyDarwinMetadataRepository;
   metadataRepository: CUDLMetadataRepository;
   router?: Router;
   xsltExecutor: XSLTExecutor;
@@ -105,34 +102,7 @@ export function getRoutes(options: {
     },
   });
 
-  const dcp = xsltTranscriptionEndpoint({
-    path: '/dcp/diplomatic/internal/:id',
-    xsltExecutor: options.xsltExecutor,
-    metadataRepository: options.metadataRepository,
-    transforms: [{xsltPath: LEGACY_DCP_XSLT}],
-    options: req => ({
-      ...extractIDTranscriptionOptions(req),
-      format: CUDLFormat.DCP,
-    }),
-  });
-
-  const dcpfull = xsltTranscriptionEndpoint({
-    path: '/dcpfull/diplomatic/internal/:id',
-    metadataRepository: options.legacyDarwinMetadataRepository,
-    xsltExecutor: options.xsltExecutor,
-    transforms: [{xsltPath: LEGACY_DCP_XSLT}],
-    options: req => ({
-      ...extractIDTranscriptionOptions(req),
-      format: LegacyDarwinFormat.DEFAULT,
-    }),
-  });
-
-  const transcriptions: Array<TranscriptionEndpoint<unknown>> = [
-    tei,
-    bezae,
-    dcp,
-    dcpfull,
-  ];
+  const transcriptions: Array<TranscriptionEndpoint<unknown>> = [tei, bezae];
 
   for (const trans of transcriptions) {
     attachTranscriptionHandler(
@@ -348,10 +318,6 @@ const MS_TEI_TRANS_XSLT = path.resolve(
 const BEZAE_TRANS_XSLT = path.resolve(
   TRANSFORMS_DIR,
   'transcriptions/bezaeHTML.xsl'
-);
-const LEGACY_DCP_XSLT = path.resolve(
-  TRANSFORMS_DIR,
-  'transcriptions/dcpTrans.xsl'
 );
 
 interface TransformStage<Opt> {

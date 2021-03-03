@@ -1,7 +1,6 @@
 {
   dataDir: "/mnt/cudl-data",
   darwinXTF: "https://dcp-public.lib.cam.ac.uk/",
-  legacyDcpDataDir: "/mnt/dcp-data/letters",
 
   xtfBase: "https://cudl-dev.lib.cam.ac.uk/xtf/",
   xtfIndexPath: "/usr/local/indices/index-cudl",

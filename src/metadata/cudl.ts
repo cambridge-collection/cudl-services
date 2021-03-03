@@ -1,15 +1,9 @@
 import util, {promisify} from 'util';
 import fs from 'fs';
-import assert, {AssertionError} from 'assert';
+import assert from 'assert';
 import {isSimplePathSegment} from '../util';
 import path from 'path';
-import {NotFoundError} from '../errors';
-import {
-  isItemJSON,
-  ItemJSON,
-  LocationResolver,
-  MetadataError,
-} from '../metadata';
+import {isItemJSON, ItemJSON, MetadataError} from '../metadata';
 
 export interface MetadataRepository<F extends string = string> {
   getPath(format: F, id: string): Promise<string>;
@@ -18,7 +12,6 @@ export interface MetadataRepository<F extends string = string> {
 }
 
 export enum CUDLFormat {
-  DCP = 'dcp',
   EAD = 'ead',
   ESSAY = 'essay',
   MODS = 'mods',
@@ -103,107 +96,4 @@ export class DefaultCUDLMetadataRepository
       );
     }
   }
-}
-
-export enum LegacyDarwinFormat {
-  DEFAULT = 'dcpfull',
-}
-
-export class LegacyDarwinMetadataRepository extends BaseMetadataRepository<LegacyDarwinFormat.DEFAULT> {
-  private readonly pathResolver: LocationResolver;
-
-  constructor(dataDir: string) {
-    super();
-    this.pathResolver = createLegacyDarwinPathResolver(dataDir);
-  }
-
-  async getPath(id: string): Promise<string>;
-  async getPath(
-    format: LegacyDarwinFormat.DEFAULT,
-    id: string
-  ): Promise<string>;
-  async getPath(format: string, id?: string) {
-    if (id === undefined) {
-      id = format;
-      format = LegacyDarwinFormat.DEFAULT;
-    }
-    assert.ok(format === LegacyDarwinFormat.DEFAULT);
-    return this.pathResolver(id);
-  }
-}
-
-interface CachedIDMap {
-  seq: number;
-  paths: Map<string, string>;
-  dirModifiedTime: number;
-  expirationTime: number;
-}
-
-export function createLegacyDarwinPathResolver(
-  dataDir: string
-): LocationResolver {
-  const cacheTTL = 60 * 1000;
-  let seq = 0;
-  let cachedIDMap: CachedIDMap | undefined;
-  let nextCachedIDMap: Promise<CachedIDMap> | undefined;
-
-  const getCachedIDMap = async (now: number) => {
-    const dirModifiedTime = (await promisify(fs.stat)(dataDir)).mtimeMs;
-    return {
-      seq: seq++,
-      dirModifiedTime,
-      expirationTime: now + cacheTTL,
-      paths: await getLegacyDarwinMetadataPaths(dataDir),
-    };
-  };
-
-  return async (id): Promise<string> => {
-    const now = Date.now();
-
-    if (cachedIDMap === undefined && nextCachedIDMap === undefined) {
-      nextCachedIDMap = getCachedIDMap(now);
-    }
-
-    const _cachedIDMap = await Promise.race(
-      [nextCachedIDMap, cachedIDMap].filter(x => x !== undefined)
-    );
-    if (_cachedIDMap === undefined) {
-      throw new AssertionError();
-    }
-    if (cachedIDMap === undefined || cachedIDMap.seq !== _cachedIDMap.seq) {
-      cachedIDMap = _cachedIDMap;
-      nextCachedIDMap = undefined;
-    }
-
-    if (now > _cachedIDMap.expirationTime && nextCachedIDMap === undefined) {
-      nextCachedIDMap = getCachedIDMap(now);
-    }
-
-    const relPath = _cachedIDMap.paths.get(id);
-    if (relPath === undefined) {
-      throw new NotFoundError(`no metadata found for id: ${id}`);
-    }
-    return path.resolve(dataDir, relPath);
-  };
-}
-
-async function getLegacyDarwinMetadataPaths(
-  dataDir: string
-): Promise<Map<string, string>> {
-  const files = await promisify(fs.readdir)(dataDir);
-  files.sort();
-
-  const paths = new Map();
-  for (const f of files) {
-    const match = /^([a-zA-Z0-9]+)_.*\.xml$/.exec(f);
-
-    if (match) {
-      const id = match[1];
-      if (!paths.has(id)) {
-        paths.set(id, f);
-      }
-    }
-  }
-
-  return paths;
 }

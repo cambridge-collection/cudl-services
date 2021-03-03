@@ -49,7 +49,6 @@ $ docker container run \
 | JSON config property | environment variable                          |
 | -------------------------- | --------------------------------------- |
 | `dataDir`                  | `CUDL_SERVICES_DATA_PATH`               |
-| `legacyDcpDataDir`         | `CUDL_SERVICES_LEGACY_DARWIN_DATA_PATH` |
 | `darwinXTF`                | `CUDL_SERVICES_DARWIN_XTF_URL`          |
 | `xtfBase`                  | `CUDL_SERVICES_XTF_URL`                 |
 | `xtfIndexPath`             | `CUDL_SERVICES_XTF_INDEX_PATH`          |

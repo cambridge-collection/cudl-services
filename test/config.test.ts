@@ -27,7 +27,6 @@ import ProcessEnv = NodeJS.ProcessEnv;
 
 const EXAMPLE_CONFIG: Config = {
   darwinXTF: 'example',
-  legacyDcpDataDir: 'example',
   users: {},
   dataDir: 'example',
   postPass: 'example',

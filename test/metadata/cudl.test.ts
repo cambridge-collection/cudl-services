@@ -1,11 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import {withDir} from 'tmp-promise';
 import {promisify} from 'util';
-import {NotFoundError} from '../../src/errors';
 import {TEST_DATA_PATH} from '../constants';
 import {
-  createLegacyDarwinPathResolver,
   CUDLFormat,
   DefaultCUDLMetadataRepository,
 } from '../../src/metadata/cudl';
@@ -121,67 +118,3 @@ describe('CUDLMetadataRepository', () => {
     }
   });
 });
-
-describe('LegacyDarwinPathResolver', () => {
-  const dateNow = Date.now;
-  let now = 0;
-  beforeEach(() => {
-    global.Date.now = jest.fn(() => now);
-  });
-  afterEach(() => {
-    global.Date.now = dateNow;
-  });
-
-  test('LegacyDarwinPathResolver uses cached path mapping', async () => {
-    const pathResolver = createLegacyDarwinPathResolver(
-      path.resolve(TEST_DATA_PATH, 'legacy-darwin')
-    );
-
-    await expect(pathResolver('1a')).resolves.toBe(
-      path.resolve(TEST_DATA_PATH, 'legacy-darwin', '1a_2a.xml')
-    );
-    await expect(pathResolver('3a')).resolves.toBe(
-      path.resolve(TEST_DATA_PATH, 'legacy-darwin', '3a_4a.xml')
-    );
-    await expect(pathResolver('foo')).rejects.toThrow(
-      new NotFoundError('no metadata found for id: foo')
-    );
-  });
-
-  test('LegacyDarwinPathResolver refreshes entries after TTL expires', async () => {
-    await withDir(
-      async dir => {
-        expect(Date.now()).toBe(0);
-        const pathResolver = createLegacyDarwinPathResolver(dir.path);
-        await promisify(fs.writeFile)(path.resolve(dir.path, '1a_2b.xml'), '');
-
-        await expect(pathResolver('1a')).resolves.toEqual(
-          path.resolve(dir.path, '1a_2b.xml')
-        );
-
-        // 1a still resolves to the (cached) original, as the TTL has not expired
-        await promisify(fs.writeFile)(path.resolve(dir.path, '1a_2a.xml'), '');
-        await expect(pathResolver('1a')).resolves.toEqual(
-          path.resolve(dir.path, '1a_2b.xml')
-        );
-
-        now = 61 * 1000;
-        expect(Date.now()).toBe(61 * 1000);
-        // The old cache is used until the replacement is ready
-        await expect(pathResolver('1a')).resolves.toEqual(
-          path.resolve(dir.path, '1a_2b.xml')
-        );
-
-        await sleep(500);
-        await expect(pathResolver('1a')).resolves.toEqual(
-          path.resolve(dir.path, '1a_2a.xml')
-        );
-      },
-      {unsafeCleanup: true}
-    );
-  });
-});
-
-function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}

@@ -13,11 +13,7 @@ import {
 } from '../../src/routes/transcription';
 import {EXAMPLE_ZACYNTHIUS_URL, TEST_DATA_PATH} from '../constants';
 import {mockGetResponder} from '../mocking/superagent-mocking';
-import {
-  getTestDataLegacyDarwinMetadataRepository,
-  getTestDataMetadataRepository,
-  normaliseSpace,
-} from '../utils';
+import {getTestDataMetadataRepository, normaliseSpace} from '../utils';
 import {XSLTExecutor} from '@lib.cam/xslt-nailgun';
 import assert from 'assert';
 
@@ -46,7 +42,6 @@ describe('transcription routes', () => {
     assert(executor);
     app = getTestApp({
       metadataRepository: getTestDataMetadataRepository(),
-      legacyDarwinMetadataRepository: getTestDataLegacyDarwinMetadataRepository(),
       xsltExecutor: executor,
       zacynthiusServiceURL: EXAMPLE_ZACYNTHIUS_URL,
     });
@@ -194,46 +189,6 @@ describe('transcription routes', () => {
             content: 'Transcription by IGNTP',
           },
           {node: '#Matthew', content: 'παραλαβειν μαριαμ την γυναικα σου'},
-        ],
-      ],
-      // requests often contain a trailing slash
-      [
-        '/dcp/diplomatic/internal/MS-DAR-00104-00247/',
-        [
-          {node: 'title', content: '818'},
-          {
-            node: '.transcription-credit',
-            content: 'View letter on Darwin Correspondence Project site',
-          },
-          {node: 'body p', content: 'From J. D. Hooker'},
-          {node: 'body p', content: '[22–30 January 1845]'},
-        ],
-      ],
-      [
-        '/dcp/diplomatic/internal/MS-DAR-00104-00247',
-        [
-          {node: 'title', content: '818'},
-          {
-            node: '.transcription-credit',
-            content: 'View letter on Darwin Correspondence Project site',
-          },
-          {node: 'body p', content: 'From J. D. Hooker'},
-          {node: 'body p', content: '[22–30 January 1845]'},
-        ],
-      ],
-      [
-        '/dcpfull/diplomatic/internal/1',
-        [
-          {node: 'title', content: '1'},
-          {
-            node: '.transcription-credit',
-            content: 'View letter on Darwin Correspondence Project site',
-          },
-          {
-            node: 'body',
-            content:
-              'I think you will not be able with all your Greek knowledge to read this precious Scrawl',
-          },
         ],
       ],
     ])('endpoint %s responds with expected HTML', async (url, expectations) => {

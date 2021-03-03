@@ -17,7 +17,6 @@ import {Resource} from '../src/resources';
 import {
   CUDLMetadataRepository,
   DefaultCUDLMetadataRepository,
-  LegacyDarwinMetadataRepository,
 } from '../src/metadata/cudl';
 
 /**
@@ -141,12 +140,6 @@ export class MemoryTagsDAO
 export function getTestDataMetadataRepository(): CUDLMetadataRepository {
   return new DefaultCUDLMetadataRepository(
     path.resolve(TEST_DATA_PATH, 'metadata')
-  );
-}
-
-export function getTestDataLegacyDarwinMetadataRepository(): LegacyDarwinMetadataRepository {
-  return new LegacyDarwinMetadataRepository(
-    path.resolve(TEST_DATA_PATH, 'legacy-darwin')
   );
 }
 

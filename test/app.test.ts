@@ -22,7 +22,6 @@ import {mockGetResponder} from './mocking/superagent-mocking';
 import {
   DummyHttpServer,
   getMockXTF,
-  getTestDataLegacyDarwinMetadataRepository,
   getTestDataMetadataRepository,
   MemoryCollectionsDAO,
   MemoryDatabasePool,
@@ -52,7 +51,6 @@ describe('app', () => {
     return {
       darwinXtfUrl: `http://localhost:${mockDarwinUpstream.getPort()}`,
       metadataRepository: getTestDataMetadataRepository(),
-      legacyDarwinMetadataRepository: getTestDataLegacyDarwinMetadataRepository(),
       users: {
         supersecret: {username: 'foo', email: 'foo@example.com'},
       },

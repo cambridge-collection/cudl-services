@@ -21,7 +21,6 @@ import {DefaultXTF, XTF} from './xtf';
 import {
   CUDLMetadataRepository,
   DefaultCUDLMetadataRepository,
-  LegacyDarwinMetadataRepository,
 } from './metadata/cudl';
 
 const cookieParser = require('cookie-parser');
@@ -38,7 +37,6 @@ const Strategy = require('passport-accesstoken').Strategy;
 export interface AppOptions {
   collectionsDAOPool: DAOPool<CollectionDAO>;
   darwinXtfUrl: string;
-  legacyDarwinMetadataRepository: LegacyDarwinMetadataRepository;
   metadataRepository: CUDLMetadataRepository;
   tagsDAOPool: DAOPool<TagsDAO>;
   users: Users;
@@ -64,9 +62,6 @@ export class App extends BaseResource {
     return new ExternalResources(
       new App({
         metadataRepository: new DefaultCUDLMetadataRepository(config.dataDir),
-        legacyDarwinMetadataRepository: new LegacyDarwinMetadataRepository(
-          config.legacyDcpDataDir
-        ),
         collectionsDAOPool: PostgresCollectionDAO.createPool(dbPool),
         tagsDAOPool: PostgresTagsDAO.createPool(dbPool),
         users: config.users,
@@ -137,8 +132,6 @@ export class App extends BaseResource {
       '/v1/transcription',
       transcription.getRoutes({
         metadataRepository: this.options.metadataRepository,
-        legacyDarwinMetadataRepository: this.options
-          .legacyDarwinMetadataRepository,
         xsltExecutor: this.xsltExecutor,
         zacynthiusServiceURL: this.options.zacynthiusServiceURL,
       })
