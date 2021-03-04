@@ -15,4 +15,5 @@ module.exports = {
   roots: ['<rootDir>/src/', '<rootDir>/test/', '<rootDir>/integration_test/'],
   // The 5 second default is often not enough in slow CI environments
   testTimeout: 1000 * 30,
+  setupFilesAfterEnv: ['./test/custom-jest-matchers.ts'],
 };
