@@ -188,7 +188,7 @@ describe('ItemJsonMetadataResponse', () => {
     );
 
     await expect(response.asJson()).rejects.toThrowErrorMatchingInlineSnapshot(
-      '"data is not valid JSON: SyntaxError: Unexpected token i in JSON at position 0"'
+      '"data is not valid JSON: Unexpected token i in JSON at position 0"'
     );
   });
 

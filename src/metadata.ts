@@ -125,6 +125,10 @@ export class DefaultMetadataResponse implements MetadataResponse {
   private readonly id: string;
   private readonly dataProvider: DataProvider;
 
+  static async generateResponse(id: string, dataProvider: DataProvider) {
+    return new DefaultMetadataResponse(id, dataProvider);
+  }
+
   constructor(id: string, dataProvider: DataProvider) {
     this.id = id;
     this.dataProvider = dataProvider;
@@ -143,6 +147,10 @@ export class DefaultMetadataResponse implements MetadataResponse {
 export class ItemJsonMetadataResponse
   extends DefaultMetadataResponse
   implements ExternalAccessAware, ExternalEmbedAware {
+  static async generateResponse(id: string, dataProvider: DataProvider) {
+    return new ItemJsonMetadataResponse(id, dataProvider);
+  }
+
   async [isExternalAccessPermitted](): Promise<boolean> {
     // We only want to allow external access to the metadata if the metadataRights field is present
     // and non-empty.
@@ -168,7 +176,7 @@ function parseJsonMetadata(jsonText: string): unknown {
   try {
     return JSON.parse(jsonText);
   } catch (e) {
-    throw new MetadataError(`data is not valid JSON: ${e}`);
+    throw new MetadataError(`data is not valid JSON: ${e.message}`, e);
   }
 }
 

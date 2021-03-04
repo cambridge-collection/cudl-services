@@ -4,13 +4,19 @@ import assert from 'assert';
 import {isSimplePathSegment} from '../util';
 import path from 'path';
 import {
+  DataStore,
+  DefaultMetadataProvider,
+  DefaultMetadataResponse,
   isItemJSON,
   ItemJSON,
+  ItemJsonMetadataResponse,
   LocationResolver,
   MetadataError,
+  MetadataProvider,
 } from '../metadata';
 
 export interface MetadataRepository<F extends string = string> {
+  /** @deprecated getPath should not be used — metadata may not be on the local filesystem */
   getPath(format: F, id: string): Promise<string>;
 
   getBytes(format: F, id: string): Promise<Buffer>;
@@ -24,6 +30,9 @@ export enum CUDLFormat {
   TRANSCRIPTION = 'transcription',
   JSON = 'json',
 }
+const XML_FORMATS = Object.values(CUDLFormat).filter(
+  cf => cf !== CUDLFormat.TRANSCRIPTION && cf !== CUDLFormat.JSON
+);
 
 abstract class BaseMetadataRepository<T extends string>
   implements MetadataRepository<T> {
@@ -82,6 +91,74 @@ export interface CUDLMetadataRepository extends MetadataRepository<CUDLFormat> {
   getJSON(id: string): Promise<ItemJSON>;
 }
 
+type CUDLProviders = {
+  [key in CUDLFormat]: key extends CUDLFormat.JSON
+    ? MetadataProvider<ItemJsonMetadataResponse>
+    : MetadataProvider;
+};
+
+/**
+ * A CUDLMetadataRepository backed by the MetadataProvider API. Data can be
+ * obtained from location-independent DataStores.
+ */
+export class MetadataProviderCUDLMetadataRepository
+  implements CUDLMetadataRepository {
+  private readonly providers: CUDLProviders;
+
+  constructor(providers: CUDLProviders) {
+    this.providers = providers;
+  }
+
+  async getBytes(format: CUDLFormat, id: string): Promise<Buffer> {
+    return (await this.providers[format].query(id)).getBytes();
+  }
+
+  async getJSON(id: string): Promise<ItemJSON> {
+    return (await this.providers[CUDLFormat.JSON].query(id)).asJson();
+  }
+
+  async getPath(): Promise<string> {
+    throw new Error('getPath() is not supported in this implementation');
+  }
+
+  static forDataStore(
+    dataStore: DataStore
+  ): MetadataProviderCUDLMetadataRepository {
+    const xmlProviders = Object.fromEntries(
+      XML_FORMATS.map(format => [
+        format,
+        new DefaultMetadataProvider(
+          dataStore,
+          DataLocationResolver(format),
+          DefaultMetadataResponse
+        ),
+      ])
+    ) as Partial<Record<CUDLFormat, MetadataProvider>>;
+
+    const providers: Partial<CUDLProviders> = {
+      ...xmlProviders,
+      [CUDLFormat.TRANSCRIPTION]: new DefaultMetadataProvider(
+        dataStore,
+        resolveTranscriptionLocation,
+        DefaultMetadataResponse
+      ),
+      [CUDLFormat.JSON]: new DefaultMetadataProvider(
+        dataStore,
+        resolveItemJsonLocation,
+        ItemJsonMetadataResponse
+      ),
+    };
+
+    assert.deepStrictEqual(
+      Object.getOwnPropertyNames(providers),
+      Object.values(CUDLFormat)
+    );
+    return new MetadataProviderCUDLMetadataRepository(
+      providers as CUDLProviders
+    );
+  }
+}
+
 export class DefaultCUDLMetadataRepository
   extends BaseMetadataRepository<CUDLFormat>
   implements CUDLMetadataRepository {
@@ -132,7 +209,7 @@ export class DefaultCUDLMetadataRepository
       return data;
     } catch (e) {
       throw new MetadataError(
-        `Failed to load metadata from ${jsonPath}: ${e.message}`,
+        `Failed to load metadata from filesystem path ${jsonPath}: ${e.message}`,
         e
       );
     }
