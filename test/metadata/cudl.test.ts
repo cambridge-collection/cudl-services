@@ -5,6 +5,7 @@ import {TEST_DATA_PATH} from '../constants';
 import {
   CUDLFormat,
   DefaultCUDLMetadataRepository,
+  resolveTranscriptionLocation,
 } from '../../src/metadata/cudl';
 
 function getRepo() {
@@ -25,6 +26,30 @@ const TRANSCRIPTION_PATH = path.resolve(
   TEST_DATA_PATH,
   'metadata/data/transcription/MS-FOO/foo.xml'
 );
+
+describe('CUDLFormat.TRANSCRIPTION LocationResolver', () => {
+  test.each([
+    [
+      'MS-NN-00002-00041/Bezae-Latin.xml',
+      'data/transcription/MS-NN-00002-00041/Bezae-Latin.xml',
+    ],
+    [
+      'MS-NN-00002-00041/Bezae-Latin',
+      'data/transcription/MS-NN-00002-00041/Bezae-Latin.xml',
+    ],
+  ])('resolves %j -> %j', async (id, expected) => {
+    await expect(resolveTranscriptionLocation(id)).resolves.toBe(expected);
+  });
+
+  test.each(['foo', 'foo.xml', 'foo/bar/baz'])(
+    'rejects invalid ID %j',
+    async invalidId => {
+      await expect(resolveTranscriptionLocation(invalidId)).rejects.toThrow(
+        `Invalid transcription id: ${invalidId}`
+      );
+    }
+  );
+});
 
 describe('CUDLMetadataRepository', () => {
   test('getPath() returns JSON metadata path', async () => {

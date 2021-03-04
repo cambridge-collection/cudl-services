@@ -3,7 +3,12 @@ import fs from 'fs';
 import assert from 'assert';
 import {isSimplePathSegment} from '../util';
 import path from 'path';
-import {isItemJSON, ItemJSON, MetadataError} from '../metadata';
+import {
+  isItemJSON,
+  ItemJSON,
+  LocationResolver,
+  MetadataError,
+} from '../metadata';
 
 export interface MetadataRepository<F extends string = string> {
   getPath(format: F, id: string): Promise<string>;
@@ -36,6 +41,21 @@ abstract class BaseMetadataRepository<T extends string>
     }
   }
 }
+
+export const resolveTranscriptionLocation: LocationResolver = async function resolveTranscriptionLocation(
+  id
+) {
+  const idParts = /^([\w-]+)\/([\w-]+)(?:\.xml)?$/.exec(id);
+  if (!idParts) {
+    throw new Error(`Invalid ${CUDLFormat.TRANSCRIPTION} id: ${id}`);
+  }
+  return path.join(
+    'data',
+    CUDLFormat.TRANSCRIPTION,
+    idParts[1],
+    `${idParts[2]}.xml`
+  );
+};
 
 export interface CUDLMetadataRepository extends MetadataRepository<CUDLFormat> {
   getJSON(id: string): Promise<ItemJSON>;
