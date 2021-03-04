@@ -57,6 +57,27 @@ export const resolveTranscriptionLocation: LocationResolver = async function res
   );
 };
 
+export const resolveItemJsonLocation: LocationResolver = async function resolveItemJsonLocation(
+  id
+) {
+  if (!isSimplePathSegment(id)) {
+    throw new Error(`invalid id: ${id}`);
+  }
+  return path.join('json', `${id}.json`);
+};
+
+export function DataLocationResolver(formatDir: string): LocationResolver {
+  if (!isSimplePathSegment(formatDir)) {
+    throw new Error(`invalid formatDir: ${formatDir}`);
+  }
+  return async function resolveDataDirLocation(id: string) {
+    if (!isSimplePathSegment(id)) {
+      throw new Error(`invalid id: ${id}`);
+    }
+    return path.join('data', formatDir, id, `${id}.xml`);
+  };
+}
+
 export interface CUDLMetadataRepository extends MetadataRepository<CUDLFormat> {
   getJSON(id: string): Promise<ItemJSON>;
 }

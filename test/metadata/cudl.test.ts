@@ -4,7 +4,9 @@ import {promisify} from 'util';
 import {TEST_DATA_PATH} from '../constants';
 import {
   CUDLFormat,
+  DataLocationResolver,
   DefaultCUDLMetadataRepository,
+  resolveItemJsonLocation,
   resolveTranscriptionLocation,
 } from '../../src/metadata/cudl';
 
@@ -27,28 +29,69 @@ const TRANSCRIPTION_PATH = path.resolve(
   'metadata/data/transcription/MS-FOO/foo.xml'
 );
 
-describe('CUDLFormat.TRANSCRIPTION LocationResolver', () => {
-  test.each([
-    [
-      'MS-NN-00002-00041/Bezae-Latin.xml',
-      'data/transcription/MS-NN-00002-00041/Bezae-Latin.xml',
-    ],
-    [
-      'MS-NN-00002-00041/Bezae-Latin',
-      'data/transcription/MS-NN-00002-00041/Bezae-Latin.xml',
-    ],
-  ])('resolves %j -> %j', async (id, expected) => {
-    await expect(resolveTranscriptionLocation(id)).resolves.toBe(expected);
+describe('LocationResolvers', () => {
+  describe('CUDLFormat.TRANSCRIPTION LocationResolver', () => {
+    test.each([
+      [
+        'MS-NN-00002-00041/Bezae-Latin.xml',
+        'data/transcription/MS-NN-00002-00041/Bezae-Latin.xml',
+      ],
+      [
+        'MS-NN-00002-00041/Bezae-Latin',
+        'data/transcription/MS-NN-00002-00041/Bezae-Latin.xml',
+      ],
+    ])('resolves %j -> %j', async (id, expected) => {
+      await expect(resolveTranscriptionLocation(id)).resolves.toBe(expected);
+    });
+
+    test.each(['foo', 'foo.xml', 'foo/bar/baz', '../foo.xml', '/foo'])(
+      'rejects invalid ID %j',
+      async invalidId => {
+        await expect(resolveTranscriptionLocation(invalidId)).rejects.toThrow(
+          `Invalid transcription id: ${invalidId}`
+        );
+      }
+    );
   });
 
-  test.each(['foo', 'foo.xml', 'foo/bar/baz'])(
-    'rejects invalid ID %j',
-    async invalidId => {
-      await expect(resolveTranscriptionLocation(invalidId)).rejects.toThrow(
-        `Invalid transcription id: ${invalidId}`
+  const INVALID_IDS = ['', 'foo/bar', '../foo', 'foo.bar'];
+
+  describe('CUDLFormat.JSON LocationResolver', () => {
+    test('resolves id to JSON file location', async () => {
+      await expect(resolveItemJsonLocation('MS-FOO-BAR')).resolves.toBe(
+        'json/MS-FOO-BAR.json'
       );
-    }
-  );
+    });
+
+    test.each(INVALID_IDS)('rejects invalid ID %j', async invalidId => {
+      await expect(resolveItemJsonLocation(invalidId)).rejects.toThrow(
+        `invalid id: ${invalidId}`
+      );
+    });
+  });
+
+  describe('DataLocationResolver', () => {
+    test('resolves id to data file location', async () => {
+      await expect(DataLocationResolver('example')('MS-FOO-BAR')).resolves.toBe(
+        'data/example/MS-FOO-BAR/MS-FOO-BAR.xml'
+      );
+    });
+
+    test.each(INVALID_IDS)('rejects invalid ID %j', async invalidId => {
+      await expect(DataLocationResolver('example')(invalidId)).rejects.toThrow(
+        `invalid id: ${invalidId}`
+      );
+    });
+
+    test.each(INVALID_IDS)(
+      'rejects invalid formatDir %j',
+      async invalidFormatDir => {
+        expect(() => DataLocationResolver(invalidFormatDir)).toThrow(
+          `invalid formatDir: ${invalidFormatDir}`
+        );
+      }
+    );
+  });
 });
 
 describe('CUDLMetadataRepository', () => {
