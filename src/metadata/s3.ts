@@ -7,6 +7,7 @@ import {
 import {applyLazyDefaults} from '../util';
 import streamToPromise from 'stream-to-promise';
 import {Readable} from 'stream';
+import {ErrorCategories} from '../errors';
 
 export interface S3DataStoreInput {
   client: S3Client;
@@ -35,7 +36,11 @@ export class S3DataStore implements DataStore {
         })
       );
     } catch (e) {
-      throw new MetadataError(`Failed to load data from S3: ${e}`);
+      throw new MetadataError({
+        message: `Failed to load data from S3: ${e}`,
+        nested: e,
+        tags: e?.name === 'NoSuchKey' ? [ErrorCategories.NotFound] : [],
+      });
     }
     if (!(response.Body instanceof Readable)) {
       throw new Error(

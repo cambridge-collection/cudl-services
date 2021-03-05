@@ -11,6 +11,7 @@ import cryptoRandomString from 'crypto-random-string';
 import assert from 'assert';
 import {S3DataStore} from '../src/metadata/s3';
 import {MetadataError} from '../src/metadata';
+import {ErrorCategories} from '../src/errors';
 
 describe('S3DataStore', () => {
   let client: S3Client;
@@ -96,8 +97,12 @@ describe('S3DataStore', () => {
         client,
         bucket: bucketName,
       });
-      await expect(store.read('missing/key')).rejects.toThrow(
+      const response = store.read('missing/key');
+      await expect(response).rejects.toThrow(
         new MetadataError('Failed to load data from S3: NoSuchKey: NoSuchKey')
+      );
+      await expect(response).rejects.toThrowErrorTaggedWith(
+        ErrorCategories.NotFound
       );
     });
   });
