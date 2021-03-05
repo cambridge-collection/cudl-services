@@ -1,5 +1,5 @@
 import {DataStore, MetadataError} from '../metadata';
-import {ValueError} from '../errors';
+import {ErrorCategories, ValueError} from '../errors';
 import path from 'path';
 import fs from 'fs/promises';
 
@@ -21,10 +21,11 @@ export class FilesystemDataStore implements DataStore {
     try {
       return await fs.readFile(target);
     } catch (e) {
-      throw new MetadataError(
-        `Failed to load metadata from filesystem path ${target}: ${e.message}`,
-        e
-      );
+      throw new MetadataError({
+        message: `Failed to load metadata from filesystem path ${target}: ${e.message}`,
+        nested: e,
+        tags: e?.code === 'ENOENT' ? [ErrorCategories.NotFound] : [],
+      });
     }
   }
 }

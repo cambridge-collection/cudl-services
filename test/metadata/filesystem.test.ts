@@ -3,8 +3,7 @@ import {mocked} from 'ts-jest/utils';
 import fs from 'fs/promises';
 
 import {FilesystemDataStore} from '../../src/metadata/filesystem';
-import {ValueError} from '../../src/errors';
-import {MetadataError} from '../../src/metadata';
+import {ErrorCategories, ValueError} from '../../src/errors';
 
 jest.mock('fs/promises', (): typeof fs => {
   const _fs = jest.createMockFromModule('fs/promises') as typeof fs;
@@ -12,7 +11,17 @@ jest.mock('fs/promises', (): typeof fs => {
     if (path === '/example/my/file') {
       return Buffer.from('data');
     }
-    throw new Error('not found');
+    throw Object.assign(
+      new Error(
+        "ENOENT: no such file or directory, open '/example/missing/file'"
+      ),
+      {
+        errno: -2,
+        code: 'ENOENT',
+        syscall: 'open',
+        path: path,
+      }
+    );
   });
   return _fs;
 });
@@ -43,12 +52,12 @@ describe('FilesystemDataStore', () => {
   });
 
   test('read() rejects on fs read errors', async () => {
-    await expect(
-      new FilesystemDataStore('/example').read('missing/file')
-    ).rejects.toThrow(
-      new MetadataError(
-        'Failed to load metadata from filesystem path /example/missing/file: not found'
-      )
+    const result = new FilesystemDataStore('/example').read('missing/file');
+    await expect(result).rejects.toThrowErrorMatchingInlineSnapshot(
+      '"Failed to load metadata from filesystem path /example/missing/file: ENOENT: no such file or directory, open \'/example/missing/file\'"'
+    );
+    await expect(result).rejects.toThrowErrorTaggedWith(
+      ErrorCategories.NotFound
     );
   });
 });
