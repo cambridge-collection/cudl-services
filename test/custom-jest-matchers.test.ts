@@ -1,4 +1,9 @@
+import ansiSerializer from 'jest-snapshot-serializer-ansi';
 import {BaseError} from '../src/errors';
+
+beforeAll(() => {
+  expect.addSnapshotSerializer(ansiSerializer);
+});
 
 describe('toThrowErrorTaggedWith', () => {
   function throwWithTags(...tags: string[]): never {

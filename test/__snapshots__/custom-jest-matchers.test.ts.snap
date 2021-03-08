@@ -1,60 +1,60 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`toThrowErrorTaggedWith fails in .rejects mode when a promise rejects with an incorrectly-tagged error 1`] = `
-"[2mexpect([22m[31mreceived[39m[2m).[22mrejects[2m.[22mtoThrowErrorTaggedWith[2m([22m[32mexpected[39m[2m)[22m
+"expect(received).rejects.toThrowErrorTaggedWith(expected)
 
-Expected: [32m[\\"b\\"][39m to be in the error's tag set
-Received: [31m[\\"a\\"][39m"
+Expected: [\\"b\\"] to be in the error's tag set
+Received: [\\"a\\"]"
 `;
 
 exports[`toThrowErrorTaggedWith fails in .rejects mode when a promise resolves 1`] = `
-"[2mexpect([22m[31mreceived[39m[2m).[22mrejects[2m.[22mtoThrowErrorTaggedWith[2m()[22m
+"expect(received).rejects.toThrowErrorTaggedWith()
 
 Received promise resolved instead of rejected
-Resolved to value: [31mundefined[39m"
+Resolved to value: undefined"
 `;
 
 exports[`toThrowErrorTaggedWith fails in .resolves mode when a promise rejects 1`] = `
-"[2mexpect([22m[31mreceived[39m[2m).[22mresolves[2m.[22mtoThrowErrorTaggedWith[2m([22m[32mexpected[39m[2m)[22m
+"expect(received).resolves.toThrowErrorTaggedWith(expected)
 
-Received value must be a function or Error but instead \\"[31mundefined[39m\\" was found"
+Received value must be a function or Error but instead \\"undefined\\" was found"
 `;
 
 exports[`toThrowErrorTaggedWith fails in .resolves mode when a promise resolves 1`] = `
-"[2mexpect([22m[31mreceived[39m[2m).[22mresolves[2m.[22mtoThrowErrorTaggedWith[2m([22m[32mexpected[39m[2m)[22m
+"expect(received).resolves.toThrowErrorTaggedWith(expected)
 
-Received value must be a function or Error but instead \\"[31mundefined[39m\\" was found"
+Received value must be a function or Error but instead \\"undefined\\" was found"
 `;
 
 exports[`toThrowErrorTaggedWith fails when callback does not throw 1`] = `
-"[2mexpect([22m[31mreceived[39m[2m).[22mtoThrowErrorTaggedWith[2m([22m[32mexpected[39m[2m)[22m
+"expect(received).toThrowErrorTaggedWith(expected)
 
 expected an Error to be thrown but none was"
 `;
 
 exports[`toThrowErrorTaggedWith fails when callback is not a function 1`] = `
-"[2mexpect([22m[31mreceived[39m[2m).[22mtoThrowErrorTaggedWith[2m([22m[32mexpected[39m[2m)[22m
+"expect(received).toThrowErrorTaggedWith(expected)
 
-Received value must be a function or Error but instead \\"[31mundefined[39m\\" was found"
+Received value must be a function or Error but instead \\"undefined\\" was found"
 `;
 
 exports[`toThrowErrorTaggedWith fails when thrown error does not have a single required tag 1`] = `
-"[2mexpect([22m[31mreceived[39m[2m).[22mtoThrowErrorTaggedWith[2m([22m[32mexpected[39m[2m)[22m
+"expect(received).toThrowErrorTaggedWith(expected)
 
-Expected: [32m[\\"a\\"][39m to be in the error's tag set
-Received: [31m[\\"b\\"][39m"
+Expected: [\\"a\\"] to be in the error's tag set
+Received: [\\"b\\"]"
 `;
 
 exports[`toThrowErrorTaggedWith fails when thrown error is not tagged 1`] = `
-"[2mexpect([22m[31mreceived[39m[2m).[22mtoThrowErrorTaggedWith[2m([22m[32mexpected[39m[2m)[22m
+"expect(received).toThrowErrorTaggedWith(expected)
 
-Expected: [32m[\\"a\\"][39m to be in the error's tag set
+Expected: [\\"a\\"] to be in the error's tag set
 Received: *error is not tagged*"
 `;
 
 exports[`toThrowErrorTaggedWith fails when thrown error is tagged with a subset of required tags 1`] = `
-"[2mexpect([22m[31mreceived[39m[2m).[22mtoThrowErrorTaggedWith[2m([22m[32mexpected[39m[2m)[22m
+"expect(received).toThrowErrorTaggedWith(expected)
 
-Expected: [32m[\\"a\\", \\"d\\"][39m to be in the error's tag set
-Received: [31m[\\"a\\", \\"b\\", \\"c\\"][39m"
+Expected: [\\"a\\", \\"d\\"] to be in the error's tag set
+Received: [\\"a\\", \\"b\\", \\"c\\"]"
 `;
