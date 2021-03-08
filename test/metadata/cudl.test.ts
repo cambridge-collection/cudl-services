@@ -12,6 +12,7 @@ import {
   resolveTranscriptionLocation,
 } from '../../src/metadata/cudl';
 import {FilesystemDataStore} from '../../src/metadata/filesystem';
+import {ErrorCategories} from '../../src/errors';
 
 const CUDL_METADATA_PATH = path.resolve(TEST_DATA_PATH, 'metadata');
 
@@ -140,10 +141,13 @@ describe('CUDLMetadataRepository', () => {
     });
 
     test('getBytes() throws MetadataError for missing data', async () => {
-      await expect(
-        getRepo().getBytes(CUDLFormat.TRANSCRIPTION, 'MS-FOO/bar')
-      ).rejects.toThrow(
+      const resp = getRepo().getBytes(CUDLFormat.TRANSCRIPTION, 'MS-FOO/bar');
+      await expect(resp).rejects.toThrow(
         /Failed to load metadata from .*\/data\/transcription\/MS-FOO\/bar\.xml: ENOENT: no such file or directory, open '.*\/data\/transcription\/MS-FOO\/bar.xml'/
+      );
+
+      await expect(resp).rejects.toThrowErrorTaggedWith(
+        ErrorCategories.NotFound
       );
     });
 

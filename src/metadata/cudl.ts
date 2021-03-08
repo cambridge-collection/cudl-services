@@ -14,6 +14,7 @@ import {
   MetadataError,
   MetadataProvider,
 } from '../metadata';
+import {ErrorCategories} from '../errors';
 
 export interface MetadataRepository<F extends string = string> {
   /** @deprecated getPath should not be used — metadata may not be on the local filesystem */
@@ -43,10 +44,11 @@ abstract class BaseMetadataRepository<T extends string>
     try {
       return await promisify(fs.readFile)(path);
     } catch (e) {
-      throw new MetadataError(
-        `Failed to load metadata from ${path}: ${e.message}`,
-        e
-      );
+      throw new MetadataError({
+        message: `Failed to load metadata from ${path}: ${e.message}`,
+        nested: e,
+        tags: e?.code === 'ENOENT' ? [ErrorCategories.NotFound] : [],
+      });
     }
   }
 }
