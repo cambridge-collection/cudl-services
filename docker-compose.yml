@@ -29,14 +29,17 @@ services:
       - ./.editorconfig:/code/.editorconfig
       - ./.eslintignore:/code/.eslintignore
       - ./.eslintrc.json:/code/.eslintrc.json
+      - ./.github:/code/.github
       - ./.gitignore:/code/.gitignore
       - ./.npmignore:/code/.npmignore
       - ./.prettierrc.js:/code/.prettierrc.js
+      - ./CONTRIBUTING.md:/code/CONTRIBUTING.md
       - ./Dockerfile:/code/Dockerfile
+      - ./LICENSE.txt:/code/LICENSE.txt
       - ./Makefile:/code/Makefile
+      - ./NOTICE.txt:/code/NOTICE.txt
       - ./README.md:/code/README.md
       - ./bin:/code/bin
-      - ./bitbucket-pipelines.yml:/code/bitbucket-pipelines.yml
       - ./config:/code/config
       - ./docker-compose.adminer.yml:/code/docker-compose.adminer.yml
       - ./docker-compose.yml:/code/docker-compose.yml
