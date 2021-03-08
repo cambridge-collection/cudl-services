@@ -26,6 +26,7 @@ import {
 } from '../../src/util';
 import {mocked} from 'ts-jest/utils';
 import {CUDLMetadataRepository} from '../../src/metadata/cudl';
+import {ErrorCategories} from '../../src/errors';
 
 function getTestApp(metadataRepository: CUDLMetadataRepository) {
   const app = express();
@@ -229,6 +230,19 @@ describe('metadata routes v2 /:format/:id', () => {
           "error": "Bad format: not-a-format",
         }
       `);
+    });
+
+    test('responds with NOT_FOUND when MetadataProvider throws an error tagged with NotFound', async () => {
+      mocked(
+        requireNotUndefined(options.metadataProviders.get('example')).query
+      ).mockRejectedValue(
+        new MetadataError({tags: [ErrorCategories.NotFound]})
+      );
+
+      const response = await request(getApp()).get('/example/123');
+
+      expect(response.status).toBe(StatusCodes.NOT_FOUND);
+      expect(response.body).toMatchSnapshot();
     });
 
     test('responds with BAD_REQUEST invalid IDs', async () => {

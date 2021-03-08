@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`metadata routes v2 /:format/:id /:format/:id responds with NOT_FOUND when MetadataProvider throws an error tagged with NotFound 1`] = `
+Object {
+  "error": "ID does not exist: 123",
+}
+`;

@@ -20,6 +20,7 @@ import {
   isSimplePathSegment,
 } from '../util';
 import {CUDLFormat, CUDLMetadataRepository} from '../metadata/cudl';
+import {ErrorCategories, isTagged} from '../errors';
 
 export interface MetadataResponseEmitter {
   canEmit(metadataResponse: MetadataResponse): boolean;
@@ -87,7 +88,18 @@ function createMetadataHandlerV2(options: CreateMetadataHandlerV2Options) {
       return;
     }
 
-    const metadata = await provider.query(id);
+    let metadata: MetadataResponse;
+    try {
+      metadata = await provider.query(id);
+    } catch (e) {
+      if (isTagged(e) && new Set(e.tags).has(ErrorCategories.NotFound)) {
+        res.status(StatusCodes.NOT_FOUND).json({
+          error: `ID does not exist: ${id}`,
+        });
+        return;
+      }
+      throw e;
+    }
 
     // If the request is an external CORS request we'll restrict
     // access to items which are not embeddable. This prevents
