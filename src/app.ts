@@ -20,8 +20,9 @@ import * as translation from './routes/translation';
 import {DefaultXTF, XTF} from './xtf';
 import {
   CUDLMetadataRepository,
-  DefaultCUDLMetadataRepository,
+  MetadataProviderCUDLMetadataRepository,
 } from './metadata/cudl';
+import {FilesystemDataStore} from './metadata/filesystem';
 
 const cookieParser = require('cookie-parser');
 const favicon = require('serve-favicon');
@@ -61,7 +62,9 @@ export class App extends BaseResource {
 
     return new ExternalResources(
       new App({
-        metadataRepository: new DefaultCUDLMetadataRepository(config.dataDir),
+        metadataRepository: MetadataProviderCUDLMetadataRepository.forDataStore(
+          new FilesystemDataStore(config.dataDir)
+        ),
         collectionsDAOPool: PostgresCollectionDAO.createPool(dbPool),
         tagsDAOPool: PostgresTagsDAO.createPool(dbPool),
         users: config.users,

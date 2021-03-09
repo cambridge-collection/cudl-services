@@ -16,8 +16,9 @@ import {TEST_DATA_PATH} from './constants';
 import {Resource} from '../src/resources';
 import {
   CUDLMetadataRepository,
-  DefaultCUDLMetadataRepository,
+  MetadataProviderCUDLMetadataRepository,
 } from '../src/metadata/cudl';
+import {FilesystemDataStore} from '../src/metadata/filesystem';
 
 /**
  * An HTTP server listening on a random port on the loopback interface which
@@ -138,8 +139,11 @@ export class MemoryTagsDAO
 }
 
 export function getTestDataMetadataRepository(): CUDLMetadataRepository {
-  return new DefaultCUDLMetadataRepository(
+  const testMetadataDataStore = new FilesystemDataStore(
     path.resolve(TEST_DATA_PATH, 'metadata')
+  );
+  return MetadataProviderCUDLMetadataRepository.forDataStore(
+    testMetadataDataStore
   );
 }
 
