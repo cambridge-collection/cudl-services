@@ -220,7 +220,7 @@ function createMetadataHandler(metadataRepository: CUDLMetadataRepository) {
         if (item?.descriptiveMetadata?.[0]?.metadataRights?.trim()) {
           // Return metadata
           res.contentType('text/plain');
-          res.sendFile(await metadataRepository.getPath(format, id));
+          res.send(await metadataRepository.getBytes(format, id));
         } else {
           res.status(StatusCodes.FORBIDDEN).json({
             error: util.format('Access not allowed to requested metadata'),

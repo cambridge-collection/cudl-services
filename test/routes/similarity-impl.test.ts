@@ -39,7 +39,6 @@ describe('similarity route implementation', () => {
       mockMetadataRepository = {
         getJSON: jest.fn(async id => meta[id]),
         getBytes: jest.fn(),
-        getPath: jest.fn(),
       };
     });
 

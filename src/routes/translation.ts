@@ -1,14 +1,14 @@
 import {XSLTExecutor} from '@lib.cam/xslt-nailgun';
 import express, {Request, Response} from 'express';
 import expressAsyncHandler from 'express-async-handler';
-import fs from 'fs';
 import {StatusCodes} from 'http-status-codes';
 import * as path from 'path';
-import util, {promisify} from 'util';
+import util from 'util';
 import {applyLazyDefaults, isSimplePathSegment} from '../util';
 import {delegateToExternalHTML} from './transcription-impl';
 import {URL} from 'url';
 import {CUDLFormat, CUDLMetadataRepository} from '../metadata/cudl';
+import {ErrorCategories, isTagged} from '../errors';
 
 export function getRoutes(options: {
   router?: express.Router;
@@ -65,22 +65,22 @@ function createTeiTranslationHandler(
       }
     }
 
-    const teiPath = await metadataRepository.getPath(
-      CUDLFormat.TEI,
-      req.params.id
-    );
+    let teiXml: Buffer;
     try {
-      await promisify(fs.access)(teiPath);
+      teiXml = await metadataRepository.getBytes(CUDLFormat.TEI, req.params.id);
     } catch (e) {
-      res.status(StatusCodes.NOT_FOUND).json({
-        error: `ID does not exist: ${req.params.id}`,
-      });
-      return;
+      if (isTagged(e) && new Set(e.tags).has(ErrorCategories.NotFound)) {
+        res.status(StatusCodes.NOT_FOUND).json({
+          error: `ID does not exist: ${req.params.id}`,
+        });
+        return;
+      }
+      throw e;
     }
 
     const pages = await extractTeiPageRange({
       xsltExecutor,
-      teiPath,
+      teiXml,
       start: req.params.from,
       end: req.params.to,
     });
@@ -95,14 +95,14 @@ function createTeiTranslationHandler(
 
 async function extractTeiPageRange(options: {
   xsltExecutor: XSLTExecutor;
-  teiPath: string;
+  teiXml: string | Buffer;
   start: string;
   end: string;
   type?: string;
 }): Promise<Buffer> {
   return options.xsltExecutor.execute({
     xsltPath: PAGE_EXTRACT_XSL,
-    xmlPath: options.teiPath,
+    xml: options.teiXml,
     parameters: {
       start: options.start,
       end: options.end,

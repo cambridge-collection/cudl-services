@@ -29,7 +29,6 @@ describe('similarity routes /:itemid/:similarityId', () => {
     metadataRepository = {
       getJSON: jest.fn(),
       getBytes: jest.fn(),
-      getPath: jest.fn(),
     };
     xtf = {
       getSimilarItems: jest.fn(),
