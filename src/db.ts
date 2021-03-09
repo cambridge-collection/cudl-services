@@ -2,7 +2,7 @@
  * This module contains functions for working with Postgres.
  */
 import pg from 'pg';
-import {StrictConfig} from './config';
+import {StrictConfig} from './cudl-config';
 import {BaseResource, Resource} from './resources';
 import {factory} from './util';
 

@@ -5,7 +5,7 @@
 import Debugger from 'debug';
 import util from 'util';
 import {App} from './app';
-import {loadConfigFromEnvar, StrictConfig} from './config';
+import {loadConfigFromEnvar, StrictConfig} from './cudl-config';
 import {using} from './resources';
 
 const debug = Debugger('cudl-services');

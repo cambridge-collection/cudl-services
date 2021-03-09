@@ -1,7 +1,7 @@
 import {mockGetResponder} from './mocking/superagent-mocking';
 
 import superagent, {Response} from 'superagent';
-import {XTFConfig} from '../src/config';
+import {XTFConfig} from '../src/cudl-config';
 import {expectElementWithTag, expectNodeWithType, NodeType} from '../src/dom';
 import {DefaultXTF, XTF} from '../src/xtf';
 

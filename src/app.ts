@@ -5,7 +5,7 @@ import passport from 'passport';
 import path from 'path';
 import {URL} from 'url';
 import {CollectionDAO, PostgresCollectionDAO} from './collections';
-import {StrictConfig, User, Users} from './config';
+import {StrictConfig, User, Users} from './cudl-config';
 
 import {DAOPool, PostgresDatabasePool} from './db';
 import {BaseResource, ExternalResources, using} from './resources';

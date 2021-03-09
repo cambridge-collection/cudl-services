@@ -1,6 +1,6 @@
 import superagent from 'superagent';
 import {URL} from 'url';
-import {XTFConfig} from './config';
+import {XTFConfig} from './cudl-config';
 import {strictDOMParser} from './dom';
 import {ValueError} from './errors';
 

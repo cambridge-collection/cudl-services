@@ -21,7 +21,7 @@ import {
   mergeConfigs,
   PartialConfig,
   splitEnvarPaths,
-} from '../src/config';
+} from '../src/cudl-config';
 import {InvalidConfigError} from '../src/errors';
 import ProcessEnv = NodeJS.ProcessEnv;
 
