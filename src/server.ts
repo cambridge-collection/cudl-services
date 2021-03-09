@@ -4,36 +4,27 @@
 
 import Debugger from 'debug';
 import util from 'util';
-import {App} from './app';
-import {loadConfigFromEnvar, StrictConfig} from './cudl-config';
+import {Config, loadConfig} from './config';
 import {using} from './resources';
 
 const debug = Debugger('cudl-services');
 
 async function runAsync() {
-  let config: StrictConfig;
+  let config: Config;
   try {
-    config = await loadConfigFromEnvar();
+    config = await loadConfig();
   } catch (e) {
     console.error(`Error: ${e.message}`);
     console.error('Setting envar DEBUG=cudl-services:config may help');
     process.exit(1);
   }
 
-  if ((config && 'user' in config) || 'group' in config) {
-    console.error(
-      '\
-  Error: config.user and config.group are no longer supported. Remove them from the \
-  config and start this process with the desired user.'
-    );
-    process.exit(1);
-  }
   if (process.getuid && process.getuid() === 0) {
     console.error('Error: Running as root is not permitted');
     process.exit(1);
   }
 
-  await using(App.fromConfig(config), async ({value: application}) => {
+  await using(config.createApplication(), async application => {
     application.expressApp.set('port', process.env.PORT || 3000);
 
     const server = application.expressApp.listen(

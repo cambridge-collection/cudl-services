@@ -10,6 +10,16 @@ import {BaseError, InvalidConfigError} from './errors';
 import fullConfigSchema from './full-config.schema.json';
 import partialConfigSchema from './partial-config.schema.json';
 import {NonOptional, requireNotUndefined} from './util';
+import {Config} from './config';
+import {App, Application, User, Users} from './app';
+import {ExternalResources} from './resources';
+import {MetadataProviderCUDLMetadataRepository} from './metadata/cudl';
+import {FilesystemDataStore} from './metadata/filesystem';
+import {PostgresCollectionDAO} from './collections';
+import {PostgresTagsDAO} from './routes/tags-impl';
+import {DefaultXTF, XTFConfig} from './xtf';
+import {URL} from 'url';
+import {DatabaseConfig, PostgresDatabasePool} from './db';
 
 const debug = Debugger('cudl-services:config');
 
@@ -33,7 +43,9 @@ export function splitEnvarPaths(paths: string | undefined) {
   return (paths || '').split(':').filter(p => !!p);
 }
 
-export async function loadConfigFile(filePath: string): Promise<PartialConfig> {
+export async function loadConfigFile(
+  filePath: string
+): Promise<PartialCUDLConfigData> {
   let jsonDocument;
   try {
     jsonDocument = await promisify(fs.readFile)(filePath, 'utf-8');
@@ -50,7 +62,7 @@ export async function loadConfigFile(filePath: string): Promise<PartialConfig> {
 export function parseConfigFromJSON(
   jsonDocument: string,
   sourceDescription: string
-): PartialConfig {
+): PartialCUDLConfigData {
   try {
     const config = json5.parse(jsonDocument);
     validateObjectIsPartialConfig(config);
@@ -65,7 +77,7 @@ export function parseConfigFromJSON(
 
 export interface ConfigSource {
   source: string;
-  config: PartialConfig;
+  config: PartialCUDLConfigData;
 }
 
 export const DEFAULT_CONFIG: ConfigSource = Object.freeze({
@@ -76,7 +88,9 @@ export const DEFAULT_CONFIG: ConfigSource = Object.freeze({
   }),
 });
 
-export function mergeConfigs(configSources: ConfigSource[]): StrictConfig {
+export function mergeConfigs(
+  configSources: ConfigSource[]
+): StrictCUDLConfigData {
   debug('Merging config from sources:', configSources);
   const merged = configSources
     .map(cs => cs.config)
@@ -108,7 +122,7 @@ export async function configPathsFromEnvar() {
   };
 }
 
-export async function loadConfigFromEnvar(): Promise<StrictConfig> {
+export async function loadConfigFromEnvar(): Promise<StrictCUDLConfigData> {
   const configFilePathInfo = await configPathsFromEnvar();
   debug(
     `${
@@ -159,41 +173,68 @@ function validateConfig(configValidator: ValidateFunction, config: unknown) {
 
 export function validateObjectIsPartialConfig(
   config: unknown
-): asserts config is PartialConfig {
+): asserts config is PartialCUDLConfigData {
   validateConfig(partialConfigValidator, config);
 }
 
 export function validateObjectIsFullConfig(
   config: unknown
-): asserts config is StrictConfig {
+): asserts config is StrictCUDLConfigData {
   validateConfig(fullConfigValidator, config);
 }
 
-export interface Config<U = Users> extends XTFConfig {
+export interface CUDLConfigData<U = Users> extends XTFConfig, DatabaseConfig {
   dataDir: string;
   users: U;
   darwinXTF: string;
-  postHost: string;
-  postPort: number;
-  postUser: string;
-  postPass: string;
-  postDatabase: string;
   zacynthiusServiceURL: string;
 }
 
-export type PartialConfig = Partial<Config<Users<Partial<User>>>>;
-export type StrictConfig = NonOptional<Config>;
+export type PartialCUDLConfigData = Partial<
+  CUDLConfigData<Users<Partial<User>>>
+>;
+export type StrictCUDLConfigData = NonOptional<CUDLConfigData>;
 
-export interface XTFConfig {
-  xtfBase: string;
-  xtfIndexPath: string;
+class ApplicationWithResources implements Application {
+  protected readonly appWithResource: ExternalResources<Application>;
+
+  constructor(appWithResource: ExternalResources<Application>) {
+    this.appWithResource = appWithResource;
+  }
+
+  get expressApp() {
+    return this.appWithResource.value.expressApp;
+  }
+
+  async close() {
+    await this.appWithResource.close();
+  }
 }
 
-export interface Users<U = User> {
-  [apiKey: string]: U;
-}
+class CUDLConfig implements Config {
+  async createApplication(): Promise<Application> {
+    return new ApplicationWithResources(
+      this.createApplicationFromConfigData(await loadConfigFromEnvar())
+    );
+  }
 
-export interface User {
-  username: string;
-  email: string;
+  createApplicationFromConfigData(config: CUDLConfigData) {
+    const dbPool = PostgresDatabasePool.fromConfig(config);
+
+    return new ExternalResources(
+      new App({
+        metadataRepository: MetadataProviderCUDLMetadataRepository.forDataStore(
+          new FilesystemDataStore(config.dataDir)
+        ),
+        collectionsDAOPool: PostgresCollectionDAO.createPool(dbPool),
+        tagsDAOPool: PostgresTagsDAO.createPool(dbPool),
+        users: config.users,
+        darwinXtfUrl: config.darwinXTF,
+        xtf: new DefaultXTF(config),
+        zacynthiusServiceURL: new URL(config.zacynthiusServiceURL),
+      }),
+      [dbPool]
+    );
+  }
 }
+export default new CUDLConfig();

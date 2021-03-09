@@ -2,14 +2,16 @@
  * This module contains functions for working with Postgres.
  */
 import pg from 'pg';
-import {StrictConfig} from './cudl-config';
 import {BaseResource, Resource} from './resources';
 import {factory} from './util';
 
-export type DatabaseConfig = Pick<
-  StrictConfig,
-  'postHost' | 'postPort' | 'postUser' | 'postPass' | 'postDatabase'
->;
+export interface DatabaseConfig {
+  postHost: string;
+  postPort: number;
+  postUser: string;
+  postPass: string;
+  postDatabase: string;
+}
 
 export interface DatabasePool<Client> extends Resource {
   getClient<T>(clientFactory: ClientFactory<Client, T>): T | Promise<T>;

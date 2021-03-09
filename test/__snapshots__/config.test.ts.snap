@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`loadConfigFromModule raises error when module does not exist 1`] = `"Failed to load config from module \\"does/not/exist/sdfsdfa\\": Error: Cannot find module 'does/not/exist/sdfsdfa' from 'src/config.ts'"`;
+
+exports[`loadConfigFromModule raises error when module does not export a Config object 1`] = `"Failed to load config from module \\"does/not/exist/sdfsdfa\\": Error: Cannot find module 'does/not/exist/sdfsdfa' from 'src/config.ts'"`;

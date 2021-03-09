@@ -4,36 +4,38 @@ import express, {Request, Response} from 'express';
 import passport from 'passport';
 import path from 'path';
 import {URL} from 'url';
-import {CollectionDAO, PostgresCollectionDAO} from './collections';
-import {StrictConfig, User, Users} from './cudl-config';
+import {CollectionDAO} from './collections';
 
-import {DAOPool, PostgresDatabasePool} from './db';
-import {BaseResource, ExternalResources, using} from './resources';
+import {DAOPool} from './db';
+import {BaseResource, Resource, using} from './resources';
 import * as darwin from './routes/darwin';
 import * as membership from './routes/membership';
 import * as metadata from './routes/metadata';
 import * as similarity from './routes/similarity';
 import * as tags from './routes/tags';
-import {PostgresTagsDAO, TagsDAO} from './routes/tags-impl';
+import {TagsDAO} from './routes/tags-impl';
 import * as transcription from './routes/transcription';
 import * as translation from './routes/translation';
-import {DefaultXTF, XTF} from './xtf';
-import {
-  CUDLMetadataRepository,
-  MetadataProviderCUDLMetadataRepository,
-} from './metadata/cudl';
-import {FilesystemDataStore} from './metadata/filesystem';
+import {XTF} from './xtf';
+import {CUDLMetadataRepository} from './metadata/cudl';
 
 const cookieParser = require('cookie-parser');
 const favicon = require('serve-favicon');
 const logger = require('morgan');
 const Strategy = require('passport-accesstoken').Strategy;
 
-// FIXME: move this to server?
-//cache directories
-// fs.ensureDirSync(config.cacheDir);
-// fs.ensureDirSync(config.cacheDir+'/transcriptions');
-// fs.ensureDirSync(config.cacheDir+'/translations');
+export interface Application extends Resource {
+  expressApp: express.Application;
+}
+
+export interface Users<U = User> {
+  [apiKey: string]: U;
+}
+
+export interface User {
+  username: string;
+  email: string;
+}
 
 export interface AppOptions {
   collectionsDAOPool: DAOPool<CollectionDAO>;
@@ -45,7 +47,7 @@ export interface AppOptions {
   zacynthiusServiceURL: URL;
 }
 
-export class App extends BaseResource {
+export class App extends BaseResource implements Application {
   readonly options: AppOptions;
   readonly expressApp: express.Application;
   protected readonly xsltExecutor: XSLTExecutor;
@@ -55,25 +57,6 @@ export class App extends BaseResource {
     this.options = Object.freeze({...options});
     this.xsltExecutor = XSLTExecutor.getInstance();
     this.expressApp = this.createExpressApp();
-  }
-
-  static fromConfig(config: StrictConfig): ExternalResources<App> {
-    const dbPool = PostgresDatabasePool.fromConfig(config);
-
-    return new ExternalResources(
-      new App({
-        metadataRepository: MetadataProviderCUDLMetadataRepository.forDataStore(
-          new FilesystemDataStore(config.dataDir)
-        ),
-        collectionsDAOPool: PostgresCollectionDAO.createPool(dbPool),
-        tagsDAOPool: PostgresTagsDAO.createPool(dbPool),
-        users: config.users,
-        darwinXtfUrl: config.darwinXTF,
-        xtf: new DefaultXTF(config),
-        zacynthiusServiceURL: new URL(config.zacynthiusServiceURL),
-      }),
-      [dbPool]
-    );
   }
 
   private createExpressApp(): express.Application {

@@ -11,7 +11,7 @@ import {file, FileResult, withFile} from 'tmp-promise';
 import {mocked} from 'ts-jest/utils';
 import {promisify} from 'util';
 import {
-  Config,
+  CUDLConfigData,
   CONFIG_FILE_ENVAR,
   CONFIG_JSON_ENVAR,
   configPathsFromEnvar,
@@ -19,13 +19,13 @@ import {
   loadConfigFile,
   loadConfigFromEnvar,
   mergeConfigs,
-  PartialConfig,
+  PartialCUDLConfigData,
   splitEnvarPaths,
 } from '../src/cudl-config';
 import {InvalidConfigError} from '../src/errors';
 import ProcessEnv = NodeJS.ProcessEnv;
 
-const EXAMPLE_CONFIG: Config = {
+const EXAMPLE_CONFIG: CUDLConfigData = {
   darwinXTF: 'example',
   users: {},
   dataDir: 'example',
@@ -47,7 +47,7 @@ describe('config', () => {
     });
 
     test('merges multiple configs', () => {
-      const configA: PartialConfig = {
+      const configA: PartialCUDLConfigData = {
         ...EXAMPLE_CONFIG,
       };
       delete configA['darwinXTF'];
@@ -102,7 +102,7 @@ describe('config', () => {
       );
     });
 
-    test.each<[string, PartialConfig]>([
+    test.each<[string, PartialCUDLConfigData]>([
       ["/* Comment */ {dataDir: 'abcd'}", {dataDir: 'abcd'}],
       [JSON.stringify(EXAMPLE_CONFIG), EXAMPLE_CONFIG],
     ])('returns partial config', async (content, expected) => {
@@ -195,7 +195,7 @@ describe('config', () => {
             configA.fd,
             JSON.stringify(EXAMPLE_CONFIG)
           );
-          const configBContent: PartialConfig = {
+          const configBContent: PartialCUDLConfigData = {
             postPort: 42,
             users: {foo: {email: 'foo@example.com'}},
           };
@@ -204,7 +204,7 @@ describe('config', () => {
             JSON.stringify(configBContent)
           );
 
-          const configCContent: PartialConfig = {
+          const configCContent: PartialCUDLConfigData = {
             users: {foo: {username: 'foo1'}},
             dataDir: '/other',
           };

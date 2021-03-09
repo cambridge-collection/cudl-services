@@ -1,8 +1,12 @@
 import superagent from 'superagent';
 import {URL} from 'url';
-import {XTFConfig} from './cudl-config';
 import {strictDOMParser} from './dom';
 import {ValueError} from './errors';
+
+export interface XTFConfig {
+  xtfBase: string;
+  xtfIndexPath: string;
+}
 
 interface XTFSearchOptions {
   smode?: string;
