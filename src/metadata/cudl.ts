@@ -17,9 +17,6 @@ import {
 import {ErrorCategories} from '../errors';
 
 export interface MetadataRepository<F extends string = string> {
-  /** @deprecated getPath should not be used — metadata may not be on the local filesystem */
-  getPath(format: F, id: string): Promise<string>;
-
   getBytes(format: F, id: string): Promise<Buffer>;
 }
 
@@ -37,7 +34,7 @@ const XML_FORMATS = Object.values(CUDLFormat).filter(
 
 abstract class BaseMetadataRepository<T extends string>
   implements MetadataRepository<T> {
-  abstract getPath(format: T, id: string): Promise<string>;
+  protected abstract getPath(format: T, id: string): Promise<string>;
 
   async getBytes(format: T, id: string): Promise<Buffer> {
     const path = await this.getPath(format, id);
@@ -119,10 +116,6 @@ export class MetadataProviderCUDLMetadataRepository
     return (await this.providers[CUDLFormat.JSON].query(id)).asJson();
   }
 
-  async getPath(): Promise<string> {
-    throw new Error('getPath() is not supported in this implementation');
-  }
-
   static forDataStore(
     dataStore: DataStore
   ): MetadataProviderCUDLMetadataRepository {
@@ -171,7 +164,7 @@ export class DefaultCUDLMetadataRepository
     this.dataDir = dataDir;
   }
 
-  async getPath(format: CUDLFormat, id: string) {
+  protected async getPath(format: CUDLFormat, id: string) {
     assert.ok(isSimplePathSegment(format));
 
     if (format === CUDLFormat.TRANSCRIPTION) {

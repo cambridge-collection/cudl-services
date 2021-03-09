@@ -30,14 +30,6 @@ const ITEM_JSON_PATH = path.resolve(
   CUDL_METADATA_PATH,
   'json/MS-ADD-03959.json'
 );
-const ITEM_TEI_PATH = path.resolve(
-  CUDL_METADATA_PATH,
-  'data/tei/MS-ADD-03959/MS-ADD-03959.xml'
-);
-const TRANSCRIPTION_PATH = path.resolve(
-  CUDL_METADATA_PATH,
-  'data/transcription/MS-FOO/foo.xml'
-);
 
 describe('LocationResolvers', () => {
   describe('CUDLFormat.TRANSCRIPTION LocationResolver', () => {
@@ -107,32 +99,8 @@ describe('LocationResolvers', () => {
 describe('CUDLMetadataRepository', () => {
   function testCUDLMetadataRepository(options: {
     getRepo: () => CUDLMetadataRepository;
-    testGetPath: boolean;
   }) {
-    const {getRepo, testGetPath} = options;
-
-    if (testGetPath) {
-      test('getPath() returns JSON metadata path', async () => {
-        expect(await getRepo().getPath(CUDLFormat.JSON, 'MS-ADD-03959')).toBe(
-          ITEM_JSON_PATH
-        );
-      });
-
-      test('getPath() returns non-JSON metadata path', async () => {
-        expect(await getRepo().getPath(CUDLFormat.TEI, 'MS-ADD-03959')).toBe(
-          ITEM_TEI_PATH
-        );
-      });
-
-      test.each([['MS-FOO/foo'], ['MS-FOO/foo.xml']])(
-        'getPath() returns transcription metadata path',
-        async id => {
-          expect(await getRepo().getPath(CUDLFormat.TRANSCRIPTION, id)).toBe(
-            TRANSCRIPTION_PATH
-          );
-        }
-      );
-    }
+    const {getRepo} = options;
 
     test('getBytes() returns file contents', async () => {
       expect(
@@ -204,14 +172,12 @@ describe('CUDLMetadataRepository', () => {
   describe('DefaultCUDLMetadataRepository', () => {
     testCUDLMetadataRepository({
       getRepo: getDefaultCUDLMetadataRepository,
-      testGetPath: true,
     });
   });
 
   describe('MetadataProviderCUDLMetadataRepository', () => {
     testCUDLMetadataRepository({
       getRepo: getMetadataProviderCUDLMetadataRepository,
-      testGetPath: false,
     });
   });
 });
