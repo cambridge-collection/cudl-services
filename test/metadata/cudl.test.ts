@@ -4,9 +4,7 @@ import {promisify} from 'util';
 import {TEST_DATA_PATH} from '../constants';
 import {
   CUDLFormat,
-  CUDLMetadataRepository,
   DataLocationResolver,
-  DefaultCUDLMetadataRepository,
   MetadataProviderCUDLMetadataRepository,
   resolveItemJsonLocation,
   resolveTranscriptionLocation,
@@ -15,17 +13,6 @@ import {FilesystemDataStore} from '../../src/metadata/filesystem';
 import {ErrorCategories} from '../../src/errors';
 
 const CUDL_METADATA_PATH = path.resolve(TEST_DATA_PATH, 'metadata');
-
-function getDefaultCUDLMetadataRepository() {
-  return new DefaultCUDLMetadataRepository(CUDL_METADATA_PATH);
-}
-
-function getMetadataProviderCUDLMetadataRepository() {
-  return MetadataProviderCUDLMetadataRepository.forDataStore(
-    new FilesystemDataStore(CUDL_METADATA_PATH)
-  );
-}
-
 const ITEM_JSON_PATH = path.resolve(
   CUDL_METADATA_PATH,
   'json/MS-ADD-03959.json'
@@ -96,88 +83,72 @@ describe('LocationResolvers', () => {
   });
 });
 
-describe('CUDLMetadataRepository', () => {
-  function testCUDLMetadataRepository(options: {
-    getRepo: () => CUDLMetadataRepository;
-  }) {
-    const {getRepo} = options;
-
-    test('getBytes() returns file contents', async () => {
-      expect(
-        await getRepo().getBytes(CUDLFormat.TRANSCRIPTION, 'MS-FOO/foo')
-      ).toEqual(Buffer.from('<foo/>\n'));
-    });
-
-    test('getBytes() throws MetadataError for missing data', async () => {
-      const resp = getRepo().getBytes(CUDLFormat.TRANSCRIPTION, 'MS-FOO/bar');
-      await expect(resp).rejects.toThrow(
-        /Failed to load metadata from .*\/data\/transcription\/MS-FOO\/bar\.xml: ENOENT: no such file or directory, open '.*\/data\/transcription\/MS-FOO\/bar.xml'/
-      );
-
-      await expect(resp).rejects.toThrowErrorTaggedWith(
-        ErrorCategories.NotFound
-      );
-    });
-
-    test('getJSON() returns parsed JSON metadata', async () => {
-      expect(await getRepo().getJSON('MS-ADD-03959')).toEqual(
-        JSON.parse(await promisify(fs.readFile)(ITEM_JSON_PATH, 'utf-8'))
-      );
-    });
-
-    test('getJSON() reports missing file', async () => {
-      expect.assertions(2);
-
-      const repo = getRepo();
-      try {
-        await repo.getJSON('MISSING');
-      } catch (e) {
-        expect(`${e}`).toMatch(
-          `MetadataError: Failed to load metadata from filesystem path ${path.join(
-            CUDL_METADATA_PATH,
-            'json',
-            'MISSING.json'
-          )}: ENOENT: no such file or directory`
-        );
-        expect(e.nested.code).toBe('ENOENT');
-      }
-    });
-
-    test('getJSON() reports broken JSON', async () => {
-      expect.assertions(2);
-
-      const repo = getRepo();
-      try {
-        await repo.getJSON('INVALID');
-      } catch (e) {
-        expect(`${e}`).toMatch(
-          /^MetadataError: .*Unexpected end of JSON input$/
-        );
-        expect(e.nested).toBeInstanceOf(SyntaxError);
-      }
-    });
-
-    test('getJSON() reports JSON with invalid properties', async () => {
-      expect.assertions(1);
-
-      const repo = getRepo();
-      try {
-        await repo.getJSON('INVALID_PROPERTIES');
-      } catch (e) {
-        expect(`${e}`).toMatch(/^MetadataError: .*unexpected JSON structure$/);
-      }
-    });
+describe('MetadataProviderCUDLMetadataRepository', () => {
+  function getRepo() {
+    return MetadataProviderCUDLMetadataRepository.forDataStore(
+      new FilesystemDataStore(CUDL_METADATA_PATH)
+    );
   }
 
-  describe('DefaultCUDLMetadataRepository', () => {
-    testCUDLMetadataRepository({
-      getRepo: getDefaultCUDLMetadataRepository,
-    });
+  test('getBytes() returns file contents', async () => {
+    expect(
+      await getRepo().getBytes(CUDLFormat.TRANSCRIPTION, 'MS-FOO/foo')
+    ).toEqual(Buffer.from('<foo/>\n'));
   });
 
-  describe('MetadataProviderCUDLMetadataRepository', () => {
-    testCUDLMetadataRepository({
-      getRepo: getMetadataProviderCUDLMetadataRepository,
-    });
+  test('getBytes() throws MetadataError for missing data', async () => {
+    const resp = getRepo().getBytes(CUDLFormat.TRANSCRIPTION, 'MS-FOO/bar');
+    await expect(resp).rejects.toThrow(
+      /Failed to load metadata from .*\/data\/transcription\/MS-FOO\/bar\.xml: ENOENT: no such file or directory, open '.*\/data\/transcription\/MS-FOO\/bar.xml'/
+    );
+
+    await expect(resp).rejects.toThrowErrorTaggedWith(ErrorCategories.NotFound);
+  });
+
+  test('getJSON() returns parsed JSON metadata', async () => {
+    expect(await getRepo().getJSON('MS-ADD-03959')).toEqual(
+      JSON.parse(await promisify(fs.readFile)(ITEM_JSON_PATH, 'utf-8'))
+    );
+  });
+
+  test('getJSON() reports missing file', async () => {
+    expect.assertions(2);
+
+    const repo = getRepo();
+    try {
+      await repo.getJSON('MISSING');
+    } catch (e) {
+      expect(`${e}`).toMatch(
+        `MetadataError: Failed to load metadata from filesystem path ${path.join(
+          CUDL_METADATA_PATH,
+          'json',
+          'MISSING.json'
+        )}: ENOENT: no such file or directory`
+      );
+      expect(e.nested.code).toBe('ENOENT');
+    }
+  });
+
+  test('getJSON() reports broken JSON', async () => {
+    expect.assertions(2);
+
+    const repo = getRepo();
+    try {
+      await repo.getJSON('INVALID');
+    } catch (e) {
+      expect(`${e}`).toMatch(/^MetadataError: .*Unexpected end of JSON input$/);
+      expect(e.nested).toBeInstanceOf(SyntaxError);
+    }
+  });
+
+  test('getJSON() reports JSON with invalid properties', async () => {
+    expect.assertions(1);
+
+    const repo = getRepo();
+    try {
+      await repo.getJSON('INVALID_PROPERTIES');
+    } catch (e) {
+      expect(`${e}`).toMatch(/^MetadataError: .*unexpected JSON structure$/);
+    }
   });
 });

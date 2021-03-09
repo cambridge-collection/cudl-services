@@ -1,5 +1,3 @@
-import util, {promisify} from 'util';
-import fs from 'fs';
 import assert from 'assert';
 import {isSimplePathSegment} from '../util';
 import path from 'path';
@@ -7,14 +5,11 @@ import {
   DataStore,
   DefaultMetadataProvider,
   DefaultMetadataResponse,
-  isItemJSON,
   ItemJSON,
   ItemJsonMetadataResponse,
   LocationResolver,
-  MetadataError,
   MetadataProvider,
 } from '../metadata';
-import {ErrorCategories} from '../errors';
 
 export interface MetadataRepository<F extends string = string> {
   getBytes(format: F, id: string): Promise<Buffer>;
@@ -31,24 +26,6 @@ export enum CUDLFormat {
 const XML_FORMATS = Object.values(CUDLFormat).filter(
   cf => cf !== CUDLFormat.TRANSCRIPTION && cf !== CUDLFormat.JSON
 );
-
-abstract class BaseMetadataRepository<T extends string>
-  implements MetadataRepository<T> {
-  protected abstract getPath(format: T, id: string): Promise<string>;
-
-  async getBytes(format: T, id: string): Promise<Buffer> {
-    const path = await this.getPath(format, id);
-    try {
-      return await promisify(fs.readFile)(path);
-    } catch (e) {
-      throw new MetadataError({
-        message: `Failed to load metadata from ${path}: ${e.message}`,
-        nested: e,
-        tags: e?.code === 'ENOENT' ? [ErrorCategories.NotFound] : [],
-      });
-    }
-  }
-}
 
 export const resolveTranscriptionLocation: LocationResolver = async function resolveTranscriptionLocation(
   id
@@ -151,62 +128,5 @@ export class MetadataProviderCUDLMetadataRepository
     return new MetadataProviderCUDLMetadataRepository(
       providers as CUDLProviders
     );
-  }
-}
-
-export class DefaultCUDLMetadataRepository
-  extends BaseMetadataRepository<CUDLFormat>
-  implements CUDLMetadataRepository {
-  private readonly dataDir: string;
-
-  constructor(dataDir: string) {
-    super();
-    this.dataDir = dataDir;
-  }
-
-  protected async getPath(format: CUDLFormat, id: string) {
-    assert.ok(isSimplePathSegment(format));
-
-    if (format === CUDLFormat.TRANSCRIPTION) {
-      const idParts = /^([\w-]+)\/([\w-]+)(?:\.xml)?$/.exec(id);
-      if (!idParts) {
-        throw new Error(`Invalid ${CUDLFormat.TRANSCRIPTION} id: ${id}`);
-      }
-      return path.join(
-        this.dataDir,
-        'data',
-        format,
-        idParts[1],
-        `${idParts[2]}.xml`
-      );
-    }
-
-    if (!isSimplePathSegment(id)) {
-      throw new Error(
-        `${name} is not a valid path segment: ${util.inspect(id)}`
-      );
-    }
-
-    if (format === CUDLFormat.JSON) {
-      return path.join(this.dataDir, 'json', `${id}.json`);
-    }
-    return path.join(this.dataDir, 'data', format, id, `${id}.xml`);
-  }
-
-  async getJSON(id: string): Promise<ItemJSON> {
-    const jsonPath = await this.getPath(CUDLFormat.JSON, id);
-    try {
-      const content = await promisify(fs.readFile)(jsonPath, 'utf-8');
-      const data = JSON.parse(content);
-      if (!isItemJSON(data)) {
-        throw new MetadataError('unexpected JSON structure');
-      }
-      return data;
-    } catch (e) {
-      throw new MetadataError(
-        `Failed to load metadata from filesystem path ${jsonPath}: ${e.message}`,
-        e
-      );
-    }
   }
 }
