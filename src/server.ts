@@ -1,66 +1,107 @@
-// As with bin/cudl-services.js (which calls run() here) using process.exit()
-// is fine as we actually want to set the exit status.
-/* eslint-disable no-process-exit */
-
 import Debugger from 'debug';
 import util from 'util';
 import {Config, loadConfig} from './config';
-import {using} from './resources';
+import {BaseResource, using} from './resources';
+import {BaseError} from './errors';
+import * as http from 'http';
+import {applyDefaults} from './util';
+import {AddressInfo} from 'net';
 
 const debug = Debugger('cudl-services');
 
-async function runAsync() {
-  let config: Config;
-  try {
-    config = await loadConfig();
-  } catch (e) {
-    console.error(`Error: ${e.message}`);
-    console.error('Setting envar DEBUG=cudl-services:config may help');
-    process.exit(1);
+export class ServerError extends BaseError {}
+
+export class Server extends BaseResource {
+  private readonly server: http.Server;
+  public readonly shutdownShutdownComplete: Promise<void>;
+
+  private constructor(server: http.Server, shutdownComplete: Promise<void>) {
+    super();
+    this.server = server;
+    this.shutdownShutdownComplete = shutdownComplete;
   }
 
-  if (process.getuid && process.getuid() === 0) {
-    console.error('Error: Running as root is not permitted');
-    process.exit(1);
+  get address(): string | AddressInfo {
+    const addr = this.server.address();
+    if (addr === null) {
+      // Should not happen as the server is listening by the time Server is constructed
+      throw new Error('server.address() returned null');
+    }
+    return addr;
   }
 
-  await using(config.createApplication(), async application => {
-    application.expressApp.set('port', process.env.PORT || 3000);
+  async close(): Promise<void> {
+    if (this.isClosed()) {
+      return;
+    }
+    await super.close();
+    this.server.close();
+    return this.shutdownShutdownComplete;
+  }
 
-    const server = application.expressApp.listen(
-      application.expressApp.get('port'),
-      () => {
-        const msg = `Express server listening on ${util.inspect(
-          server?.address()
-        )}`;
-        (debug.enabled ? debug : console.log)(msg);
+  static async start(options?: {port?: number}): Promise<Server> {
+    const {port} = applyDefaults(options || {}, {port: 0});
+
+    let config: Config;
+    try {
+      config = await loadConfig();
+    } catch (e) {
+      throw new ServerError({
+        message: `Failed to load configuration: ${e}`,
+        nested: e,
+      });
+    }
+
+    let serverCreated: (server: http.Server | PromiseLike<http.Server>) => void;
+    const serverPromise = new Promise<http.Server>(resolve => {
+      serverCreated = resolve;
+    });
+
+    const onServerShutdownComplete = using(
+      config.createApplication(),
+      async application => {
+        application.expressApp.set('port', port);
+
+        const server = application.expressApp.listen(port);
+        server.once('listening', () => {
+          const msg = `Express server listening on ${util.inspect(
+            server?.address()
+          )}`;
+          (debug.enabled ? debug : console.log)(msg);
+          serverCreated(server);
+        });
+
+        await new Promise((resolve, reject) => {
+          function shutdown() {
+            process.stdout.write(' Shutting down gracefully... ');
+            server.close(err => {
+              if (err) {
+                reject(err);
+              } else {
+                resolve(undefined);
+              }
+            });
+          }
+
+          process.once('SIGINT', shutdown);
+          process.once('SIGTERM', shutdown);
+          server.once('error', reject);
+          server.once('close', resolve);
+        });
+        console.log('server stopped.');
       }
     );
 
-    await new Promise((resolve, reject) => {
-      function shutdown() {
-        process.stdout.write(' Shutting down gracefully... ');
-        server.close(err => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(undefined);
-          }
-        });
-      }
-
-      process.once('SIGINT', shutdown);
-      process.once('SIGTERM', shutdown);
-      server.once('error', reject);
-      server.once('close', resolve);
-    });
-  });
-  console.log('server stopped.');
-}
-
-export function run() {
-  runAsync().catch(e => {
-    console.error('Error: Server exited with an uncaught exception:\n\n', e);
-    process.exit(1);
-  });
+    // We must wait for both promises when waiting for the server, otherwise we'd ignore
+    // errors from the process of creating the server.
+    try {
+      await Promise.race([serverPromise, onServerShutdownComplete]);
+    } catch (e) {
+      throw new ServerError({
+        message: `Failed to start server: ${e}`,
+        nested: e,
+      });
+    }
+    return new Server(await serverPromise, onServerShutdownComplete);
+  }
 }

@@ -13,14 +13,19 @@ Error: node is running as PID 1; this is not allowed as node cannot reap child
   process.exit(1);
 }
 
-let run;
+if (process.getuid && process.getuid() === 0) {
+  console.error('Error: Running as root is not permitted');
+  process.exit(1);
+}
+
+let server;
 try {
   // eslint-disable-next-line node/no-missing-require
-  run = require('cudl-services').run;
+  server = require('cudl-services');
 } catch (e1) {
   try {
     // eslint-disable-next-line node/no-missing-require
-    run = require('../build/dist-root/lib/server').run;
+    server = require('../build/dist-root/lib/server');
   } catch (e2) {
     console.error('Failed to load server entry point:');
     console.error(e1);
@@ -28,4 +33,12 @@ try {
     process.exit(1);
   }
 }
-run();
+
+server.Server.start({port: process.env.PORT || 3000}).catch(e => {
+  if (e instanceof server.ServerError) {
+    console.error(`Error: ${e.message}`);
+  } else {
+    console.error('Error: Server exited with an uncaught exception:\n\n', e);
+  }
+  process.exit(1);
+});

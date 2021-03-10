@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Server start() throws if loadConfig() fails 1`] = `"Failed to load configuration: Error: Boom!"`;
+
+exports[`Server start() throws if loadConfig().createApplication() fails 1`] = `"Failed to start server: Error: Boom!"`;
