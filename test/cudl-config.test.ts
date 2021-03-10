@@ -1,9 +1,4 @@
-jest.mock('glob', () => {
-  return jest.fn(() => {
-    throw new Error('No mock implementation specified');
-  });
-});
-
+import {Application} from '../src/app';
 import fs from 'fs';
 import glob from 'glob';
 
@@ -11,11 +6,12 @@ import {file, FileResult, withFile} from 'tmp-promise';
 import {mocked} from 'ts-jest/utils';
 import {promisify} from 'util';
 import {
-  CUDLConfigData,
+  ApplicationWithResources,
   CONFIG_FILE_ENVAR,
   CONFIG_JSON_ENVAR,
   configPathsFromEnvar,
   ConfigSource,
+  CUDLConfigData,
   loadConfigFile,
   loadConfigFromEnvar,
   mergeConfigs,
@@ -23,6 +19,15 @@ import {
   splitEnvarPaths,
 } from '../src/cudl-config';
 import {InvalidConfigError} from '../src/errors';
+import {ExternalResources, Resource} from '../src/resources';
+import express from 'express';
+
+jest.mock('glob', () => {
+  return jest.fn(() => {
+    throw new Error('No mock implementation specified');
+  });
+});
+
 import ProcessEnv = NodeJS.ProcessEnv;
 
 const EXAMPLE_CONFIG: CUDLConfigData = {
@@ -231,5 +236,41 @@ describe('config', () => {
       process.env[CONFIG_JSON_ENVAR] = JSON.stringify(EXAMPLE_CONFIG);
       await expect(loadConfigFromEnvar()).resolves.toEqual(EXAMPLE_CONFIG);
     });
+  });
+});
+
+describe('ApplicationWithResources', () => {
+  let app: Application;
+  let expressApp: express.Express;
+  let res1: Resource;
+  let res2: Resource;
+
+  beforeEach(() => {
+    expressApp = express();
+    app = {
+      close: jest.fn(),
+      expressApp,
+    };
+    res1 = new ExternalResources(41, []);
+    res2 = new ExternalResources(42, []);
+    jest.spyOn(res1, 'close');
+    jest.spyOn(res2, 'close');
+  });
+
+  test("expressApp is wrapped Application's expressApp", () => {
+    const awr = ApplicationWithResources.from(app, res1, res2);
+    expect(awr.expressApp).toBe(expressApp);
+  });
+
+  test('closes Application on close()', async () => {
+    const awr = ApplicationWithResources.from(app, res1, res2);
+    expect(app.close).not.toHaveBeenCalled();
+    expect(res1.close).not.toHaveBeenCalled();
+    expect(res2.close).not.toHaveBeenCalled();
+
+    await awr.close();
+    expect(app.close).toHaveBeenCalled();
+    expect(res1.close).toHaveBeenCalled();
+    expect(res2.close).toHaveBeenCalled();
   });
 });

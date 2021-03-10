@@ -12,7 +12,7 @@ import partialConfigSchema from './partial-config.schema.json';
 import {NonOptional, requireNotUndefined} from './util';
 import {Config} from './config';
 import {App, Application, User, Users} from './app';
-import {ExternalResources} from './resources';
+import {ExternalResources, Resource} from './resources';
 import {MetadataProviderCUDLMetadataRepository} from './metadata/cudl';
 import {FilesystemDataStore} from './metadata/filesystem';
 import {PostgresCollectionDAO} from './collections';
@@ -195,11 +195,20 @@ export type PartialCUDLConfigData = Partial<
 >;
 export type StrictCUDLConfigData = NonOptional<CUDLConfigData>;
 
-class ApplicationWithResources implements Application {
-  protected readonly appWithResource: ExternalResources<Application>;
+export class ApplicationWithResources implements Application {
+  private readonly appWithResource: ExternalResources<Application>;
 
-  constructor(appWithResource: ExternalResources<Application>) {
+  private constructor(appWithResource: ExternalResources<Application>) {
     this.appWithResource = appWithResource;
+  }
+
+  static from(
+    application: Application,
+    ...res: Resource[]
+  ): ApplicationWithResources {
+    return new ApplicationWithResources(
+      new ExternalResources<Application>(application, res)
+    );
   }
 
   get expressApp() {
@@ -207,21 +216,22 @@ class ApplicationWithResources implements Application {
   }
 
   async close() {
-    await this.appWithResource.close();
+    await Promise.all([
+      this.appWithResource.value.close(),
+      this.appWithResource.close(),
+    ]);
   }
 }
 
 class CUDLConfig implements Config {
   async createApplication(): Promise<Application> {
-    return new ApplicationWithResources(
-      this.createApplicationFromConfigData(await loadConfigFromEnvar())
-    );
+    return this.createApplicationFromConfigData(await loadConfigFromEnvar());
   }
 
   createApplicationFromConfigData(config: CUDLConfigData) {
     const dbPool = PostgresDatabasePool.fromConfig(config);
 
-    return new ExternalResources(
+    return ApplicationWithResources.from(
       new App({
         metadataRepository: MetadataProviderCUDLMetadataRepository.forDataStore(
           new FilesystemDataStore(config.dataDir)
@@ -233,7 +243,7 @@ class CUDLConfig implements Config {
         xtf: new DefaultXTF(config),
         zacynthiusServiceURL: new URL(config.zacynthiusServiceURL),
       }),
-      [dbPool]
+      dbPool
     );
   }
 }
