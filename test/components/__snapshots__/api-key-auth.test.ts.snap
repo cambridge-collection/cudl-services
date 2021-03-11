@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getPassport throws if no Authenticator is set 1`] = `"express app has no passport Authenticator on the \\"passport\\" setting. Has the passportInitialiseComponent been registered?"`;
+
+exports[`passportApiKeyAuthenticationComponent registration throws if passport is not registered 1`] = `"express app has no passport Authenticator on the \\"passport\\" setting. Has the passportInitialiseComponent been registered?"`;
