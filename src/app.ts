@@ -18,6 +18,7 @@ import * as transcription from './routes/transcription';
 import * as translation from './routes/translation';
 import {XTF} from './xtf';
 import {CUDLMetadataRepository} from './metadata/cudl';
+import {NestedArray, unNest} from './util';
 
 const cookieParser = require('cookie-parser');
 const favicon = require('serve-favicon');
@@ -45,6 +46,90 @@ export interface AppOptions {
   users: Users;
   xtf: XTF;
   zacynthiusServiceURL: URL;
+}
+
+interface Component extends Resource {
+  register(express: express.Express): Promise<void>;
+}
+
+export class SettingsComponent extends BaseResource implements Component {
+  readonly settings: ReadonlyMap<string, unknown>;
+
+  constructor(settings: Record<string, unknown>) {
+    super();
+    this.settings = new Map(Object.entries(settings));
+  }
+
+  async register(express: express.Express): Promise<void> {
+    for (const [key, value] of this.settings.entries()) {
+      express.set(key, value);
+    }
+  }
+}
+
+export class MiddlewareComponent extends BaseResource implements Component {
+  readonly path?: string;
+  readonly handler:
+    | express.RequestHandler[]
+    | express.RequestHandler
+    | express.Application;
+
+  constructor(options: {
+    path?: string;
+    handler:
+      | express.RequestHandler[]
+      | express.RequestHandler
+      | express.Application;
+  }) {
+    super();
+    this.path = options.path;
+    this.handler = options.handler;
+  }
+
+  async register(express: express.Router): Promise<void> {
+    if (this.path !== undefined) {
+      if (Array.isArray(this.handler)) {
+        express.use(this.path, ...this.handler);
+      } else {
+        express.use(this.path, this.handler);
+      }
+    } else {
+      if (Array.isArray(this.handler)) {
+        express.use(...this.handler);
+      } else {
+        express.use(this.handler);
+      }
+    }
+  }
+}
+
+export class ComponentApp extends BaseResource implements Application {
+  readonly components: ReadonlyArray<Component>;
+  readonly expressApp: express.Application;
+
+  private constructor(
+    expressApp: express.Application,
+    components: Iterable<Component>
+  ) {
+    super();
+    this.components = [...components];
+    this.expressApp = expressApp;
+  }
+
+  static async from(
+    ...components: NestedArray<Component>
+  ): Promise<ComponentApp> {
+    const expressApp = express();
+    const flatComponents = [...unNest(components)];
+    for (const component of flatComponents) {
+      await component.register(expressApp);
+    }
+    return new ComponentApp(expressApp, flatComponents);
+  }
+
+  async close(): Promise<void> {
+    await Promise.all([super.close(), ...this.components.map(c => c.close())]);
+  }
 }
 
 export class App extends BaseResource implements Application {
