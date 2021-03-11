@@ -1,4 +1,4 @@
-import {AssertionError} from 'assert';
+import assert, {AssertionError} from 'assert';
 import escapeStringRegexp from 'escape-string-regexp';
 import {Request} from 'express';
 import * as uri from 'uri-js';
@@ -351,4 +351,35 @@ export type UnknownObject = Readonly<Record<string | number | symbol, unknown>>;
 /** Allow accessing arbitrary properties of an object as unknown values. */
 export function asUnknownObject(obj: object): UnknownObject {
   return obj as UnknownObject;
+}
+
+export type Nested<T> = Iterable<Nested<T> | T>;
+type NotArray<T> = T extends Array<unknown> ? never : T;
+export type NestedArray<T> = Array<NestedArray<NotArray<T>> | NotArray<T>>;
+
+export function unNest<T>(nested: NestedArray<T>): Iterable<T>;
+export function unNest<T>(
+  nested: Nested<T>,
+  isTerminal: (nested: Nested<T> | T) => nested is T
+): Iterable<T>;
+export function* unNest<T>(
+  nested: Nested<T>,
+  isTerminal?: (nested: Nested<T> | T) => nested is T
+): Iterable<T> {
+  if (isTerminal === undefined) {
+    isTerminal = function isNestedArrayTerminal(obj: Nested<T> | T): obj is T {
+      return !Array.isArray(obj);
+    };
+    assert(isTerminal(nested) || Array.isArray(nested));
+  }
+
+  for (const obj of nested) {
+    if (isTerminal(obj)) {
+      yield obj;
+    } else {
+      for (const terminal of unNest(obj, isTerminal)) {
+        yield terminal;
+      }
+    }
+  }
 }

@@ -15,6 +15,7 @@ import {
   PickOptional,
   requireNotUndefined,
   sorted,
+  unNest,
 } from '../src/util';
 import {ParsedQs} from 'qs';
 import {AssertionError} from 'assert';
@@ -358,5 +359,30 @@ describe('firstQueryValue()', () => {
     expect(() => firstQueryValue({})).toThrow(
       'Unexpected request query value: {}'
     );
+  });
+});
+
+describe('unNest', () => {
+  test('unNest flattens one level', () => {
+    expect([...unNest([0, 1, 2])]).toEqual([0, 1, 2]);
+  });
+
+  test('unNest flattens two levels', () => {
+    expect([...unNest([0, [1, 2], 3])]).toEqual([0, 1, 2, 3]);
+  });
+
+  test('unNest flattens four levels', () => {
+    expect([...unNest([0, [1, [2], 3], 4])]).toEqual([0, 1, 2, 3, 4]);
+  });
+
+  test('unNest flattens arbitrary iterables', () => {
+    expect(
+      new Set(
+        unNest<number>(
+          new Set([new Set([0, [1, [2], 3], 4]), new Set([5, 6, 7])]),
+          (o): o is number => typeof o === 'number'
+        )
+      )
+    ).toEqual(new Set([0, 1, 2, 3, 4, 5, 6, 7]));
   });
 });
