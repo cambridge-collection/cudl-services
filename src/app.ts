@@ -48,11 +48,30 @@ export interface AppOptions {
   zacynthiusServiceURL: URL;
 }
 
-interface Component extends Resource {
+export interface Component extends Resource {
   register(express: express.Express): Promise<void>;
 }
 
-export class SettingsComponent extends BaseResource implements Component {
+export abstract class BaseComponent extends BaseResource implements Component {
+  abstract register(express: express.Express): Promise<void>;
+}
+
+class FnComponent extends BaseComponent {
+  readonly register: Component['register'];
+  constructor(registrationFn: Component['register']) {
+    super();
+    this.register = registrationFn;
+  }
+}
+export function fnComponent(
+  registrationFn: (express: express.Express) => unknown
+): Component {
+  return new FnComponent(async express => {
+    await registrationFn(express);
+  });
+}
+
+export class SettingsComponent extends BaseComponent {
   readonly settings: ReadonlyMap<string, unknown>;
 
   constructor(settings: Record<string, unknown>) {
@@ -67,7 +86,7 @@ export class SettingsComponent extends BaseResource implements Component {
   }
 }
 
-export class MiddlewareComponent extends BaseResource implements Component {
+export class MiddlewareComponent extends BaseComponent {
   readonly path?: string;
   readonly handler:
     | express.RequestHandler[]

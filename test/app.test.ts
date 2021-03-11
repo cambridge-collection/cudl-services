@@ -14,6 +14,7 @@ import {
   App,
   AppOptions,
   ComponentApp,
+  fnComponent,
   MiddlewareComponent,
   SettingsComponent,
 } from '../src/app';
@@ -305,6 +306,30 @@ describe('SettingsComponent', () => {
     for (const [key, value] of Object.entries(settings)) {
       expect(app.get(key)).toEqual(value);
     }
+  });
+});
+
+describe('fnComponent', () => {
+  test('is applied to app when registered', async () => {
+    const fn = jest.fn();
+    const app = express();
+    const comp = fnComponent(fn);
+    expect(fn).not.toHaveBeenCalled();
+    await comp.register(app);
+    expect(fn).toHaveBeenCalledWith(app);
+  });
+
+  test('supplied function can return in order to avoid requiring braces', async () => {
+    await fnComponent(() => true).register(express());
+  });
+
+  test('supplied function can be async', async () => {
+    const asyncDependency = (async () => 42)();
+    const app = express();
+    await fnComponent(async app =>
+      app.set('foo', await asyncDependency)
+    ).register(app);
+    expect(app.get('foo')).toBe(42);
   });
 });
 
