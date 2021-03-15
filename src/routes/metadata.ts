@@ -41,7 +41,7 @@ type CreateMetadataHandlerV2Options = Omit<
   'router'
 >;
 
-export function getRoutesV2(options: GetRoutesV2Options) {
+export function getRoutesV2(options: GetRoutesV2Options): express.Handler {
   const {router, ...handlerOptions} = applyLazyDefaults(options, {
     router: () => express.Router(),
     isExternalEmbedPermitted: () => IsExternalEmbedPermitted,

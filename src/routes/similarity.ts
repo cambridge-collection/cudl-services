@@ -9,11 +9,13 @@ import {CUDLMetadataRepository} from '../metadata/cudl';
 
 const debug = createDebugger('cudl-services:similarity');
 
-export function getRoutes(options: {
+export interface GetRouteOptions {
   router?: express.Router;
   metadataRepository: CUDLMetadataRepository;
   xtf: XTF;
-}) {
+}
+
+export function getRoutes(options: GetRouteOptions): express.Handler {
   const router = options.router || express.Router();
 
   router.get(

@@ -25,10 +25,12 @@ import {
 } from './tags-impl';
 import {using} from '../resources';
 
-export function getRoutes(options: {
+export interface GetRoutesOptions {
   router?: express.Router;
   daoPool: DAOPool<TagsDAO>;
-}) {
+}
+
+export function getRoutes(options: GetRoutesOptions): express.Handler {
   const router = options.router || express.Router();
   const {daoPool} = options;
 

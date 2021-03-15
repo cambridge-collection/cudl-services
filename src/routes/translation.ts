@@ -10,12 +10,14 @@ import {URL} from 'url';
 import {CUDLFormat, CUDLMetadataRepository} from '../metadata/cudl';
 import {ErrorCategories, isTagged} from '../errors';
 
-export function getRoutes(options: {
+export interface GetRoutesOptions {
   router?: express.Router;
   metadataRepository: CUDLMetadataRepository;
   xsltExecutor: XSLTExecutor;
   zacynthiusServiceURL: URL;
-}) {
+}
+
+export function getRoutes(options: GetRoutesOptions): express.Handler {
   const {
     router,
     metadataRepository,

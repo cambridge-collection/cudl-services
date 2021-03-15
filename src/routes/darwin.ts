@@ -6,16 +6,18 @@ import * as util from 'util';
 
 const DEFAULT_TIMEOUT = 20 * 1000;
 
+export interface GetRoutesOptions {
+  router?: express.Router;
+  darwinXtfUrl: string;
+}
+
 /**
  * This is a proxy for the Darwin Correspondence Project's XTF server. All it
  * does is authenticate requests. For some reason it was bundled into this
  * codebase.
  * FIXME: This has nothing to do with CUDL, extract it to somewhere else
  */
-export function getRoutes(options: {
-  router?: express.Router;
-  darwinXtfUrl: string;
-}) {
+export function getRoutes(options: GetRoutesOptions): express.Handler {
   const router = options.router || express.Router();
   router.use(proxyDarwinXtfRequestHandler(options.darwinXtfUrl));
   return router;

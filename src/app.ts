@@ -122,6 +122,8 @@ export class MiddlewareComponent extends BaseComponent {
   }
 }
 
+export type Components = Component | NestedArray<Component>;
+
 export class ComponentApp extends BaseResource implements Application {
   readonly components: ReadonlyArray<Component>;
   readonly expressApp: express.Application;

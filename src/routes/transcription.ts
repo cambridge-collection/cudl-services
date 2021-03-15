@@ -1,5 +1,5 @@
 import {ExecuteOptions, XSLTExecutor} from '@lib.cam/xslt-nailgun';
-import {Request, Router} from 'express';
+import express, {Request, Router} from 'express';
 
 import {StatusCodes} from 'http-status-codes';
 
@@ -51,7 +51,7 @@ export function getRoutes(options: {
   router?: Router;
   xsltExecutor: XSLTExecutor;
   zacynthiusServiceURL: URL;
-}) {
+}): express.Handler {
   const {router, zacynthiusServiceURL} = applyLazyDefaults(options, {
     router: () => Router(),
   });
