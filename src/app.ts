@@ -124,6 +124,24 @@ export class MiddlewareComponent extends BaseComponent {
 
 export type Components = Component | NestedArray<Component>;
 
+/**
+ * Register multiple ordered components with an app.
+ *
+ * @param app The target to register components with
+ * @param components The components to register
+ * @return The app and the flattened list of components in the order of registration
+ */
+export async function registerComponents(
+  app: express.Application,
+  ...components: NestedArray<Component>
+): Promise<{app: express.Application; flatComponents: Component[]}> {
+  const flatComponents = [...unNest(components)];
+  for (const component of flatComponents) {
+    await component.register(app);
+  }
+  return {app, flatComponents};
+}
+
 export class ComponentApp extends BaseResource implements Application {
   readonly components: ReadonlyArray<Component>;
   readonly expressApp: express.Application;
@@ -140,12 +158,11 @@ export class ComponentApp extends BaseResource implements Application {
   static async from(
     ...components: NestedArray<Component>
   ): Promise<ComponentApp> {
-    const expressApp = express();
-    const flatComponents = [...unNest(components)];
-    for (const component of flatComponents) {
-      await component.register(expressApp);
-    }
-    return new ComponentApp(expressApp, flatComponents);
+    const {app, flatComponents} = await registerComponents(
+      express(),
+      components
+    );
+    return new ComponentApp(app, flatComponents);
   }
 
   async close(): Promise<void> {

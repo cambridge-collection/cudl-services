@@ -13,9 +13,11 @@ import 'jest-extended';
 import {
   App,
   AppOptions,
+  Component,
   ComponentApp,
   fnComponent,
   MiddlewareComponent,
+  registerComponents,
   SettingsComponent,
 } from '../src/app';
 import {embedMetadata} from '../src/routes/similarity-impl';
@@ -330,6 +332,35 @@ describe('fnComponent', () => {
       app.set('foo', await asyncDependency)
     ).register(app);
     expect(app.get('foo')).toBe(42);
+  });
+});
+
+describe('registerComponents', () => {
+  const onRegister = jest.fn();
+  const MockComponent = jest.fn<Component, [string]>(id => ({
+    async register(app: express.Application): Promise<void> {
+      onRegister(app, id);
+    },
+    async close(): Promise<void> {},
+  }));
+
+  test('registers components in order provided', async () => {
+    const app = express();
+    const a = MockComponent('a');
+    const b = MockComponent('b');
+    const c = MockComponent('c');
+    const d = MockComponent('d');
+
+    await expect(registerComponents(app, a, b, [c, [[d]]])).resolves.toEqual({
+      app,
+      flatComponents: [a, b, c, d],
+    });
+    expect(onRegister.mock.calls).toEqual([
+      [app, 'a'],
+      [app, 'b'],
+      [app, 'c'],
+      [app, 'd'],
+    ]);
   });
 });
 
