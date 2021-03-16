@@ -14,6 +14,7 @@ import {
   isItemJSON,
   ItemJSON,
   ItemJsonMetadataResponse,
+  ItemJsonMetadataResponseEmitter,
   LocationResolver,
   MetadataPredicate,
   MetadataProvider,
@@ -22,6 +23,9 @@ import {
 } from '../src/metadata';
 import {mocked} from 'ts-jest/utils';
 import {applyLazyDefaults} from '../src/util';
+import express from 'express';
+import expressAsyncHandler from 'express-async-handler';
+import request from 'supertest';
 
 test.each([
   [true, {}],
@@ -135,6 +139,50 @@ describe('ItemJsonMetadataResponse', () => {
       await expect(response[isExternalEmbedPermitted]()).resolves.toBe(result);
     }
   );
+
+  describe('ItemJsonMetadataResponseEmitter', () => {
+    const item: ItemJSON = {
+      embeddable: true,
+      descriptiveMetadata: [],
+    };
+    const itemResponse = new ItemJsonMetadataResponse('foo', async () =>
+      Buffer.from(JSON.stringify(item))
+    );
+    test('has a static instance', () => {
+      expect(ItemJsonMetadataResponseEmitter.instance).toBeInstanceOf(
+        ItemJsonMetadataResponseEmitter
+      );
+    });
+
+    test('canEmit() is true for ItemJsonMetadataResponse', () => {
+      expect(ItemJsonMetadataResponseEmitter.instance.canEmit(itemResponse));
+    });
+
+    test('canEmit() is false for unsupported MetadataResponses', async () => {
+      expect(
+        ItemJsonMetadataResponseEmitter.instance.canEmit(
+          new DefaultMetadataResponse('foo', async () => Buffer.from(''))
+        )
+      ).not.toBeTruthy();
+    });
+
+    test('emit() writes metadata to response', async () => {
+      const app = express();
+      app.use(
+        '/',
+        expressAsyncHandler(async (req, res) => {
+          await ItemJsonMetadataResponseEmitter.instance.emit(
+            itemResponse,
+            res
+          );
+        })
+      );
+
+      const res = await request(app).get('/');
+      expect(res.ok);
+      expect(res.body).toEqual(item);
+    });
+  });
 
   test.each([
     ['something', true],

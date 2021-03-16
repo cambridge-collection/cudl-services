@@ -1,6 +1,8 @@
 import {BaseError} from './errors';
 import {asUnknownObject} from './util';
 import {Memoize} from 'typescript-memoize';
+import {MetadataResponseEmitter} from './routes/metadata';
+import express from 'express';
 
 export interface MetadataResponse {
   getId(): string;
@@ -169,6 +171,35 @@ export class ItemJsonMetadataResponse
       throw new MetadataError('unexpected JSON structure');
     }
     return data;
+  }
+}
+
+export class ItemJsonMetadataResponseEmitter
+  implements MetadataResponseEmitter {
+  private constructor() {}
+
+  @Memoize()
+  static get instance(): ItemJsonMetadataResponseEmitter {
+    return new ItemJsonMetadataResponseEmitter();
+  }
+
+  canEmit(
+    metadataResponse: MetadataResponse
+  ): metadataResponse is ItemJsonMetadataResponse {
+    return metadataResponse instanceof ItemJsonMetadataResponse;
+  }
+
+  async emit(
+    metadataResponse: MetadataResponse,
+    res: express.Response
+  ): Promise<void> {
+    if (!this.canEmit(metadataResponse)) {
+      throw new Error(
+        `metadataResponse is not supported by this emitter: ${metadataResponse}`
+      );
+    }
+    res.json(await metadataResponse.asJson());
+    return;
   }
 }
 
