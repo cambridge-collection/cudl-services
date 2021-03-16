@@ -49,11 +49,11 @@ export interface AppOptions {
 }
 
 export interface Component extends Resource {
-  register(express: express.Express): Promise<void>;
+  register(app: express.Application): Promise<void>;
 }
 
 export abstract class BaseComponent extends BaseResource implements Component {
-  abstract register(express: express.Express): Promise<void>;
+  abstract register(express: express.Application): Promise<void>;
 }
 
 class FnComponent extends BaseComponent {
@@ -64,10 +64,10 @@ class FnComponent extends BaseComponent {
   }
 }
 export function fnComponent(
-  registrationFn: (express: express.Express) => unknown
+  registrationFn: (app: express.Application) => unknown
 ): Component {
-  return new FnComponent(async express => {
-    await registrationFn(express);
+  return new FnComponent(async app => {
+    await registrationFn(app);
   });
 }
 
@@ -79,9 +79,9 @@ export class SettingsComponent extends BaseComponent {
     this.settings = new Map(Object.entries(settings));
   }
 
-  async register(express: express.Express): Promise<void> {
+  async register(app: express.Application): Promise<void> {
     for (const [key, value] of this.settings.entries()) {
-      express.set(key, value);
+      app.set(key, value);
     }
   }
 }
