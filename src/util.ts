@@ -29,7 +29,7 @@ export interface ExternalCorsRequestMatcher extends RequestMatcher {
   internalDomainNameMatcher: DomainNameMatcher;
 }
 
-type RequestHeaders = Pick<Request, 'header'>;
+type RequestHeaders = Pick<Request, 'headers'>;
 
 export function ExternalCorsRequestMatcher(options: {
   internalDomains: DomainNameMatcher;
@@ -45,7 +45,7 @@ export function ExternalCorsRequestMatcher(options: {
 }
 
 export function getOriginHostName(req: RequestHeaders): string | undefined {
-  const origin = req.header('origin');
+  const origin = req.headers.origin;
   return origin && uri.parse(origin).host;
 }
 

@@ -20,17 +20,12 @@ import {
 import {ParsedQs} from 'qs';
 import {AssertionError} from 'assert';
 import {Request} from 'express';
-import {mocked} from 'ts-jest/utils';
 
 describe('HTTP Request things', () => {
   function mockRequest(
     headers: Record<string, string>
-  ): Pick<Request, 'header'> {
-    const req: Pick<Request, 'header'> = {
-      header: jest.fn(),
-    };
-    mocked(req.header).mockImplementation(name => headers[name.toLowerCase()]);
-    return req;
+  ): Pick<Request, 'headers'> {
+    return {headers};
   }
 
   test.each<[Record<string, string>, string | undefined]>([
