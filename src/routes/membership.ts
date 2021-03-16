@@ -3,10 +3,12 @@ import expressAsyncHandler from 'express-async-handler';
 import xmlbuilder from 'xmlbuilder';
 import {Collection, GetItemCollections} from '../collections';
 
-export function getRoutes(options: {
+export interface GetRoutesOptions {
   router?: express.Router;
   getItemCollections: GetItemCollections;
-}) {
+}
+
+export function getRoutes(options: GetRoutesOptions): express.Handler {
   const router = options.router || express.Router();
   router.get(
     '/collections/:id',
