@@ -4,6 +4,7 @@ import {promisify} from 'util';
 import {TEST_DATA_PATH} from '../constants';
 import {
   CUDLFormat,
+  cudlProvidersForDataStore,
   DataLocationResolver,
   MetadataProviderCUDLMetadataRepository,
   resolveItemJsonLocation,
@@ -11,6 +12,9 @@ import {
 } from '../../src/metadata/cudl';
 import {FilesystemDataStore} from '../../src/metadata/filesystem';
 import {ErrorCategories} from '../../src/errors';
+import {DataStore} from '../../src/metadata';
+
+import 'jest-extended';
 
 const CUDL_METADATA_PATH = path.resolve(TEST_DATA_PATH, 'metadata');
 const ITEM_JSON_PATH = path.resolve(
@@ -81,6 +85,26 @@ describe('LocationResolvers', () => {
       }
     );
   });
+});
+
+describe('cudlProvidersForDataStore', () => {
+  const mockDataStore = jest.fn<DataStore, []>(() => ({
+    read: jest.fn().mockResolvedValue(Buffer.from('data')),
+  }))();
+
+  const paths: Partial<Record<CUDLFormat, string>> = {
+    [CUDLFormat.TRANSCRIPTION]: 'foo/bar',
+  };
+
+  test.each(Object.values(CUDLFormat))(
+    'uses provided DataStore for provider of CUDLFormat %s',
+    async type => {
+      const providers = cudlProvidersForDataStore(mockDataStore);
+      await expect(
+        (await providers[type].query(paths[type] || 'mock')).getBytes()
+      ).resolves.toEqual(Buffer.from('data'));
+    }
+  );
 });
 
 describe('MetadataProviderCUDLMetadataRepository', () => {

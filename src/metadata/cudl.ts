@@ -67,11 +67,44 @@ export interface CUDLMetadataRepository extends MetadataRepository<CUDLFormat> {
   getJSON(id: string): Promise<ItemJSON>;
 }
 
-type CUDLProviders = {
+export type CUDLProviders = {
   [key in CUDLFormat]: key extends CUDLFormat.JSON
     ? MetadataProvider<ItemJsonMetadataResponse>
     : MetadataProvider;
 };
+
+export function cudlProvidersForDataStore(dataStore: DataStore): CUDLProviders {
+  const xmlProviders = Object.fromEntries(
+    XML_FORMATS.map(format => [
+      format,
+      new DefaultMetadataProvider(
+        dataStore,
+        DataLocationResolver(format),
+        DefaultMetadataResponse
+      ),
+    ])
+  ) as Partial<Record<CUDLFormat, MetadataProvider>>;
+
+  const providers: Partial<CUDLProviders> = {
+    ...xmlProviders,
+    [CUDLFormat.TRANSCRIPTION]: new DefaultMetadataProvider(
+      dataStore,
+      resolveTranscriptionLocation,
+      DefaultMetadataResponse
+    ),
+    [CUDLFormat.JSON]: new DefaultMetadataProvider(
+      dataStore,
+      resolveItemJsonLocation,
+      ItemJsonMetadataResponse
+    ),
+  };
+
+  assert.deepStrictEqual(
+    Object.getOwnPropertyNames(providers),
+    Object.values(CUDLFormat)
+  );
+  return providers as CUDLProviders;
+}
 
 /**
  * A CUDLMetadataRepository backed by the MetadataProvider API. Data can be
@@ -96,37 +129,8 @@ export class MetadataProviderCUDLMetadataRepository
   static forDataStore(
     dataStore: DataStore
   ): MetadataProviderCUDLMetadataRepository {
-    const xmlProviders = Object.fromEntries(
-      XML_FORMATS.map(format => [
-        format,
-        new DefaultMetadataProvider(
-          dataStore,
-          DataLocationResolver(format),
-          DefaultMetadataResponse
-        ),
-      ])
-    ) as Partial<Record<CUDLFormat, MetadataProvider>>;
-
-    const providers: Partial<CUDLProviders> = {
-      ...xmlProviders,
-      [CUDLFormat.TRANSCRIPTION]: new DefaultMetadataProvider(
-        dataStore,
-        resolveTranscriptionLocation,
-        DefaultMetadataResponse
-      ),
-      [CUDLFormat.JSON]: new DefaultMetadataProvider(
-        dataStore,
-        resolveItemJsonLocation,
-        ItemJsonMetadataResponse
-      ),
-    };
-
-    assert.deepStrictEqual(
-      Object.getOwnPropertyNames(providers),
-      Object.values(CUDLFormat)
-    );
     return new MetadataProviderCUDLMetadataRepository(
-      providers as CUDLProviders
+      cudlProvidersForDataStore(dataStore)
     );
   }
 }
