@@ -18,6 +18,7 @@ import {
   fnComponent,
   MiddlewareComponent,
   registerComponents,
+  ResourceCleanupComponent,
   SettingsComponent,
 } from '../src/app';
 import {embedMetadata} from '../src/routes/similarity-impl';
@@ -38,6 +39,7 @@ import {
   MemoryDatabasePool,
   MemoryTagsDAO,
 } from './utils';
+import {Resource} from '../src/resources';
 
 jest.mock('../src/routes/similarity-impl');
 
@@ -332,6 +334,42 @@ describe('fnComponent', () => {
       app.set('foo', await asyncDependency)
     ).register(app);
     expect(app.get('foo')).toBe(42);
+  });
+});
+
+describe('ResourceCleanupComponent', () => {
+  const MockResource = jest.fn<Resource, []>(() => ({close: jest.fn()}));
+
+  test('closes held Resource when closed', async () => {
+    const resource = new MockResource();
+    const cleanup = new ResourceCleanupComponent(resource);
+
+    expect(resource.close).not.toHaveBeenCalled();
+    await cleanup.close();
+    expect(resource.close).toHaveBeenCalled();
+  });
+
+  test('closes all resources from closing() factory function', async () => {
+    const a = new MockResource();
+    const b = new MockResource();
+    const cleanup = ResourceCleanupComponent.closing(a, b);
+
+    expect(a.close).not.toHaveBeenCalled();
+    expect(b.close).not.toHaveBeenCalled();
+    await cleanup.close();
+    expect(a.close).toHaveBeenCalled();
+    expect(b.close).toHaveBeenCalled();
+  });
+
+  test('register() fails if already closed', async () => {
+    const cleanup = ResourceCleanupComponent.closing();
+    await cleanup.close();
+
+    await expect(() =>
+      cleanup.register()
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      '"operation on closed resource"'
+    );
   });
 });
 

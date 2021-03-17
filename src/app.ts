@@ -7,7 +7,7 @@ import {URL} from 'url';
 import {CollectionDAO} from './collections';
 
 import {DAOPool} from './db';
-import {BaseResource, Resource, using} from './resources';
+import {aggregate, BaseResource, Resource, using} from './resources';
 import * as darwin from './routes/darwin';
 import * as membership from './routes/membership';
 import * as metadata from './routes/metadata';
@@ -119,6 +119,28 @@ export class MiddlewareComponent extends BaseComponent {
         express.use(this.handler);
       }
     }
+  }
+}
+
+/** A Component that closes a Resource when a ComponentApp is closed. */
+export class ResourceCleanupComponent extends BaseComponent {
+  private readonly resource: Resource;
+
+  constructor(resource: Resource) {
+    super();
+    this.resource = resource;
+  }
+
+  static closing(...resources: Resource[]): ResourceCleanupComponent {
+    return new ResourceCleanupComponent(aggregate(...resources));
+  }
+
+  async register(): Promise<void> {
+    this.ensureNotClosed();
+  }
+
+  async close(): Promise<void> {
+    await Promise.all([super.close(), this.resource.close()]);
   }
 }
 
