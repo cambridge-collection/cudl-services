@@ -56,18 +56,34 @@ export async function closingOnError<A extends Resource, B>(
   }
 }
 
-export class ExternalResources<T> extends BaseResource {
+/**
+ * An aggregate Resource which closes the resources it holds when closed.
+ */
+export class Resources extends BaseResource {
   private readonly resources: Resource[];
-  readonly value: T;
 
-  constructor(value: T, resources: Resource[]) {
+  constructor(resources: Iterable<Resource>) {
     super();
-    this.value = value;
     this.resources = Array.from(resources);
   }
 
   async close(): Promise<void> {
-    await super.close();
-    await Promise.all(this.resources.map(r => r.close()));
+    await Promise.all([super.close(), ...this.resources.map(r => r.close())]);
+  }
+}
+
+/**
+ * Create a Resource which closes all of the specified Resources when closed.
+ */
+export function aggregate(...resources: Resource[]): Resources {
+  return new Resources(resources);
+}
+
+export class ExternalResources<T> extends Resources {
+  readonly value: T;
+
+  constructor(value: T, resources: Resource[]) {
+    super(resources);
+    this.value = value;
   }
 }

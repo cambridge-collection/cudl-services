@@ -1,7 +1,9 @@
 import {
+  aggregate,
   BaseResource,
   closingOnError,
   Resource,
+  Resources,
   using,
 } from '../src/resources';
 
@@ -115,6 +117,42 @@ describe('resources', () => {
         new Error('boom')
       );
       expect(resource.close).toHaveBeenCalled();
+    });
+  });
+
+  describe('Resources', () => {
+    test('closes held Resources', async () => {
+      const a = new MockResource();
+      const b = new MockResource();
+
+      const combined = new Resources([a, b]);
+
+      expect(a.close).not.toHaveBeenCalled();
+      expect(b.close).not.toHaveBeenCalled();
+
+      await combined.close();
+
+      expect(combined.isClosed()).toBeTruthy();
+      expect(a.close).toHaveBeenCalled();
+      expect(b.close).toHaveBeenCalled();
+    });
+  });
+
+  describe('aggregate', () => {
+    test('closes aggregated resources', async () => {
+      const a = new MockResource();
+      const b = new MockResource();
+
+      const combined = aggregate(a, b);
+
+      expect(a.close).not.toHaveBeenCalled();
+      expect(b.close).not.toHaveBeenCalled();
+
+      await combined.close();
+
+      expect(combined.isClosed()).toBeTruthy();
+      expect(a.close).toHaveBeenCalled();
+      expect(b.close).toHaveBeenCalled();
     });
   });
 });
