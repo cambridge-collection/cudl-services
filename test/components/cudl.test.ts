@@ -24,18 +24,17 @@ import {
 import request from 'supertest';
 import {Collection} from '../../src/collections';
 import {MemoryCollectionsDAO, MemoryDatabasePool} from '../utils';
-import {XSLTExecutor} from '@lib.cam/xslt-nailgun';
 import {URL} from 'url';
-import {CUDLFormat, CUDLMetadataRepository} from '../../src/metadata/cudl';
-import {DAOPool} from '../../src/db';
-import {Resource} from '../../src/resources';
+import {CUDLFormat} from '../../src/metadata/cudl';
 
+import {ItemJsonMetadataResponseEmitter} from '../../src/metadata';
 import {
-  DataStore,
-  ItemJsonMetadataResponseEmitter,
-  MetadataProvider,
-} from '../../src/metadata';
-import {XTF} from '../../src/xtf';
+  MockCUDLMetadataRepository,
+  MockDAOPool,
+  MockDataStore,
+  MockXSLTExecutor,
+  MockXTF,
+} from '../mocking/local';
 
 jest.mock('../../src/routes/tags');
 jest.mock('../../src/routes/transcription');
@@ -43,41 +42,6 @@ jest.mock('../../src/routes/translation');
 jest.mock('../../src/routes/metadata');
 jest.mock('../../src/routes/membership');
 jest.mock('../../src/routes/similarity');
-
-const MockCUDLMetadataRepository = jest
-  .fn<CUDLMetadataRepository, []>()
-  .mockImplementation(() => {
-    return {getJSON: jest.fn(), getBytes: jest.fn()};
-  });
-
-const MockXSLTExecutor = jest.fn<XSLTExecutor, []>().mockImplementation(
-  () =>
-    (({
-      close: jest.fn(),
-      execute: jest.fn(),
-    } as Partial<XSLTExecutor>) as XSLTExecutor)
-);
-
-function MockDAOPool<T extends Resource>(): DAOPool<T> {
-  return jest.fn<DAOPool<T>, []>(
-    (): DAOPool<T> => {
-      return {getInstance: jest.fn()} as DAOPool<T>;
-    }
-  )();
-}
-
-const MockDataStore = jest.fn<DataStore, []>(() => ({
-  read: jest.fn(),
-}));
-
-const MockMetadataProvider = jest.fn<MetadataProvider, []>(() => ({
-  query: jest.fn(),
-}));
-
-const MockXTF = jest.fn<XTF, []>(() => ({
-  getSimilarItems: jest.fn(),
-  search: jest.fn(),
-}));
 
 describe('tagsComponents', () => {
   const options: TagsOptions = {

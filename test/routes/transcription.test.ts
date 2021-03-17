@@ -17,6 +17,8 @@ import {getTestDataMetadataRepository, normaliseSpace} from '../utils';
 import {XSLTExecutor} from '@lib.cam/xslt-nailgun';
 import assert from 'assert';
 
+jest.unmock('@lib.cam/xslt-nailgun');
+
 function getTestApp(options: Parameters<typeof getRoutes>[0]) {
   const app = express();
   app.use('/', getRoutes(options));

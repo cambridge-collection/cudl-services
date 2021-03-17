@@ -1,23 +1,18 @@
 import {DAOPool} from '../db';
-import {TagsDAO} from '../routes/tags-impl';
-import {Components, MiddlewareComponent, Users} from '../app';
+import {Components, MiddlewareComponent} from '../app';
 import * as tags from '../routes/tags';
 import * as translation from '../routes/translation';
 import * as similarity from '../routes/similarity';
 import {CollectionDAO} from '../collections';
 import {
   CUDLMetadataRepository,
-  CUDLProviders,
   cudlProvidersForDataStore,
 } from '../metadata/cudl';
-import {XTF} from '../xtf';
 import {URL} from 'url';
 import * as transcription from '../routes/transcription';
 import {XSLTExecutor} from '@lib.cam/xslt-nailgun';
-import {GetRoutesV2Options} from '../routes/metadata';
 import * as metadata from '../routes/metadata';
 import {DomainNameMatcher, ExternalCorsRequestMatcher} from '../util';
-import internal from 'stream';
 import {DataStore, ItemJsonMetadataResponseEmitter} from '../metadata';
 import * as membership from '../routes/membership';
 import {using} from '../resources';

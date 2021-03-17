@@ -12,6 +12,8 @@ import {mockGetResponder} from '../mocking/superagent-mocking';
 import {getTestDataMetadataRepository} from '../utils';
 import {CUDLMetadataRepository} from '../../src/metadata/cudl';
 
+jest.unmock('@lib.cam/xslt-nailgun');
+
 // Example translation requests:
 // /v1/translation/tei/EN/MS-LC-II-00077/15r/15r
 // /v1/translation/tei/EN/MS-LC-II-00077/viii%20recto/viii%20recto
