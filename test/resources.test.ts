@@ -1,10 +1,17 @@
-import {BaseResource, using} from '../src/resources';
+import {
+  BaseResource,
+  closingOnError,
+  Resource,
+  using,
+} from '../src/resources';
 
 class MyResource extends BaseResource {
   example() {
     this.ensureNotClosed();
   }
 }
+
+const MockResource = jest.fn<Resource, []>(() => ({close: jest.fn()}));
 
 describe('resources', () => {
   describe('BaseResource', () => {
@@ -69,6 +76,45 @@ describe('resources', () => {
       }));
       await expect(using(resource, () => 42)).rejects.toThrow('boom');
       expect(failingClose.mock.calls.length).toBe(1);
+    });
+  });
+
+  describe('closingOnError', () => {
+    test('user is called with non-promise resource', async () => {
+      const resource = new MockResource();
+      const user = jest.fn();
+
+      await closingOnError(resource, user);
+      expect(user).toHaveBeenCalledTimes(1);
+      expect(user).toHaveBeenCalledWith(resource);
+    });
+
+    test('user is called with resolved resource from resource promise', async () => {
+      const resource = new MockResource();
+      const user = jest.fn();
+
+      await closingOnError(Promise.resolve(resource), user);
+      expect(user).toHaveBeenCalledTimes(1);
+      expect(user).toHaveBeenCalledWith(resource);
+    });
+
+    test('returns result of user', async () => {
+      const resource = new MockResource();
+      const user = jest.fn().mockResolvedValueOnce(42);
+
+      const result = await closingOnError(resource, user);
+      expect(result).toBe(42);
+      expect(resource.close).not.toHaveBeenCalled();
+    });
+
+    test('closes resource if user fails', async () => {
+      const resource = new MockResource();
+      const user = jest.fn().mockRejectedValueOnce(new Error('boom'));
+
+      await expect(closingOnError(resource, user)).rejects.toThrow(
+        new Error('boom')
+      );
+      expect(resource.close).toHaveBeenCalled();
     });
   });
 });

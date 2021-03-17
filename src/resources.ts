@@ -42,6 +42,20 @@ export async function using<A extends Resource, B>(
   }
 }
 
+export async function closingOnError<A extends Resource, B>(
+  resource: PromiseLike<A> | A,
+  user: ResourceUser<A, B>
+): Promise<B> {
+  // if the resource promise fails we can't close it
+  const resolvedResource = await resource;
+  try {
+    return await user(resolvedResource);
+  } catch (e) {
+    await resolvedResource.close();
+    throw e;
+  }
+}
+
 export class ExternalResources<T> extends BaseResource {
   private readonly resources: Resource[];
   readonly value: T;
