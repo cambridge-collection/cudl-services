@@ -17,7 +17,7 @@ export interface S3DataStoreInput {
 }
 
 export class S3DataStore implements DataStore {
-  private readonly options: Required<S3DataStoreInput>;
+  readonly options: Required<S3DataStoreInput>;
 
   constructor(options: S3DataStoreInput) {
     this.options = applyLazyDefaults(options, {

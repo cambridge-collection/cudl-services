@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getCudlDataDataStore throws on unsupported URL 1`] = `"dataLocation URL's protocol is not supported: foo://abc"`;
+
+exports[`parseConfigURLValue throws error referencing the property name when value is not a valid URL 1`] = `"invalidProp is not a valid URL: \\"/not/valid\\". TypeError [ERR_INVALID_URL]: Invalid URL: /not/valid"`;

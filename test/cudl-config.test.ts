@@ -1,39 +1,51 @@
-import {Application} from '../src/app';
+import {Application, Component} from '../src/app';
 import fs from 'fs';
 import glob from 'glob';
 
 import {file, FileResult, withFile} from 'tmp-promise';
 import {mocked} from 'ts-jest/utils';
 import {promisify} from 'util';
-import {
+import cudlConfigDefaultExport, {
   ApplicationWithResources,
   CONFIG_FILE_ENVAR,
   CONFIG_JSON_ENVAR,
   configPathsFromEnvar,
   ConfigSource,
+  CUDLConfig,
   CUDLConfigData,
+  getCudlDataDataStore,
   loadConfigFile,
   loadConfigFromEnvar,
   mergeConfigs,
+  parseConfigURLValue,
   PartialCUDLConfigData,
   splitEnvarPaths,
 } from '../src/cudl-config';
 import {InvalidConfigError} from '../src/errors';
 import {ExternalResources, Resource} from '../src/resources';
 import express from 'express';
+import {URL} from 'url';
+import {FilesystemDataStore} from '../src/metadata/filesystem';
+import {S3DataStore} from '../src/metadata/s3';
+import {cudlComponents} from '../src/components/cudl/cudl-components';
+import {MockComponent} from './mocking/local';
+import {leadingComponents} from '../src/components/common';
 
 jest.mock('glob', () => {
   return jest.fn(() => {
     throw new Error('No mock implementation specified');
   });
 });
+jest.mock('pg');
+jest.mock('../src/components/cudl/cudl-components');
+jest.mock('../src/components/common');
 
 import ProcessEnv = NodeJS.ProcessEnv;
 
 const EXAMPLE_CONFIG: CUDLConfigData = {
   darwinXTF: 'example',
   users: {},
-  dataDir: 'example',
+  dataLocation: 'example',
   postPass: 'example',
   postUser: 'example',
   postHost: 'example',
@@ -108,7 +120,7 @@ describe('config', () => {
     });
 
     test.each<[string, PartialCUDLConfigData]>([
-      ["/* Comment */ {dataDir: 'abcd'}", {dataDir: 'abcd'}],
+      ["/* Comment */ {dataLocation: 'abcd'}", {dataLocation: 'abcd'}],
       [JSON.stringify(EXAMPLE_CONFIG), EXAMPLE_CONFIG],
     ])('returns partial config', async (content, expected) => {
       await promisify(fs.writeFile)(tmpFile.fd, content);
@@ -130,13 +142,12 @@ describe('config', () => {
   describe('loadConfigFromEnvar()', () => {
     let env: ProcessEnv;
     beforeEach(() => {
-      jest.resetAllMocks();
+      mocked(glob as SimpleGlobSignature).mockClear();
       env = process.env;
       process.env = {};
     });
     afterEach(() => {
       process.env = env;
-      jest.resetModules();
     });
 
     type SimpleGlobSignature = (
@@ -211,7 +222,7 @@ describe('config', () => {
 
           const configCContent: PartialCUDLConfigData = {
             users: {foo: {username: 'foo1'}},
-            dataDir: '/other',
+            dataLocation: '/other',
           };
 
           process.env[CONFIG_FILE_ENVAR] = `${configA.path}:${configB.path}`;
@@ -221,7 +232,7 @@ describe('config', () => {
             ...EXAMPLE_CONFIG,
             ...{
               postPort: 42,
-              dataDir: '/other',
+              dataLocation: '/other',
               users: {foo: {email: 'foo@example.com', username: 'foo1'}},
             },
           });
@@ -272,5 +283,100 @@ describe('ApplicationWithResources', () => {
     expect(app.close).toHaveBeenCalled();
     expect(res1.close).toHaveBeenCalled();
     expect(res2.close).toHaveBeenCalled();
+  });
+});
+
+describe('parseConfigURLValue', () => {
+  test('returns URL instance for valid URL string', () => {
+    expect(parseConfigURLValue('http://example.com/', 'example')).toEqual(
+      new URL('http://example.com/')
+    );
+  });
+
+  test('throws error referencing the property name when value is not a valid URL', () => {
+    expect(() =>
+      parseConfigURLValue('/not/valid', 'invalidProp')
+    ).toThrowErrorMatchingSnapshot();
+  });
+});
+
+describe('getCudlDataDataStore', () => {
+  test('returns FilesystemDataStore for non-URL path', () => {
+    const dataStore = getCudlDataDataStore({
+      dataLocation: '/example dir/path',
+    }) as FilesystemDataStore;
+    expect(dataStore).toBeInstanceOf(FilesystemDataStore);
+    expect(dataStore.rootPath).toEqual('/example dir/path');
+  });
+
+  test('returns FilesystemDataStore for file: URL', () => {
+    const dataStore = getCudlDataDataStore({
+      dataLocation: 'file:///example%20dir/path',
+    }) as FilesystemDataStore;
+    expect(dataStore).toBeInstanceOf(FilesystemDataStore);
+    expect(dataStore.rootPath).toEqual('/example dir/path');
+  });
+
+  test('returns S3DataStore for s3: URL', () => {
+    const dataStore = getCudlDataDataStore({
+      dataLocation: 's3://bucketname/key/prefix/',
+    }) as S3DataStore;
+    expect(dataStore).toBeInstanceOf(S3DataStore);
+    expect(dataStore.options.bucket).toEqual('bucketname');
+    expect(dataStore.options.keyPrefix).toEqual('key/prefix/');
+  });
+
+  test('throws on unsupported URL', () => {
+    expect(() =>
+      getCudlDataDataStore({dataLocation: 'foo://abc'})
+    ).toThrowErrorMatchingSnapshot();
+  });
+});
+
+test('module exports an instance of CUDLConfig as the default export', () => {
+  expect(cudlConfigDefaultExport).toBeInstanceOf(CUDLConfig);
+});
+
+describe('CUDLConfig', () => {
+  describe('createApplicationFromConfigData', () => {
+    const config: CUDLConfigData = {
+      dataLocation: '/example-data-location',
+      zacynthiusServiceURL: 'http://zac.example.com/',
+      darwinXTF: 'http://darwin.example.com/',
+      users: {
+        secret: {username: 'example-user', email: 'example@example.com'},
+      },
+      xtfBase: 'http://xtf.example.com/',
+      xtfIndexPath: '/example-xtf-index',
+      postDatabase: 'example-pg-db',
+      postHost: 'example-pg-host',
+      postPass: 'example-pg-pass',
+      postPort: 1234,
+      postUser: 'example-pg-user',
+    };
+
+    let mockCudlComponents: Component;
+    let mockLeadingComponent: Component;
+
+    beforeEach(() => {
+      mockCudlComponents = new MockComponent();
+      mocked(cudlComponents).mockResolvedValueOnce(mockCudlComponents);
+      mockLeadingComponent = new MockComponent();
+      mocked(leadingComponents).mockReturnValueOnce([mockLeadingComponent]);
+    });
+
+    test('includes cudlComponents in created app', async () => {
+      const app = await new CUDLConfig().createApplicationFromConfigData(
+        config
+      );
+      expect(app.components).toContain(mockCudlComponents);
+    });
+
+    test('includes common.leadingComponents in created app', async () => {
+      const app = await new CUDLConfig().createApplicationFromConfigData(
+        config
+      );
+      expect(app.components).toContain(mockLeadingComponent);
+    });
   });
 });

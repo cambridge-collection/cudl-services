@@ -14,7 +14,7 @@
           }
         }
       },
-      "required": ["darwinXTF", "dataDir", "postDatabase", "postHost", "postPort", "postPass", "postUser", "users", "xtfBase", "xtfIndexPath", "zacynthiusServiceURL"]
+      "required": ["darwinXTF", "dataLocation", "postDatabase", "postHost", "postPort", "postPass", "postUser", "users", "xtfBase", "xtfIndexPath", "zacynthiusServiceURL"]
     }
   ]
 }

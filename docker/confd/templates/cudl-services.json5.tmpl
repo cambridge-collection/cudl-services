@@ -1,6 +1,6 @@
 {
-  {{if exists "/cudl/services/data/path"}}
-    dataDir: "{{getv "/cudl/services/data/path" js}}",
+  {{if exists "/cudl/services/data/location"}}
+    dataLocation: "{{getv "/cudl/services/data/location" js}}",
   {{end}}
   {{if exists "/cudl/services/legacy/darwin/data/path"}}
     darwinXTF: "{{getv "/cudl/services/darwin/xtf/url" | js}}",

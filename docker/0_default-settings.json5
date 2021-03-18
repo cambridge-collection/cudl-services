@@ -1,4 +1,4 @@
 {
-  dataDir: "/mnt/cudl-data",
+  dataLocation: "/mnt/cudl-data",
   darwinXTF: "https://dcp-public.lib.cam.ac.uk/"
 }

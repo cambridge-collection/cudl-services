@@ -12,8 +12,8 @@ import {
   translationComponents,
 } from '../../../src/components/cudl';
 import {mocked} from 'ts-jest/utils';
-import {Component} from '../../../src/app';
 import {
+  MockComponent,
   MockDataStore,
   MockPostgresDatabasePool,
   MockXTF,
@@ -25,11 +25,6 @@ import {darwinProxyComponents} from '../../../src/components/darwin-corresponden
 jest.mock('../../../src/components/cudl');
 jest.mock('../../../src/components/darwin-correspondence-project');
 jest.mock('@lib.cam/xslt-nailgun');
-
-const MockComponent = jest.fn<Component, []>(() => ({
-  register: jest.fn(),
-  close: jest.fn(),
-}));
 
 describe('cudlComponents', () => {
   let options: CudlOptions;

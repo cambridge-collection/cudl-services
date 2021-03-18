@@ -5,21 +5,29 @@ import fs from 'fs';
 import glob from 'glob';
 import json5 from 'json5';
 import util, {promisify} from 'util';
-import {BaseError, InvalidConfigError} from './errors';
+import {BaseError, InvalidConfigError, ValueError} from './errors';
 
 import fullConfigSchema from './full-config.schema.json';
 import partialConfigSchema from './partial-config.schema.json';
 import {NonOptional, requireNotUndefined} from './util';
 import {Config} from './config';
-import {App, Application, User, Users} from './app';
-import {ExternalResources, Resource} from './resources';
-import {MetadataProviderCUDLMetadataRepository} from './metadata/cudl';
+import {
+  Application,
+  ComponentApp,
+  ResourceCleanupComponent,
+  User,
+  Users,
+} from './app';
+import {closingOnError, ExternalResources, Resource} from './resources';
 import {FilesystemDataStore} from './metadata/filesystem';
-import {PostgresCollectionDAO} from './collections';
-import {PostgresTagsDAO} from './routes/tags-impl';
 import {DefaultXTF, XTFConfig} from './xtf';
-import {URL} from 'url';
+import {fileURLToPath, pathToFileURL, URL} from 'url';
 import {DatabaseConfig, PostgresDatabasePool} from './db';
+import {DataStore} from './metadata';
+import {S3DataStore} from './metadata/s3';
+import {S3Client} from '@aws-sdk/client-s3';
+import {cudlComponents} from './components/cudl/cudl-components';
+import {leadingComponents} from './components/common';
 
 const debug = Debugger('cudl-services:config');
 
@@ -184,7 +192,7 @@ export function validateObjectIsFullConfig(
 }
 
 export interface CUDLConfigData<U = Users> extends XTFConfig, DatabaseConfig {
-  dataDir: string;
+  dataLocation: string;
   users: U;
   darwinXTF: string;
   zacynthiusServiceURL: string;
@@ -223,27 +231,87 @@ export class ApplicationWithResources implements Application {
   }
 }
 
-class CUDLConfig implements Config {
+export function parseConfigURLValue(value: string, propertyName: string): URL {
+  try {
+    return new URL(value);
+  } catch (e) {
+    throw new InvalidConfigError({
+      message: `${propertyName} is not a valid URL: "${value}". ${e}`,
+      nested: e,
+    });
+  }
+}
+
+export function getCudlDataDataStore(
+  config: Pick<CUDLConfigData, 'dataLocation'>
+): DataStore {
+  let locationUrl: URL;
+  try {
+    locationUrl = new URL(config.dataLocation);
+  } catch (e) {
+    locationUrl = pathToFileURL(config.dataLocation);
+    debug(
+      `dataLocation "${config.dataLocation}" is not a valid URL, treating it as a ` +
+        `path, resulting in the URL: ${locationUrl}`
+    );
+  }
+
+  if (locationUrl.protocol === 'file:') {
+    return new FilesystemDataStore(fileURLToPath(locationUrl));
+  } else if (locationUrl.protocol === 's3:') {
+    return new S3DataStore({
+      client: new S3Client({}),
+      ...parseS3URL(locationUrl),
+    });
+  }
+  throw new InvalidConfigError(
+    `dataLocation URL's protocol is not supported: ${config.dataLocation}`
+  );
+}
+
+function parseS3URL(s3Url: URL): {bucket: string; keyPrefix: string} {
+  if (s3Url.protocol !== 's3:') {
+    throw new ValueError(`unsupported URL: ${s3Url}`);
+  }
+  const bucket = decodeURIComponent(s3Url.host);
+  const keyPrefix = decodeURIComponent(s3Url.pathname.replace(/^\//, ''));
+  return {bucket, keyPrefix};
+}
+
+export class CUDLConfig implements Config {
   async createApplication(): Promise<Application> {
     return this.createApplicationFromConfigData(await loadConfigFromEnvar());
   }
 
-  createApplicationFromConfigData(config: CUDLConfigData) {
-    const dbPool = PostgresDatabasePool.fromConfig(config);
+  async createApplicationFromConfigData(
+    config: CUDLConfigData
+  ): Promise<ComponentApp> {
+    return await closingOnError(
+      PostgresDatabasePool.fromConfig(config),
+      async dbPool => {
+        const commonLeadingComponents = leadingComponents({
+          apiKeys: config.users,
+        });
 
-    return ApplicationWithResources.from(
-      new App({
-        metadataRepository: MetadataProviderCUDLMetadataRepository.forDataStore(
-          new FilesystemDataStore(config.dataDir)
-        ),
-        collectionsDAOPool: PostgresCollectionDAO.createPool(dbPool),
-        tagsDAOPool: PostgresTagsDAO.createPool(dbPool),
-        users: config.users,
-        darwinXtfUrl: config.darwinXTF,
-        xtf: new DefaultXTF(config),
-        zacynthiusServiceURL: new URL(config.zacynthiusServiceURL),
-      }),
-      dbPool
+        const components = await cudlComponents({
+          dbPool,
+          zacynthiusServiceURL: parseConfigURLValue(
+            config.zacynthiusServiceURL,
+            'zacynthiusServiceURL'
+          ),
+          xtf: new DefaultXTF(config),
+          cudlDataDataStore: getCudlDataDataStore(config),
+          darwin: {
+            darwinXtfUrl: parseConfigURLValue(config.darwinXTF, 'darwinXTF'),
+          },
+        });
+
+        return ComponentApp.from(
+          commonLeadingComponents,
+          components,
+          ResourceCleanupComponent.closing(dbPool)
+        );
+      }
     );
   }
 }

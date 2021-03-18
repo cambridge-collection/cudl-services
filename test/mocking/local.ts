@@ -4,6 +4,7 @@ import {DAOPool, PostgresDatabasePool} from '../../src/db';
 import {XTF} from '../../src/xtf';
 import {DataStore, MetadataProvider} from '../../src/metadata';
 import {CUDLMetadataRepository} from '../../src/metadata/cudl';
+import {Component} from '../../src/app';
 
 export const MockCUDLMetadataRepository = jest
   .fn<CUDLMetadataRepository, []>()
@@ -47,3 +48,8 @@ export const MockPostgresDatabasePool = jest.fn<PostgresDatabasePool, []>(
       close: jest.fn(),
     } as Partial<PostgresDatabasePool>) as PostgresDatabasePool)
 );
+
+export const MockComponent = jest.fn<Component, []>(() => ({
+  register: jest.fn(),
+  close: jest.fn(),
+}));
