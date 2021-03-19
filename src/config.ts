@@ -28,7 +28,7 @@ export async function loadConfig(): Promise<Config> {
 export async function loadConfigFromModule(module: string): Promise<Config> {
   let config: Config;
   try {
-    config = require(module);
+    config = require(module)?.default;
   } catch (e) {
     throw new InvalidConfigError({
       message: `Failed to load config from module "${module}": ${e}`,

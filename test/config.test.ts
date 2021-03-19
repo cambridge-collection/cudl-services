@@ -6,7 +6,7 @@ jest.mock(
     const config: Config = {
       createApplication: jest.fn(),
     };
-    return config;
+    return {default: config};
   },
   {virtual: true}
 );
@@ -14,14 +14,14 @@ jest.mock(
 jest.mock(
   'example-invalid-config-module',
   () => {
-    return {};
+    return {default: {}};
   },
   {virtual: true}
 );
 
 describe('loadConfigFromModule', () => {
   test('returns Config from valid module reference', async () => {
-    const expectedConfig = require('example-config-module') as Config;
+    const expectedConfig = require('example-config-module').default as Config;
 
     await expect(loadConfigFromModule('example-config-module')).resolves.toBe(
       expectedConfig
