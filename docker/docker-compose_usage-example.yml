@@ -1,0 +1,79 @@
+version: "3.4"
+
+services:
+  cudl-services:
+    image: camdl/cudl-services:${CUDL_SERVICES_IMAGE_VERSION:-latest}
+    environment:
+      CUDL_SERVICES_DATA_LOCATION: /var/lib/cudl/cudl-data
+      CUDL_SERVICES_XTF_URL: http://xtf:8080/
+      CUDL_SERVICES_XTF_INDEX_PATH: /var/lib/xtf/index/default
+      CUDL_SERVICES_DB_HOST: db
+      CUDL_SERVICES_DB_NAME: cudlservices
+      CUDL_SERVICES_DB_USERNAME: cudlservices
+      CUDL_SERVICES_DB_PASSWORD: ${TEST_DB_PASSWORD:-password}
+      DEBUG: "*"
+    volumes:
+      - sample-cudl-data:/var/lib/cudl/cudl-data
+    ports:
+      - 55000:3000
+    depends_on:
+      - flyway
+      - db
+      - localstack
+      - xtf
+      - sample-data
+
+  db:
+    image: postgres:12
+    restart: always
+    environment:
+      POSTGRES_USER: cudlservices
+      POSTGRES_DB: cudlservices
+      POSTGRES_PASSWORD: ${TEST_DB_PASSWORD:-password}
+    ports:
+      - "${TEST_DB_PORT:-5432}:5432"
+
+  flyway:
+    image: flyway/flyway:6.1.0
+    depends_on:
+      - db
+    volumes:
+      - ./integration_test/data/postgres-migration:/flyway/sql
+    environment:
+      FLYWAY_URL: jdbc:postgresql://db/cudlservices
+      FLYWAY_USER: cudlservices
+      FLYWAY_PASSWORD: ${TEST_DB_PASSWORD:-password}
+    command: migrate -connectRetries=60
+
+  # Provide local Amazon S3 for integration tests
+  localstack:
+    image: localstack/localstack
+    environment:
+      SERVICES: iam,s3
+    ports:
+      - "4566:4566"
+      - "4571:4571"
+
+  xtf:
+    image: camdl/cudl-xtf:fd13
+    environment:
+      XTF_INDEX_0_NAME: default
+      XTF_SERVICES_URL: http://cudl-services:3000/
+    volumes:
+      - sample-cudl-data:/var/lib/xtf/data/default
+      - xtf-index:/var/lib/xtf/index
+    depends_on:
+      - sample-data
+    ports:
+      - 55001:8080
+    command: "textIndexer -index default -incremental; bin/catalina.sh run"
+
+
+  sample-data:
+    image: camdl/cudl-data-samples
+    volumes:
+      - sample-cudl-data:/data
+
+volumes:
+  sample-cudl-data:
+  xtf-index:
