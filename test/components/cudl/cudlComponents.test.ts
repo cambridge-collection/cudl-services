@@ -34,6 +34,7 @@ describe('cudlComponents', () => {
       cudlDataDataStore: new MockDataStore(),
       xtf: new MockXTF(),
       darwin: {darwinXtfUrl: new URL('http://darwin.example.com')},
+      teiServiceURL: new URL('http://tei-html.example.com'),
       zacynthiusServiceURL: new URL('http://zacynthius.example.com'),
       dbPool: new MockPostgresDatabasePool(),
     };

@@ -18,6 +18,10 @@ import {
   CUDLMetadataRepository,
   MetadataRepository,
 } from '../metadata/cudl';
+import {
+  TeiHtmlServiceContent,
+  teiHtmlServiceHandler,
+} from './cudl-tei-html-service-impl';
 import expressAsyncHandler = require('express-async-handler');
 
 interface TranscriptionEndpoint<T> {
@@ -46,35 +50,25 @@ function xsltTranscriptionEndpoint<Fmt extends string, Opt>(options: {
   };
 }
 
-export function getRoutes(options: {
+export interface GetRoutesOptions {
   metadataRepository: CUDLMetadataRepository;
   router?: Router;
+  teiServiceURL: URL;
   xsltExecutor: XSLTExecutor;
   zacynthiusServiceURL: URL;
-}): express.Handler {
-  const {router, zacynthiusServiceURL} = applyLazyDefaults(options, {
-    router: () => Router(),
-  });
+}
 
-  const tei = xsltTranscriptionEndpoint<
-    CUDLFormat,
-    IDPagesTranscriptionOptions
-  >({
-    path: '/tei/diplomatic/internal/:id/:start/:end',
-    xsltExecutor: options.xsltExecutor,
-    metadataRepository: options.metadataRepository,
-    transforms: [
-      {
-        xsltPath: PAGE_EXTRACT_XSLT,
-        params: options => ({start: options.start, end: options.end}),
-      },
-      {xsltPath: MS_TEI_TRANS_XSLT},
-    ],
-    options: req => ({
-      ...extractIDPagesTranscriptionOptions(req),
-      format: CUDLFormat.TEI,
-    }),
-  });
+export function getRoutes(options: GetRoutesOptions): express.Handler {
+  const {router, zacynthiusServiceURL, teiServiceURL} = applyLazyDefaults(
+    options,
+    {
+      router: () => Router(),
+    }
+  );
+
+  router.use(
+    teiHtmlServiceHandler(TeiHtmlServiceContent.TRANSCRIPTION, teiServiceURL)
+  );
 
   const bezae = xsltTranscriptionEndpoint<
     CUDLFormat,
@@ -102,7 +96,7 @@ export function getRoutes(options: {
     },
   });
 
-  const transcriptions: Array<TranscriptionEndpoint<unknown>> = [tei, bezae];
+  const transcriptions: Array<TranscriptionEndpoint<unknown>> = [bezae];
 
   for (const trans of transcriptions) {
     attachTranscriptionHandler(
@@ -310,10 +304,6 @@ const TRANSFORMS_DIR = path.resolve(__dirname, '../../transforms');
 const PAGE_EXTRACT_XSLT = path.resolve(
   TRANSFORMS_DIR,
   'transcriptions/pageExtract.xsl'
-);
-const MS_TEI_TRANS_XSLT = path.resolve(
-  TRANSFORMS_DIR,
-  'transcriptions/msTeiTrans.xsl'
 );
 const BEZAE_TRANS_XSLT = path.resolve(
   TRANSFORMS_DIR,

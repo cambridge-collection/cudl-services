@@ -22,6 +22,16 @@ const XHTML_TYPE = mime.getType('xhtml');
 validate(typeof HTML_TYPE === 'string');
 validate(typeof XHTML_TYPE === 'string');
 const HTML_MEDIA_TYPES = new Set([HTML_TYPE, XHTML_TYPE]);
+export const DEFAULT_RESOURCE_EXTENSIONS: ReadonlySet<string> = new Set([
+  'css',
+  'eot',
+  'otf',
+  'svg',
+  'woff',
+  'woff2',
+  'js',
+  'ico',
+]);
 
 export function defaultBaseResourceURL(pathPattern: PathParams) {
   if (typeof pathPattern === 'string' && pathPattern.startsWith('/')) {
@@ -53,13 +63,13 @@ export function delegateToExternalHTML(options: {
     resourceExtensions: _resourceExtensions,
     baseResourceURL,
   } = applyLazyDefaults(options, {
-    resourceExtensions: () => ['css', 'js', 'otf', 'ttf'],
+    resourceExtensions: () => DEFAULT_RESOURCE_EXTENSIONS,
     baseResourceURL: () => defaultBaseResourceURL(options.pathPattern),
   });
 
   const externalBaseURL = new URL(`${_externalBaseURL}`);
   const resourceExtensions = [..._resourceExtensions];
-  if (!resourceExtensions.every(ext => /^[a-z]+$/.test(ext))) {
+  if (!resourceExtensions.every(ext => /^[a-z0-9]+$/.test(ext))) {
     throw new ValueError(
       `Invalid resourceExtensions: ${resourceExtensions.join(', ')}`
     );

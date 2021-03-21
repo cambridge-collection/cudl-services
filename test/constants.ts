@@ -17,6 +17,9 @@ export const EXAMPLE_STATIC_FILES = {
   MATHJAX_JS: {path: 'newton/js/MathJax.js', type: 'application/javascript'},
 };
 
+export const EXAMPLE_TEI_URL = new URL(
+  'http://cudl-transcriptions.example.com/'
+);
 export const EXAMPLE_ZACYNTHIUS_URL = new URL(
   'http://codex-zacynthius-transcription.example.com/some/path/'
 );

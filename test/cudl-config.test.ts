@@ -44,16 +44,17 @@ import ProcessEnv = NodeJS.ProcessEnv;
 
 const EXAMPLE_CONFIG: CUDLConfigData = {
   darwinXTF: 'example',
-  users: {},
   dataLocation: 'example',
-  postPass: 'example',
-  postUser: 'example',
-  postHost: 'example',
-  postPort: 1234,
   postDatabase: 'example',
+  postHost: 'example',
+  postPass: 'example',
+  postPort: 1234,
+  postUser: 'example',
+  teiServiceURL: 'http://tei.example.com/',
+  users: {},
   xtfBase: 'example',
   xtfIndexPath: 'example',
-  zacynthiusServiceURL: 'http://example.com/',
+  zacynthiusServiceURL: 'http://zac.example.com/',
 };
 
 describe('config', () => {
@@ -340,19 +341,20 @@ test('module exports an instance of CUDLConfig as the default export', () => {
 describe('CUDLConfig', () => {
   describe('createApplicationFromConfigData', () => {
     const config: CUDLConfigData = {
-      dataLocation: '/example-data-location',
-      zacynthiusServiceURL: 'http://zac.example.com/',
       darwinXTF: 'http://darwin.example.com/',
-      users: {
-        secret: {username: 'example-user', email: 'example@example.com'},
-      },
-      xtfBase: 'http://xtf.example.com/',
-      xtfIndexPath: '/example-xtf-index',
+      dataLocation: '/example-data-location',
       postDatabase: 'example-pg-db',
       postHost: 'example-pg-host',
       postPass: 'example-pg-pass',
       postPort: 1234,
       postUser: 'example-pg-user',
+      teiServiceURL: 'http://tei.example.com/',
+      users: {
+        secret: {username: 'example-user', email: 'example@example.com'},
+      },
+      xtfBase: 'http://xtf.example.com/',
+      xtfIndexPath: '/example-xtf-index',
+      zacynthiusServiceURL: 'http://zac.example.com/',
     };
 
     let mockCudlComponents: Component;

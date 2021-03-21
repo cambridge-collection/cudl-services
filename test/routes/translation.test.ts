@@ -1,111 +1,123 @@
-import {XSLTExecutor} from '@lib.cam/xslt-nailgun';
 import express, {Application} from 'express';
-import {StatusCodes} from 'http-status-codes';
-import {JSDOM} from 'jsdom';
 import {get} from 'superagent';
 import request from 'supertest';
 import {getRoutes} from '../../src/routes/translation';
 
-import {EXAMPLE_STATIC_FILES, EXAMPLE_ZACYNTHIUS_URL} from '../constants';
+import {
+  EXAMPLE_TEI_URL,
+  EXAMPLE_ZACYNTHIUS_URL,
+  TEST_DATA_PATH,
+} from '../constants';
 import {mockGetResponder} from '../mocking/superagent-mocking';
+import {promisify} from 'util';
+import fs from 'fs';
+import path from 'path';
+import {mocked} from 'ts-jest/utils';
+import {parseHTML} from '../../src/html';
+import {StatusCodes} from 'http-status-codes';
+import {DEFAULT_RESOURCE_EXTENSIONS} from '../../src/routes/transcription-impl';
+import mime from 'mime';
+import assert from 'assert';
 
-import {getTestDataMetadataRepository} from '../utils';
-import {CUDLMetadataRepository} from '../../src/metadata/cudl';
-
-jest.unmock('@lib.cam/xslt-nailgun');
-
-// Example translation requests:
-// /v1/translation/tei/EN/MS-LC-II-00077/15r/15r
-// /v1/translation/tei/EN/MS-LC-II-00077/viii%20recto/viii%20recto
-
-function getTestApp(
-  metadataRepository: CUDLMetadataRepository,
-  xsltExecutor: XSLTExecutor
-) {
+function getTestApp() {
   const app = express();
   app.use(
     '/',
     getRoutes({
-      metadataRepository,
-      xsltExecutor,
+      teiServiceURL: EXAMPLE_TEI_URL,
       zacynthiusServiceURL: EXAMPLE_ZACYNTHIUS_URL,
     })
   );
   return app;
 }
 
-let metadataRepository: CUDLMetadataRepository;
-let xsltExecutor: XSLTExecutor;
 let app: Application;
 
-beforeAll(() => {
-  xsltExecutor = XSLTExecutor.getInstance();
-  metadataRepository = getTestDataMetadataRepository();
-  app = getTestApp(metadataRepository, xsltExecutor);
-});
-
-afterAll(async () => {
-  await xsltExecutor.close();
+beforeEach(() => {
+  jest.clearAllMocks();
+  app = getTestApp();
 });
 
 describe('translation routes /tei/EN/:id/:from/:to', () => {
-  test('responds with 404 for missing ID', async () => {
-    const response = await request(app).get('/tei/EN/missing/1/2');
-    expect(response.status).toBe(StatusCodes.NOT_FOUND);
-    expect(response.body.error).toMatch('ID does not exist: missing');
-  });
-
-  test.each<['id' | 'from' | 'to', string, string, string]>([
-    ['id', 'foo../blah', 'bar', 'baz'],
-    ['from', 'foo', 'bar../blah', 'baz'],
-    ['to', 'foo', 'bar', 'baz../blah'],
-  ])(
-    'responds with 500 for invalid %s parameter',
-    async (param, id, from, to) => {
+  describe('tei', () => {
+    test('requests with the same start and end page are normalised by redirecting to the URL without end', async () => {
       const response = await request(app).get(
-        `/tei/EN/${encodeURIComponent(id)}/${encodeURIComponent(
-          from
-        )}/${encodeURIComponent(to)}`
+        '/tei/EN/MS-FOO-01234-00001/i1/i1'
       );
-      expect(response.status).toBe(StatusCodes.BAD_REQUEST);
-      expect(response.body.error).toMatch(
-        `Bad ${param}: ${{id, from, to}[param]}`
+      expect(response.status).toEqual(StatusCodes.MOVED_PERMANENTLY);
+      expect(response.headers.location).toEqual(
+        '/tei/EN/MS-FOO-01234-00001/i1'
       );
-    }
-  );
+    });
 
-  type HTMLLinkElement = Element & {href?: string};
+    test.each([...DEFAULT_RESOURCE_EXTENSIONS])(
+      'requests for .%s resources are proxied',
+      async ext => {
+        const type = mime.getType(ext);
+        assert(typeof type === 'string');
+        mockGetResponder.mockResolvedValueOnce({
+          status: 200,
+          type,
+          body: Buffer.from(''),
+          ok: true,
+          serverError: false,
+        });
 
-  test('responds with HTML content for valid request', async () => {
-    const urlBase = 'https://example.com';
-    const urlPath = '/tei/EN/MS-LC-II-00077/viii%20recto/viii%20recto';
-    const response = await request(app).get(
-      '/tei/EN/MS-LC-II-00077/viii%20recto/viii%20recto'
+        const response = await request(app).get(
+          `/tei/resources/foo/bar/baz.${ext}`
+        );
+        expect(response.ok).toBeTruthy();
+        expect(mocked(get)).toHaveBeenCalledTimes(1);
+        expect(mocked(get)).toHaveBeenLastCalledWith(
+          `${EXAMPLE_TEI_URL}foo/bar/baz.${ext}`
+        );
+      }
     );
-    expect(response.status).toBe(StatusCodes.OK);
-    expect(response.type).toBe('text/html');
-    const dom = new JSDOM(response.text, {url: `${urlBase}${urlPath}`});
-    const doc = dom.window.document;
 
-    expect(doc.querySelector('html > head > title')?.textContent).toBe(
-      'Folio viii recto'
-    );
-    expect(
-      (doc.querySelector('head link[rel=stylesheet]') as HTMLLinkElement | null)
-        ?.href
-    ).toBe(`${urlBase}/${EXAMPLE_STATIC_FILES.TEXTS_STYLESHEET.path}`);
-    expect(doc.querySelector('body .header')?.textContent).toBe('<viii recto>');
-    expect(
-      doc.querySelector('body .body p:nth-of-type(1)')?.textContent
-    ).toMatch(
-      /^There is probably no portion of the history of our earlier colleges/
-    );
-    expect(
-      doc.querySelector('body .body p:nth-of-type(2)')?.textContent
-    ).toMatch(/^The volume in question is a bulky folio bound in dark green/);
-    expect(
-      doc.querySelector('body .body p:nth-of-type(3)')?.textContent
-    ).toMatch(/^\[difficult hand; transcription still in progress\]/);
+    test.each([
+      [
+        '/tei/EN/MS-FOO-01234-00001/i1',
+        `${EXAMPLE_TEI_URL}html/data/tei/MS-FOO-01234-00001/MS-FOO-01234-00001-i1-translation.html`,
+        '../../resources',
+      ],
+      [
+        '/tei/EN/MS-FOO-01234-00001/i1/i2',
+        `${EXAMPLE_TEI_URL}html/data/tei/MS-FOO-01234-00001/MS-FOO-01234-00001-i1-i2-translation.html`,
+        '../../../resources',
+      ],
+    ])('translation HTML %s', async (_path, upstreamURL, baseResourceURL) => {
+      mockGetResponder.mockResolvedValueOnce({
+        status: 200,
+        type: 'text/html',
+        body: await promisify(fs.readFile)(
+          // translation HTML is similar enough to transcription HTML to not matter
+          path.resolve(TEST_DATA_PATH, 'transcriptions/tei.html')
+        ),
+        ok: true,
+        serverError: false,
+      });
+
+      const response = await request(app).get(_path);
+      expect(response.ok).toBeTruthy();
+
+      expect(mocked(get)).toHaveBeenCalledTimes(1);
+      expect(mocked(get)).toHaveBeenLastCalledWith(upstreamURL);
+
+      const doc = parseHTML({
+        html: response.text,
+        contentType: response.type,
+        url: `http://example.com/v1/translation${_path}`,
+      }).window.document;
+      const linkEl = doc.querySelector<HTMLLinkElement>(
+        'head link[rel=stylesheet]'
+      );
+      expect(linkEl!.getAttribute('href')).toBe(
+        `${baseResourceURL}/cudl-resources/stylesheets/texts.css`
+      );
+      expect(linkEl!.href).toBe(
+        'http://example.com/v1/translation/tei/resources/cudl-resources/stylesheets/texts.css'
+      );
+    });
   });
 });
 

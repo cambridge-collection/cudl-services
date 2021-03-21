@@ -27,8 +27,9 @@ export function tagsComponents(options: TagsOptions): Components {
 
 export interface TranscriptionOptions {
   metadataRepository: CUDLMetadataRepository;
-  zacynthiusServiceURL: URL;
+  teiServiceURL: URL;
   xsltExecutor: XSLTExecutor;
+  zacynthiusServiceURL: URL;
 }
 export function transcriptionComponents(
   options: TranscriptionOptions
@@ -37,6 +38,7 @@ export function transcriptionComponents(
     path: '/v1/transcription',
     handler: transcription.getRoutes({
       metadataRepository: options.metadataRepository,
+      teiServiceURL: options.teiServiceURL,
       xsltExecutor: options.xsltExecutor,
       zacynthiusServiceURL: options.zacynthiusServiceURL,
     }),

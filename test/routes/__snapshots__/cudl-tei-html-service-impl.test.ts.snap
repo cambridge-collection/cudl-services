@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`teiTranscriptionPathGenerator for type "transcription" throws with missing param error when given params: {"id":"i","end":"e"} 1`] = `"failed to generate TEI HTML service transcription path: id and start params must be present"`;
+
+exports[`teiTranscriptionPathGenerator for type "transcription" throws with missing param error when given params: {"id":"i"} 1`] = `"failed to generate TEI HTML service transcription path: id and start params must be present"`;
+
+exports[`teiTranscriptionPathGenerator for type "transcription" throws with missing param error when given params: {"start":"s","end":"e"} 1`] = `"failed to generate TEI HTML service transcription path: id and start params must be present"`;
+
+exports[`teiTranscriptionPathGenerator for type "transcription" throws with missing param error when given params: {"start":"s"} 1`] = `"failed to generate TEI HTML service transcription path: id and start params must be present"`;
+
+exports[`teiTranscriptionPathGenerator for type "translation" throws with missing param error when given params: {"id":"i","end":"e"} 1`] = `"failed to generate TEI HTML service translation path: id and start params must be present"`;
+
+exports[`teiTranscriptionPathGenerator for type "translation" throws with missing param error when given params: {"id":"i"} 1`] = `"failed to generate TEI HTML service translation path: id and start params must be present"`;
+
+exports[`teiTranscriptionPathGenerator for type "translation" throws with missing param error when given params: {"start":"s","end":"e"} 1`] = `"failed to generate TEI HTML service translation path: id and start params must be present"`;
+
+exports[`teiTranscriptionPathGenerator for type "translation" throws with missing param error when given params: {"start":"s"} 1`] = `"failed to generate TEI HTML service translation path: id and start params must be present"`;

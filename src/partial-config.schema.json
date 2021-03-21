@@ -10,6 +10,7 @@
     "postPort": {"type": "number"},
     "postPass": {"type": "string"},
     "postUser": {"type": "string"},
+    "teiServiceURL": {"type": "string"},
     "users": {
       "type": "object",
       "additionalProperties": {

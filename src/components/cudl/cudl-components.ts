@@ -31,6 +31,7 @@ export interface CudlOptions {
   cudlDataDataStore: DataStore;
   darwin: DarwinProxyComponentOptions;
   internalDomainName?: string;
+  teiServiceURL: URL;
   xtf: XTF;
   zacynthiusServiceURL: URL;
 }
@@ -38,7 +39,13 @@ export interface CudlOptions {
 export async function cudlComponents(
   options: CudlOptions
 ): Promise<Components> {
-  const {cudlDataDataStore, dbPool, xtf, zacynthiusServiceURL} = options;
+  const {
+    cudlDataDataStore,
+    dbPool,
+    teiServiceURL,
+    xtf,
+    zacynthiusServiceURL,
+  } = options;
   const internalDomainName = options.internalDomainName || CUDL_HOST;
   const metadataProviders = cudlProvidersForDataStore(
     options.cudlDataDataStore
@@ -53,12 +60,12 @@ export async function cudlComponents(
     tagsComponents({daoPool: tagsDAOPool}),
     transcriptionComponents({
       metadataRepository,
+      teiServiceURL,
       xsltExecutor,
       zacynthiusServiceURL,
     }),
     translationComponents({
-      xsltExecutor,
-      metadataRepository,
+      teiServiceURL,
       zacynthiusServiceURL: options.zacynthiusServiceURL,
     }),
     metadataComponents({cudlDataDataStore, internalDomainName}),

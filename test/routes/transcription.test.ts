@@ -11,11 +11,18 @@ import {
   getRoutes,
   rewriteHtmlResourceUrls,
 } from '../../src/routes/transcription';
-import {EXAMPLE_ZACYNTHIUS_URL, TEST_DATA_PATH} from '../constants';
+import {
+  EXAMPLE_TEI_URL,
+  EXAMPLE_ZACYNTHIUS_URL,
+  TEST_DATA_PATH,
+} from '../constants';
 import {mockGetResponder} from '../mocking/superagent-mocking';
 import {getTestDataMetadataRepository, normaliseSpace} from '../utils';
 import {XSLTExecutor} from '@lib.cam/xslt-nailgun';
 import assert from 'assert';
+import {DEFAULT_RESOURCE_EXTENSIONS} from '../../src/routes/transcription-impl';
+import mime from 'mime';
+import {StatusCodes} from 'http-status-codes';
 
 jest.unmock('@lib.cam/xslt-nailgun');
 
@@ -44,6 +51,7 @@ describe('transcription routes', () => {
     assert(executor);
     app = getTestApp({
       metadataRepository: getTestDataMetadataRepository(),
+      teiServiceURL: EXAMPLE_TEI_URL,
       xsltExecutor: executor,
       zacynthiusServiceURL: EXAMPLE_ZACYNTHIUS_URL,
     });
@@ -149,6 +157,89 @@ describe('transcription routes', () => {
       );
     });
 
+    describe('tei', () => {
+      test('requests with the same start and end page are normalised by redirecting to the URL without end', async () => {
+        const response = await request(app).get(
+          '/tei/diplomatic/internal/MS-FOO-01234-00001/i1/i1'
+        );
+        expect(response.status).toEqual(StatusCodes.MOVED_PERMANENTLY);
+        expect(response.headers.location).toEqual(
+          '/tei/diplomatic/internal/MS-FOO-01234-00001/i1'
+        );
+      });
+
+      test.each([...DEFAULT_RESOURCE_EXTENSIONS])(
+        'requests for .%s resources are proxied',
+        async ext => {
+          const type = mime.getType(ext);
+          assert(typeof type === 'string');
+          mockGetResponder.mockResolvedValueOnce({
+            status: 200,
+            type,
+            body: Buffer.from(''),
+            ok: true,
+            serverError: false,
+          });
+
+          const response = await request(app).get(
+            `/tei/resources/foo/bar/baz.${ext}`
+          );
+          expect(response.ok).toBeTruthy();
+          expect(mocked(get)).toHaveBeenCalledTimes(1);
+          expect(mocked(get)).toHaveBeenLastCalledWith(
+            `${EXAMPLE_TEI_URL}foo/bar/baz.${ext}`
+          );
+        }
+      );
+
+      test.each([
+        [
+          '/tei/diplomatic/internal/MS-FOO-01234-00001/i1',
+          `${EXAMPLE_TEI_URL}html/data/tei/MS-FOO-01234-00001/MS-FOO-01234-00001-i1.html`,
+          '../../../resources',
+        ],
+        [
+          '/tei/diplomatic/internal/MS-FOO-01234-00001/i1/i2',
+          `${EXAMPLE_TEI_URL}html/data/tei/MS-FOO-01234-00001/MS-FOO-01234-00001-i1-i2.html`,
+          '../../../../resources',
+        ],
+      ])(
+        'transcription HTML %s',
+        async (_path, upstreamURL, baseResourceURL) => {
+          mockGetResponder.mockResolvedValueOnce({
+            status: 200,
+            type: 'text/html',
+            body: await promisify(fs.readFile)(
+              path.resolve(TEST_DATA_PATH, 'transcriptions/tei.html')
+            ),
+            ok: true,
+            serverError: false,
+          });
+
+          const response = await request(app).get(_path);
+          expect(response.ok).toBeTruthy();
+
+          expect(mocked(get)).toHaveBeenCalledTimes(1);
+          expect(mocked(get)).toHaveBeenLastCalledWith(upstreamURL);
+
+          const doc = parseHTML({
+            html: response.text,
+            contentType: response.type,
+            url: `http://example.com/v1/transcription${_path}`,
+          }).window.document;
+          const linkEl = doc.querySelector<HTMLLinkElement>(
+            'head link[rel=stylesheet]'
+          );
+          expect(linkEl!.getAttribute('href')).toBe(
+            `${baseResourceURL}/cudl-resources/stylesheets/texts.css`
+          );
+          expect(linkEl!.href).toBe(
+            'http://example.com/v1/transcription/tei/resources/cudl-resources/stylesheets/texts.css'
+          );
+        }
+      );
+    });
+
     test.each([
       ['overtext/tooltipster/dist/css/tooltipster.bundle.min.css', 'text/css'],
       ['jquery-3.3.1.min.js', 'application/javascript'],
@@ -172,16 +263,6 @@ describe('transcription routes', () => {
 
   describe('XSLT transcriptions', () => {
     test.each<[string, Array<{node: string; content: string}>]>([
-      [
-        '/tei/diplomatic/internal/PR-08743-B-00013-00042/2/2',
-        [
-          {node: 'title', content: 'Folio 2'},
-          {
-            node: '.body p',
-            content: 'Se alza Madrid potente con la brava Artilleria',
-          },
-        ],
-      ],
       [
         '/bezae/diplomatic/Bezae-Greek.xml/MS-NN-00002-00041/3v/3v',
         [

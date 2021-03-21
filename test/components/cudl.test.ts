@@ -63,6 +63,7 @@ describe('tagsComponents', () => {
 describe('transcriptionComponents', () => {
   const options: TranscriptionOptions = {
     metadataRepository: MockCUDLMetadataRepository(),
+    teiServiceURL: new URL('http://mock'),
     xsltExecutor: MockXSLTExecutor(),
     zacynthiusServiceURL: new URL('http://mock'),
   };
@@ -84,8 +85,7 @@ describe('transcriptionComponents', () => {
 
 describe('translationComponents', () => {
   const options: TranslationOptions = {
-    metadataRepository: MockCUDLMetadataRepository(),
-    xsltExecutor: MockXSLTExecutor(),
+    teiServiceURL: new URL('http://mock'),
     zacynthiusServiceURL: new URL('http://mock'),
   };
 

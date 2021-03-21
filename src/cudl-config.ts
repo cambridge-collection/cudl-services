@@ -195,6 +195,7 @@ export interface CUDLConfigData<U = Users> extends XTFConfig, DatabaseConfig {
   dataLocation: string;
   users: U;
   darwinXTF: string;
+  teiServiceURL: string;
   zacynthiusServiceURL: string;
 }
 
@@ -294,16 +295,20 @@ export class CUDLConfig implements Config {
         });
 
         const components = await cudlComponents({
-          dbPool,
-          zacynthiusServiceURL: parseConfigURLValue(
-            config.zacynthiusServiceURL,
-            'zacynthiusServiceURL'
-          ),
-          xtf: new DefaultXTF(config),
           cudlDataDataStore: getCudlDataDataStore(config),
           darwin: {
             darwinXtfUrl: parseConfigURLValue(config.darwinXTF, 'darwinXTF'),
           },
+          dbPool,
+          teiServiceURL: parseConfigURLValue(
+            config.teiServiceURL,
+            'teiServiceURL'
+          ),
+          xtf: new DefaultXTF(config),
+          zacynthiusServiceURL: parseConfigURLValue(
+            config.zacynthiusServiceURL,
+            'zacynthiusServiceURL'
+          ),
         });
 
         return ComponentApp.from(
