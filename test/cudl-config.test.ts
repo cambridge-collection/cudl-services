@@ -204,7 +204,9 @@ describe('config', () => {
     });
 
     test('loads config from file identified by envar', async () => {
-      mocked(glob).mockImplementation(jest.requireActual('glob'));
+      mocked(glob).mockImplementation(
+        jest.requireActual('glob') as typeof glob
+      );
 
       await withFile(async configA => {
         await withFile(async configB => {
