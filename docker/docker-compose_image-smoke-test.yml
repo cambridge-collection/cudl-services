@@ -16,6 +16,7 @@ services:
       CUDL_SERVICES_DB_NAME: cudlservices
       CUDL_SERVICES_DB_USERNAME: cudlservices
       CUDL_SERVICES_DB_PASSWORD: password
+      CUDL_SERVICES_TEI_HTML_URL: http://xtf.example/
       CUDL_SERVICES_XTF_URL: http://xtf.example/
       CUDL_SERVICES_XTF_INDEX_PATH: /example
 
