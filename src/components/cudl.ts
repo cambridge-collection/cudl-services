@@ -60,7 +60,7 @@ export interface MetadataOptions {
 export function metadataComponents(options: MetadataOptions): Components {
   return new MiddlewareComponent({
     path: '/v1/metadata',
-    handler: metadata.getRoutesV2({
+    handler: metadata.getRoutes({
       metadataProviders: new Map(
         Object.entries(cudlProvidersForDataStore(options.cudlDataDataStore))
       ),

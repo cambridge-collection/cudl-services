@@ -111,13 +111,13 @@ describe('metadataComponents()', () => {
   };
 
   beforeEach(() => {
-    mocked(metadata.getRoutesV2).mockClear();
-    mocked(metadata.getRoutesV2).mockReturnValueOnce((req, res) => {
+    mocked(metadata.getRoutes).mockClear();
+    mocked(metadata.getRoutes).mockReturnValueOnce((req, res) => {
       res.end('mock');
     });
   });
 
-  test('registers routes/metadata#getRoutesV2 at /v1/metadata', async () => {
+  test('registers routes/metadata#getRoutes at /v1/metadata', async () => {
     const {app} = await registerComponents(
       express(),
       metadataComponents(options)
@@ -134,7 +134,7 @@ describe('metadataComponents()', () => {
 
     await registerComponents(express(), metadataComponents(options));
 
-    const providers = mocked(metadata.getRoutesV2).mock.calls[0][0]
+    const providers = mocked(metadata.getRoutes).mock.calls[0][0]
       .metadataProviders;
 
     await expect(
@@ -144,8 +144,8 @@ describe('metadataComponents()', () => {
 
   test('creates ExternalCorsRequestMatcher for provided domain name', async () => {
     await registerComponents(express(), metadataComponents(options));
-    expect(metadata.getRoutesV2).toHaveBeenCalled();
-    const getRoutesOptions = mocked(metadata.getRoutesV2).mock.calls[0][0];
+    expect(metadata.getRoutes).toHaveBeenCalled();
+    const getRoutesOptions = mocked(metadata.getRoutes).mock.calls[0][0];
 
     const corsReqFromInternal = ({
       headers: {origin: 'http://internal.example.com'},
@@ -163,7 +163,7 @@ describe('metadataComponents()', () => {
 
   test('provides an emitter for Item JSON', async () => {
     await registerComponents(express(), metadataComponents(options));
-    const getRoutesOptions = mocked(metadata.getRoutesV2).mock.calls[0][0];
+    const getRoutesOptions = mocked(metadata.getRoutes).mock.calls[0][0];
 
     expect(getRoutesOptions.metadataEmitters).toContain(
       ItemJsonMetadataResponseEmitter.instance
@@ -173,7 +173,7 @@ describe('metadataComponents()', () => {
   // predicates are not required, as the metadata providers can specify this themselves
   test('does not specify external access or embed predicates', async () => {
     await registerComponents(express(), metadataComponents(options));
-    const getRoutesOptions = mocked(metadata.getRoutesV2).mock.calls[0][0];
+    const getRoutesOptions = mocked(metadata.getRoutes).mock.calls[0][0];
 
     expect(getRoutesOptions.isExternalAccessPermitted).toBeUndefined();
     expect(getRoutesOptions.isExternalEmbedPermitted).toBeUndefined();

@@ -7,11 +7,6 @@ import {ValueError} from './errors';
 
 import {ParsedQs} from 'qs';
 
-const CUDL_HOST = 'cudl.lib.cam.ac.uk';
-const CUDL_HOST_REGEX = new RegExp(
-  '(?:^|\\.)' + escapeStringRegexp(CUDL_HOST) + '$'
-);
-
 export const CORS_HEADERS = Object.freeze({
   'Access-Control-Allow-Origin': '*',
 });
@@ -64,20 +59,6 @@ export function DomainNameMatcher(domainName: string): DomainNameMatcher {
       return desc;
     },
   };
-}
-
-// TODO: rm this once routes/metadata has been deduped
-export function isExternalCorsRequest(req: Request) {
-  const origin = req.header('origin');
-  if (!origin) {
-    return false;
-  }
-
-  const host = uri.parse(origin).host;
-
-  // If we have an origin header and it's not cudl, then it's an external cors
-  // request.
-  return host && !CUDL_HOST_REGEX.test(host);
 }
 
 export function isSimplePathSegment(value: string): boolean {
