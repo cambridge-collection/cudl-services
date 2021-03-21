@@ -5,6 +5,9 @@
   {{if exists "/cudl/services/darwin/xtf/url"}}
     darwinXTF: "{{getv "/cudl/services/darwin/xtf/url" | js}}",
   {{end}}
+  {{if exists "/cudl/services/zacynthius/html/url"}}
+    zacynthiusServiceURL: "{{getv "/cudl/services/zacynthius/html/url" | js}}",
+  {{end}}
   {{if exists "/cudl/services/xtf/url"}}
     xtfBase: "{{getv "/cudl/services/xtf/url" | js}}",
   {{end}}
