@@ -30,7 +30,7 @@ describe('S3DataStore', () => {
         secretAccessKey: 'fake',
       },
     });
-    bucketName = `tmpBucket${cryptoRandomString({length: 5})}`;
+    bucketName = `tmp-bucket-${cryptoRandomString({length: 5})}`;
     await client.send(
       new CreateBucketCommand({
         Bucket: bucketName,
