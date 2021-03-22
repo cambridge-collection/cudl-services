@@ -23,12 +23,16 @@ describe('S3DataStore', () => {
 
   beforeAll(async () => {
     client = new S3Client({
-      endpoint: awsEndpointUrl,
-      region: 'us-east-1',
       credentials: {
         accessKeyId: 'fake',
         secretAccessKey: 'fake',
       },
+      endpoint: awsEndpointUrl,
+      // localstack doesn't support domain name bucket addressing by default.
+      // Without this, we get DNS errors trying to look up
+      // <bucket-name>.localstack or <bucket-name>.localhost
+      forcePathStyle: true,
+      region: 'us-east-1',
     });
     bucketName = `tmp-bucket-${cryptoRandomString({length: 5})}`;
     await client.send(
