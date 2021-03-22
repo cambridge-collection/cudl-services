@@ -89,7 +89,7 @@ services:
 
   # Provide local Amazon S3 for integration tests
   localstack:
-    image: localstack/localstack
+    image: localstack/localstack:0.12.8
     environment:
       SERVICES: iam,s3
     ports:
