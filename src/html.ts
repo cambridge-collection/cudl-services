@@ -2,16 +2,74 @@ import jsdom from 'jsdom';
 import RelateUrl from 'relateurl';
 import {URL} from 'url';
 
+import util from 'util';
+
+import parse5 from 'parse5';
+import xmlserializer from 'xmlserializer';
+import express from 'express';
+import accepts from 'accepts';
+import assert from 'assert';
+
 export function parseHTML(options: {
   html: string | Buffer;
   contentType?: string;
   url?: URL | string;
-}) {
+}): jsdom.JSDOM {
   const {html, contentType, url} = options;
   return new jsdom.JSDOM(html, {
     contentType,
     url: url === undefined ? undefined : ensureURL(url).toString(),
   });
+}
+
+export function serialiseXhtml(html: string): string {
+  const htmlDom = parse5.parse(html, {scriptingEnabled: false});
+  return xmlserializer.serializeToString(htmlDom);
+}
+
+export enum HTMLType {
+  HTML = 'text/html',
+  XHTML = 'application/xhtml+xml',
+}
+export interface NegotiatedHtmlType {
+  html: string;
+  contentType: HTMLType;
+}
+export interface NegotiatedHtmlTypeBridge {
+  (html: string): NegotiatedHtmlType;
+}
+function isHTMLType(value: unknown): value is HTMLType {
+  return value === HTMLType.HTML || value === HTMLType.XHTML;
+}
+
+/**
+ * Get a function that converts from HTML to either XHTML or HTML based on a request's Accept
+ * header.
+ *
+ * The default is to maintain the input HTML as the output HTML, XHTML is only used if specifically
+ * accepted with higher preference than HTML.
+ *
+ * @param req The request to content-negotiate with.
+ * @return the conversion function
+ */
+export function negotiateHtmlResponseType(
+  req: express.Request
+): NegotiatedHtmlTypeBridge {
+  const accept = accepts(req);
+  const acceptedType = accept.type([HTMLType.HTML, HTMLType.XHTML]);
+  const negotiatedType = acceptedType === false ? HTMLType.HTML : acceptedType;
+  assert(
+    isHTMLType(negotiatedType),
+    `HTML type content negotiation resulted in unexpected accepted type: ${util.inspect(
+      acceptedType
+    )}`
+  );
+
+  if (negotiatedType === HTMLType.HTML) {
+    return html => ({html, contentType: HTMLType.HTML});
+  } else {
+    return html => ({html: serialiseXhtml(html), contentType: HTMLType.XHTML});
+  }
 }
 
 export type URLRewriter = (options: {
