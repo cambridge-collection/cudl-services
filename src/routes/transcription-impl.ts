@@ -1,4 +1,4 @@
-import {Request, RequestHandler, Response, Router} from 'express';
+import express, {Request, RequestHandler, Response, Router} from 'express';
 import expressAsyncHandler from 'express-async-handler';
 import {PathParams} from 'express-serve-static-core';
 import {getReasonPhrase, StatusCodes} from 'http-status-codes';
@@ -10,12 +10,14 @@ import {ValueError} from '../errors';
 import {
   ensureURL,
   isParent,
+  negotiateHtmlResponseType,
   parseHTML,
   rewriteResourceURLs,
   URLRewriter,
 } from '../html';
 import {applyDefaults, applyLazyDefaults, validate} from '../util';
 import {relativeResolve} from '../uri';
+import Omit = jest.Omit;
 
 const HTML_TYPE = mime.getType('html');
 const XHTML_TYPE = mime.getType('xhtml');
@@ -93,6 +95,7 @@ export function delegateToExternalHTML(options: {
         })
       ),
     ],
+    responseTransmitter: htmlContentNegotiationResponseTransmitter,
   });
 
   const resourceEndpoint = ExternalResourceDelegator.create({
@@ -117,6 +120,17 @@ interface ExternalResourceDelegatorOptions<T> {
   responseTransmitter: ResponseTransmitter<T>;
 }
 
+type ExternalResourceDelegatorCreateOptions<T> = Omit<
+  ExternalResourceDelegatorOptions<T>,
+  'responseGenerator' | 'responseTransmitter'
+> &
+  Partial<
+    Pick<
+      ExternalResourceDelegatorOptions<T>,
+      'responseGenerator' | 'responseTransmitter'
+    >
+  >;
+
 export interface ResponseData {
   url: URL;
   status: number;
@@ -128,9 +142,13 @@ export interface ResponseData {
 type URLGenerator = (req: Request) => URL | Promise<URL>;
 type ResponseGenerator<T> = (url: URL) => T | Promise<T>;
 type ResponseHandler<T> = (delegateData: T) => Promise<T | undefined>;
+interface ResponseTransmitterOptions<T> {
+  delegateData: Promise<T>;
+  clientRequest: Request;
+  clientResponse: Response;
+}
 interface ResponseTransmitter<T> {
-  (err: unknown, delegateData: undefined, clientResponse: Response): void;
-  (err: undefined, delegateData: T, clientResponse: Response): void;
+  (options: ResponseTransmitterOptions<T>): Promise<void>;
 }
 
 export class ExternalResourceDelegator<T> {
@@ -157,11 +175,8 @@ export class ExternalResourceDelegator<T> {
   }
 
   static create(
-    options: Omit<
-      ExternalResourceDelegatorOptions<
-        TransformedResponse<superagent.Response, ResponseData>
-      >,
-      'responseGenerator' | 'responseTransmitter'
+    options: ExternalResourceDelegatorCreateOptions<
+      TransformedResponse<superagent.Response, ResponseData>
     >
   ): ExternalResourceDelegator<
     TransformedResponse<superagent.Response, ResponseData>
@@ -172,10 +187,11 @@ export class ExternalResourceDelegator<T> {
       pathPattern: options.pathPattern,
       responseHandler: options.responseHandler || [],
       urlGenerator: options.urlGenerator,
-      responseGenerator: superagentResponseGenerator(
-        defaultSuperagentResponseDataGenerator
-      ),
-      responseTransmitter: defaultSuperagentResponseTransmitter,
+      responseGenerator:
+        options.responseGenerator ||
+        superagentResponseGenerator(defaultSuperagentResponseDataGenerator),
+      responseTransmitter:
+        options.responseTransmitter || defaultSuperagentResponseTransmitter,
     });
   }
 
@@ -189,9 +205,17 @@ export class ExternalResourceDelegator<T> {
           delegatedResponse = nextResponse;
         }
       }
-      this.responseTransmitter(undefined, delegatedResponse, res);
+      await this.responseTransmitter({
+        delegateData: Promise.resolve(delegatedResponse),
+        clientRequest: req,
+        clientResponse: res,
+      });
     } catch (e) {
-      this.responseTransmitter(e, undefined, res);
+      await this.responseTransmitter({
+        delegateData: Promise.reject(e),
+        clientRequest: req,
+        clientResponse: res,
+      });
     }
   }
 
@@ -249,19 +273,23 @@ function defaultSuperagentResponseDataGenerator(
 
 const defaultSuperagentResponseTransmitter: ResponseTransmitter<
   TransformedResponse<superagent.Response, ResponseData>
-> = (
-  err: unknown,
-  delegateData:
-    | TransformedResponse<superagent.Response, ResponseData>
-    | undefined,
-  clientResponse: Response
-) => {
-  if (delegateData === undefined) {
-    throw err;
-  }
-
-  const {status, type, body} = delegateData.currentRes;
+> = async ({delegateData, clientResponse}) => {
+  const {status, type, body} = (await delegateData).currentRes;
   clientResponse.status(status).type(type).send(body);
+};
+
+const htmlContentNegotiationResponseTransmitter: ResponseTransmitter<
+  TransformedResponse<superagent.Response, ResponseData>
+> = async ({delegateData, clientRequest, clientResponse}) => {
+  const {status, type, body} = (await delegateData).currentRes;
+  if (!HTML_MEDIA_TYPES.has(type)) {
+    clientResponse.status(status).type(type).send(body);
+  } else {
+    const {html, contentType} = negotiateHtmlResponseType(clientRequest)(
+      body.toString()
+    );
+    clientResponse.status(status).type(contentType).send(html);
+  }
 };
 
 type DefaultResponseHandler = ResponseHandler<
@@ -399,3 +427,15 @@ export function createDefaultResourceURLRewriter(options?: {
     return relativeResolve(baseResourceURL, rootRelativeResourceURL);
   };
 }
+
+export const overrideAcceptHeaderFromQueryParameterMiddleware: express.Handler = (
+  req,
+  res,
+  next
+) => {
+  const overriddenAccept = req.query['Accept'];
+  if (typeof overriddenAccept === 'string') {
+    req.headers.accept = overriddenAccept;
+  }
+  next();
+};

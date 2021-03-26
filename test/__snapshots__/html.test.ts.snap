@@ -1,0 +1,27 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+exports[`serialiseXHTML returns expected XHTML for example 0 1`] = `
+"<html xmlns=\\"http://www.w3.org/1999/xhtml\\"><head>
+        <script src=\\"//other.example.com/js/foo.js\\"/>
+        <script src=\\"/things/js/bar.js\\"/>
+        <script src=\\"js/baz.js\\"/>
+        <link href=\\"http://other.example.com/css/foo.css\\" rel=\\"stylesheet\\" type=\\"text/css\\"/>
+        <link href=\\"/things/css/bar.css\\" rel=\\"stylesheet\\" type=\\"text/css\\"/>
+        <link href=\\"css/baz.css\\" rel=\\"stylesheet\\" type=\\"text/css\\"/>
+    </head>
+<body>
+</body></html>"
+`;
+
+exports[`serialiseXHTML returns expected XHTML for example 1 1`] = `
+"<html xmlns=\\"http://www.w3.org/1999/xhtml\\"><head>
+  <meta http-equiv=\\"Content-Type\\" content=\\"text/html; charset=UTF-8\\"/>
+  <title>Example Transcription</title>
+  <link href=\\"/cudl-resources/stylesheets/texts.css\\" rel=\\"stylesheet\\" type=\\"text/css\\"/>
+</head>
+<body>
+  <h1>Example</h1>
+  <p>This is not a real transcription.</p>
+
+
+</body></html>"
+`;

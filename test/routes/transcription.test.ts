@@ -6,7 +6,7 @@ import {get} from 'superagent';
 import request from 'supertest';
 import {mocked} from 'ts-jest/utils';
 import {promisify} from 'util';
-import {parseHTML} from '../../src/html';
+import {HTMLType, parseHTML} from '../../src/html';
 import {
   getRoutes,
   rewriteHtmlResourceUrls,
@@ -288,6 +288,21 @@ describe('transcription routes', () => {
         );
       }
     });
+
+    test.each([
+      [HTMLType.HTML, `${HTMLType.HTML},HTMLType.XHTML`],
+      [HTMLType.XHTML, `${HTMLType.XHTML},HTMLType.HTML`],
+    ])(
+      'responds with %s from HTML endpoint when client accepts %j',
+      async (expectedType, acceptedTypes) => {
+        const response = await request(app)
+          .get('/bezae/diplomatic/Bezae-Greek.xml/MS-NN-00002-00041/3v/3v')
+          .accept(acceptedTypes);
+
+        expect(response.ok).toBeTruthy();
+        expect(response.type).toBe(expectedType);
+      }
+    );
   });
 
   describe('utilities', () => {

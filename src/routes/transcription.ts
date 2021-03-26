@@ -12,7 +12,10 @@ import {
   requireRequestParam,
   requireRequestParams,
 } from '../util';
-import {delegateToExternalHTML} from './transcription-impl';
+import {
+  delegateToExternalHTML,
+  overrideAcceptHeaderFromQueryParameterMiddleware,
+} from './transcription-impl';
 import {
   CUDLFormat,
   CUDLMetadataRepository,
@@ -23,6 +26,7 @@ import {
   teiHtmlServiceHandler,
 } from './cudl-tei-html-service-impl';
 import expressAsyncHandler = require('express-async-handler');
+import {negotiateHtmlResponseType} from '../html';
 
 interface TranscriptionEndpoint<T> {
   path: string;
@@ -65,6 +69,8 @@ export function getRoutes(options: GetRoutesOptions): express.Handler {
       router: () => Router(),
     }
   );
+
+  router.use(overrideAcceptHeaderFromQueryParameterMiddleware);
 
   router.use(
     teiHtmlServiceHandler(TeiHtmlServiceContent.TRANSCRIPTION, teiServiceURL)
@@ -179,7 +185,7 @@ function attachTranscriptionHandler<T>(
 
 class InvalidTranscriptionOptionsError extends Error {}
 
-function createTranscriptionHandler<T>(
+export function createTranscriptionHandler<T>(
   transcriptionService: TranscriptionService<T>,
   extractOptions: (req: Request) => T
 ) {
@@ -196,7 +202,10 @@ function createTranscriptionHandler<T>(
 
     try {
       const html = await transcriptionService.getTranscription(options);
-      res.type('html').end(html);
+      const {html: negotiatedHtml, contentType} = negotiateHtmlResponseType(
+        req
+      )(html);
+      res.type(contentType).send(negotiatedHtml);
       return;
     } catch (e) {
       let status, msg;

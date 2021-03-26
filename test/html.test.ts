@@ -2,12 +2,21 @@ import {mocked} from 'ts-jest/utils';
 import {URL} from 'url';
 import {
   ensureURL,
+  HTMLType,
   isParent,
   isSameOrigin,
+  NegotiatedHtmlType,
+  negotiateHtmlResponseType,
   parseHTML,
   rewriteResourceURLs,
+  serialiseXhtml,
   URLRewriter,
 } from '../src/html';
+
+import fs from 'fs';
+import path from 'path';
+import express from 'express';
+import request from 'supertest';
 
 const html = `\
 <!doctype html>
@@ -161,4 +170,49 @@ describe('rewriteResourceURLs()', () => {
       )!.src
     ).toBe('http://example.com/things/js/baz.js');
   });
+});
+
+describe('serialiseXHTML', () => {
+  test.each([
+    html,
+    fs.readFileSync(path.join(__dirname, 'data/transcriptions/tei.html'), {
+      encoding: 'utf-8',
+    }),
+  ])('returns expected XHTML for example %#', htmlString => {
+    expect(serialiseXhtml(htmlString)).toMatchSnapshot();
+  });
+});
+
+describe('negotiateHtmlResponseType', () => {
+  const html =
+    '<html><head><title>hi</title><link rel="manifest" href="/manifest.json"></head></html>';
+
+  test.each([
+    [HTMLType.HTML, 'text/html,application/xhtml+xml'],
+    [HTMLType.XHTML, 'application/xhtml+xml,text/html'],
+    [HTMLType.HTML, 'text/plain'],
+    [HTMLType.HTML, ''],
+  ])(
+    'returns conversion to %s when accepting %j',
+    async (expectedType, accept) => {
+      const app = express();
+      let conversionResult: NegotiatedHtmlType | undefined;
+      app.get('/', (req, res) => {
+        const htmlTypeBridge = negotiateHtmlResponseType(req);
+        conversionResult = htmlTypeBridge(html);
+        res.end();
+      });
+      await request(app).get('/').accept(accept);
+
+      expect(conversionResult?.contentType).toEqual(expectedType);
+      if (expectedType === HTMLType.HTML) {
+        expect(conversionResult?.html).toEqual(html);
+      } else {
+        // XHTML conversion
+        expect(conversionResult?.html).toMatchInlineSnapshot(
+          '"<html xmlns=\\"http://www.w3.org/1999/xhtml\\"><head><title>hi</title><link rel=\\"manifest\\" href=\\"/manifest.json\\"/></head><body/></html>"'
+        );
+      }
+    }
+  );
 });

@@ -6,6 +6,7 @@ services:
     environment:
       CUDL_SERVICES_DATA_LOCATION: /var/lib/cudl/cudl-data
       CUDL_SERVICES_XTF_URL: http://xtf:8080/
+      CUDL_SERVICES_TEI_HTML_URL: https://cudl-transcriptions-staging.s3-eu-west-1.amazonaws.com/
       CUDL_SERVICES_XTF_INDEX_PATH: /var/lib/xtf/index/default
       CUDL_SERVICES_DB_HOST: db
       CUDL_SERVICES_DB_NAME: cudlservices

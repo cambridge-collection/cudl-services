@@ -1,20 +1,24 @@
 import {StatusCodes} from 'http-status-codes';
-import {Response} from 'superagent';
-import superagent from 'superagent';
+import superagent, {Response} from 'superagent';
 import * as util from 'util';
 import {ValueError} from '../../src/errors';
-import {URLRewriter} from '../../src/html';
+import {HTMLType, URLRewriter} from '../../src/html';
 import {
   contentTypes,
   createDefaultResourceURLRewriter,
   createRestrictedTypeResponseHandler,
   createRewriteHTMLResourceURLsResponseHandler,
   defaultBaseResourceURL,
+  delegateToExternalHTML,
+  overrideAcceptHeaderFromQueryParameterMiddleware,
   ResponseData,
   TransformedResponse,
 } from '../../src/routes/transcription-impl';
 import {URL} from 'url';
 import {validate} from '../../src/util';
+import express from 'express';
+import request from 'supertest';
+import {mockGetResponder} from '../mocking/superagent-mocking';
 
 describe('response handlers', () => {
   describe('HTML resource URL rewriting', () => {
@@ -155,5 +159,77 @@ describe('response handlers', () => {
     expect(defaultBaseResourceURL('/foo/bar/baz')).toEqual('../../resources/');
     expect(() => defaultBaseResourceURL('asfd')).toThrow(ValueError);
     expect(() => defaultBaseResourceURL(/sdf/)).toThrow(ValueError);
+  });
+});
+
+describe('overrideAcceptHeaderFromQueryParameterMiddleware', () => {
+  const app = express();
+  app.get('/', overrideAcceptHeaderFromQueryParameterMiddleware, (req, res) => {
+    res.send(req.headers.accept);
+  });
+
+  test('accept header is used when not overridden', async () => {
+    const res = await request(app).get('/').accept('text/plain');
+    expect(res.text).toEqual('text/plain');
+  });
+
+  test('accept header is ignored when overridden', async () => {
+    const res = await request(app)
+      .get('/')
+      .accept('x-weird/foo')
+      .query('Accept=text/plain,application/octet-stream');
+    expect(res.text).toEqual('text/plain,application/octet-stream');
+  });
+
+  test('accept override query param is case sensitive', async () => {
+    const res = await request(app)
+      .get('/')
+      .accept('x-weird/foo')
+      .query('accept=text/plain,application/octet-stream');
+    expect(res.text).toEqual('x-weird/foo');
+  });
+});
+
+describe('delegateToExternalHTML', () => {
+  describe('HTML/XHTML content negotiation', () => {
+    test.each([
+      [HTMLType.HTML, `${HTMLType.HTML},HTMLType.XHTML`],
+      [HTMLType.XHTML, `${HTMLType.XHTML},HTMLType.HTML`],
+    ])(
+      'responds with %s from HTML endpoint when client accepts %j',
+      async (expectedType, acceptedTypes) => {
+        const app = express();
+        app.get(
+          '/',
+          delegateToExternalHTML({
+            externalPathGenerator: () => '/',
+            externalBaseURL: 'http://example.com/',
+            pathPattern: '/',
+          })
+        );
+
+        const html =
+          '<html><head><title></title><meta property="foo" content=""></head><body></body></html>';
+        mockGetResponder.mockResolvedValueOnce({
+          status: 200,
+          type: 'text/html',
+          text: html,
+          body: Buffer.from(html, 'utf8'),
+          ok: true,
+          serverError: false,
+        });
+
+        const res = await request(app).get('/').accept(acceptedTypes);
+        expect(res.type).toEqual(expectedType);
+        if (expectedType === HTMLType.HTML) {
+          expect(res.text).toEqual(html);
+        } else {
+          // XHTML
+          expect(res.text).toMatchInlineSnapshot(
+            '"<html xmlns=\\"http://www.w3.org/1999/xhtml\\"><head><title/><meta property=\\"foo\\" content=\\"\\"/></head><body/></html>"'
+          );
+        }
+      }
+    );
   });
 });
