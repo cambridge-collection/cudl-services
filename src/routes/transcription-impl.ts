@@ -10,12 +10,14 @@ import {ValueError} from '../errors';
 import {
   ensureURL,
   isParent,
+  negotiateHtmlResponseType,
   parseHTML,
   rewriteResourceURLs,
   URLRewriter,
 } from '../html';
 import {applyDefaults, applyLazyDefaults, validate} from '../util';
 import {relativeResolve} from '../uri';
+import Omit = jest.Omit;
 
 const HTML_TYPE = mime.getType('html');
 const XHTML_TYPE = mime.getType('xhtml');
@@ -93,6 +95,7 @@ export function delegateToExternalHTML(options: {
         })
       ),
     ],
+    responseTransmitter: htmlContentNegotiationResponseTransmitter,
   });
 
   const resourceEndpoint = ExternalResourceDelegator.create({
@@ -116,6 +119,17 @@ interface ExternalResourceDelegatorOptions<T> {
   responseGenerator: ResponseGenerator<T>;
   responseTransmitter: ResponseTransmitter<T>;
 }
+
+type ExternalResourceDelegatorCreateOptions<T> = Omit<
+  ExternalResourceDelegatorOptions<T>,
+  'responseGenerator' | 'responseTransmitter'
+> &
+  Partial<
+    Pick<
+      ExternalResourceDelegatorOptions<T>,
+      'responseGenerator' | 'responseTransmitter'
+    >
+  >;
 
 export interface ResponseData {
   url: URL;
@@ -161,11 +175,8 @@ export class ExternalResourceDelegator<T> {
   }
 
   static create(
-    options: Omit<
-      ExternalResourceDelegatorOptions<
-        TransformedResponse<superagent.Response, ResponseData>
-      >,
-      'responseGenerator' | 'responseTransmitter'
+    options: ExternalResourceDelegatorCreateOptions<
+      TransformedResponse<superagent.Response, ResponseData>
     >
   ): ExternalResourceDelegator<
     TransformedResponse<superagent.Response, ResponseData>
@@ -176,10 +187,11 @@ export class ExternalResourceDelegator<T> {
       pathPattern: options.pathPattern,
       responseHandler: options.responseHandler || [],
       urlGenerator: options.urlGenerator,
-      responseGenerator: superagentResponseGenerator(
-        defaultSuperagentResponseDataGenerator
-      ),
-      responseTransmitter: defaultSuperagentResponseTransmitter,
+      responseGenerator:
+        options.responseGenerator ||
+        superagentResponseGenerator(defaultSuperagentResponseDataGenerator),
+      responseTransmitter:
+        options.responseTransmitter || defaultSuperagentResponseTransmitter,
     });
   }
 
@@ -264,6 +276,20 @@ const defaultSuperagentResponseTransmitter: ResponseTransmitter<
 > = async ({delegateData, clientResponse}) => {
   const {status, type, body} = (await delegateData).currentRes;
   clientResponse.status(status).type(type).send(body);
+};
+
+const htmlContentNegotiationResponseTransmitter: ResponseTransmitter<
+  TransformedResponse<superagent.Response, ResponseData>
+> = async ({delegateData, clientRequest, clientResponse}) => {
+  const {status, type, body} = (await delegateData).currentRes;
+  if (!HTML_MEDIA_TYPES.has(type)) {
+    clientResponse.status(status).type(type).send(body);
+  } else {
+    const {html, contentType} = negotiateHtmlResponseType(clientRequest)(
+      body.toString()
+    );
+    clientResponse.status(status).type(contentType).send(html);
+  }
 };
 
 type DefaultResponseHandler = ResponseHandler<
