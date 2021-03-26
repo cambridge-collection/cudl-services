@@ -128,9 +128,13 @@ export interface ResponseData {
 type URLGenerator = (req: Request) => URL | Promise<URL>;
 type ResponseGenerator<T> = (url: URL) => T | Promise<T>;
 type ResponseHandler<T> = (delegateData: T) => Promise<T | undefined>;
+interface ResponseTransmitterOptions<T> {
+  delegateData: Promise<T>;
+  clientRequest: Request;
+  clientResponse: Response;
+}
 interface ResponseTransmitter<T> {
-  (err: unknown, delegateData: undefined, clientResponse: Response): void;
-  (err: undefined, delegateData: T, clientResponse: Response): void;
+  (options: ResponseTransmitterOptions<T>): Promise<void>;
 }
 
 export class ExternalResourceDelegator<T> {
@@ -189,9 +193,17 @@ export class ExternalResourceDelegator<T> {
           delegatedResponse = nextResponse;
         }
       }
-      this.responseTransmitter(undefined, delegatedResponse, res);
+      await this.responseTransmitter({
+        delegateData: Promise.resolve(delegatedResponse),
+        clientRequest: req,
+        clientResponse: res,
+      });
     } catch (e) {
-      this.responseTransmitter(e, undefined, res);
+      await this.responseTransmitter({
+        delegateData: Promise.reject(e),
+        clientRequest: req,
+        clientResponse: res,
+      });
     }
   }
 
@@ -249,18 +261,8 @@ function defaultSuperagentResponseDataGenerator(
 
 const defaultSuperagentResponseTransmitter: ResponseTransmitter<
   TransformedResponse<superagent.Response, ResponseData>
-> = (
-  err: unknown,
-  delegateData:
-    | TransformedResponse<superagent.Response, ResponseData>
-    | undefined,
-  clientResponse: Response
-) => {
-  if (delegateData === undefined) {
-    throw err;
-  }
-
-  const {status, type, body} = delegateData.currentRes;
+> = async ({delegateData, clientResponse}) => {
+  const {status, type, body} = (await delegateData).currentRes;
   clientResponse.status(status).type(type).send(body);
 };
 
