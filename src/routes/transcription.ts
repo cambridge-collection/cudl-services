@@ -12,7 +12,10 @@ import {
   requireRequestParam,
   requireRequestParams,
 } from '../util';
-import {delegateToExternalHTML} from './transcription-impl';
+import {
+  delegateToExternalHTML,
+  overrideAcceptHeaderFromQueryParameterMiddleware,
+} from './transcription-impl';
 import {
   CUDLFormat,
   CUDLMetadataRepository,
@@ -66,6 +69,8 @@ export function getRoutes(options: GetRoutesOptions): express.Handler {
       router: () => Router(),
     }
   );
+
+  router.use(overrideAcceptHeaderFromQueryParameterMiddleware);
 
   router.use(
     teiHtmlServiceHandler(TeiHtmlServiceContent.TRANSCRIPTION, teiServiceURL)

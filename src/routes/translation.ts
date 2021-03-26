@@ -1,6 +1,9 @@
 import express, {Request} from 'express';
 import {applyLazyDefaults} from '../util';
-import {delegateToExternalHTML} from './transcription-impl';
+import {
+  delegateToExternalHTML,
+  overrideAcceptHeaderFromQueryParameterMiddleware,
+} from './transcription-impl';
 import {URL} from 'url';
 import {ValueError} from '../errors';
 import {
@@ -21,6 +24,8 @@ export function getRoutes(options: GetRoutesOptions): express.Handler {
       router: () => express.Router(),
     }
   );
+
+  router.use(overrideAcceptHeaderFromQueryParameterMiddleware);
 
   router.use(
     teiHtmlServiceHandler(TeiHtmlServiceContent.TRANSLATION, teiServiceURL)
