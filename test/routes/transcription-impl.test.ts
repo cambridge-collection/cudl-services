@@ -10,11 +10,14 @@ import {
   createRestrictedTypeResponseHandler,
   createRewriteHTMLResourceURLsResponseHandler,
   defaultBaseResourceURL,
+  overrideAcceptHeaderFromQueryParameterMiddleware,
   ResponseData,
   TransformedResponse,
 } from '../../src/routes/transcription-impl';
 import {URL} from 'url';
 import {validate} from '../../src/util';
+import express from 'express';
+import request from 'supertest';
 
 describe('response handlers', () => {
   describe('HTML resource URL rewriting', () => {
@@ -155,5 +158,33 @@ describe('response handlers', () => {
     expect(defaultBaseResourceURL('/foo/bar/baz')).toEqual('../../resources/');
     expect(() => defaultBaseResourceURL('asfd')).toThrow(ValueError);
     expect(() => defaultBaseResourceURL(/sdf/)).toThrow(ValueError);
+  });
+});
+
+describe('overrideAcceptHeaderFromQueryParameterMiddleware', () => {
+  const app = express();
+  app.get('/', overrideAcceptHeaderFromQueryParameterMiddleware, (req, res) => {
+    res.send(req.headers.accept);
+  });
+
+  test('accept header is used when not overridden', async () => {
+    const res = await request(app).get('/').accept('text/plain');
+    expect(res.text).toEqual('text/plain');
+  });
+
+  test('accept header is ignored when overridden', async () => {
+    const res = await request(app)
+      .get('/')
+      .accept('x-weird/foo')
+      .query('Accept=text/plain,application/octet-stream');
+    expect(res.text).toEqual('text/plain,application/octet-stream');
+  });
+
+  test('accept override query param is case sensitive', async () => {
+    const res = await request(app)
+      .get('/')
+      .accept('x-weird/foo')
+      .query('accept=text/plain,application/octet-stream');
+    expect(res.text).toEqual('x-weird/foo');
   });
 });

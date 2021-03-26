@@ -1,4 +1,4 @@
-import {Request, RequestHandler, Response, Router} from 'express';
+import express, {Request, RequestHandler, Response, Router} from 'express';
 import expressAsyncHandler from 'express-async-handler';
 import {PathParams} from 'express-serve-static-core';
 import {getReasonPhrase, StatusCodes} from 'http-status-codes';
@@ -399,3 +399,15 @@ export function createDefaultResourceURLRewriter(options?: {
     return relativeResolve(baseResourceURL, rootRelativeResourceURL);
   };
 }
+
+export const overrideAcceptHeaderFromQueryParameterMiddleware: express.Handler = (
+  req,
+  res,
+  next
+) => {
+  const overriddenAccept = req.query['Accept'];
+  if (typeof overriddenAccept === 'string') {
+    req.headers.accept = overriddenAccept;
+  }
+  next();
+};
