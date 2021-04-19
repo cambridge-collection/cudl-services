@@ -56,7 +56,7 @@ services:
       - "4571:4571"
 
   xtf:
-    image: camdl/cudl-xtf:fd13
+    image: camdl/cudl-xtf:latest
     environment:
       XTF_INDEX_0_NAME: default
       XTF_SERVICES_URL: http://cudl-services:3000/
@@ -67,7 +67,8 @@ services:
       - sample-data
     ports:
       - 55001:8080
-    command: "textIndexer -index default -incremental; bin/catalina.sh run"
+#    command: "textIndexer -index default -incremental; bin/catalina.sh run"
+    command: "bin/catalina.sh run"
 
 
   sample-data:
