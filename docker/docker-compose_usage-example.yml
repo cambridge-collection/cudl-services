@@ -39,7 +39,7 @@ services:
     depends_on:
       - db
     volumes:
-      - ./integration_test/data/postgres-migration:/flyway/sql
+      - ../integration_test/data/postgres-migration:/flyway/sql
     environment:
       FLYWAY_URL: jdbc:postgresql://db/cudlservices
       FLYWAY_USER: cudlservices
