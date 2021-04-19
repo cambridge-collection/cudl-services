@@ -14,7 +14,7 @@ services:
       CUDL_SERVICES_DB_PASSWORD: ${TEST_DB_PASSWORD:-password}
       DEBUG: "*"
     volumes:
-      - sample-cudl-data:/var/lib/cudl/cudl-data
+      - ${CUDL_DATA_DIR:-sample-cudl-data}:/var/lib/cudl/cudl-data
     ports:
       - 55000:3000
     depends_on:
@@ -61,7 +61,7 @@ services:
       XTF_INDEX_0_NAME: default
       XTF_SERVICES_URL: http://cudl-services:3000/
     volumes:
-      - sample-cudl-data:/var/lib/xtf/data/default
+      - ${CUDL_DATA_DIR:-sample-cudl-data}:/var/lib/xtf/data/default
       - xtf-index:/var/lib/xtf/index
     depends_on:
       - sample-data
