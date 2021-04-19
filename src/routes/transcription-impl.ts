@@ -3,6 +3,7 @@ import expressAsyncHandler from 'express-async-handler';
 import {PathParams} from 'express-serve-static-core';
 import {getReasonPhrase, StatusCodes} from 'http-status-codes';
 import mime from 'mime';
+import mimeDb from 'mime-db';
 import RelateURL from 'relateurl';
 import superagent from 'superagent';
 import {URL} from 'url';
@@ -24,15 +25,21 @@ const XHTML_TYPE = mime.getType('xhtml');
 validate(typeof HTML_TYPE === 'string');
 validate(typeof XHTML_TYPE === 'string');
 const HTML_MEDIA_TYPES = new Set([HTML_TYPE, XHTML_TYPE]);
+
+const DEFAULT_IMAGE_EXTENSIONS: ReadonlySet<string> = new Set(
+  Object.entries(mimeDb)
+    .filter(([type]) => type.startsWith('image/'))
+    .flatMap(([, entry]) => entry.extensions || [])
+);
+
 export const DEFAULT_RESOURCE_EXTENSIONS: ReadonlySet<string> = new Set([
   'css',
   'eot',
   'otf',
-  'svg',
   'woff',
   'woff2',
   'js',
-  'ico',
+  ...DEFAULT_IMAGE_EXTENSIONS,
 ]);
 
 export function defaultBaseResourceURL(pathPattern: PathParams) {
