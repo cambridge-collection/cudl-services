@@ -20,7 +20,6 @@ import {mockGetResponder} from '../mocking/superagent-mocking';
 import {getTestDataMetadataRepository, normaliseSpace} from '../utils';
 import {XSLTExecutor} from '@lib.cam/xslt-nailgun';
 import assert from 'assert';
-import {DEFAULT_RESOURCE_EXTENSIONS} from '../../src/routes/transcription-impl';
 import mime from 'mime';
 import {StatusCodes} from 'http-status-codes';
 
@@ -168,7 +167,7 @@ describe('transcription routes', () => {
         );
       });
 
-      test.each([...DEFAULT_RESOURCE_EXTENSIONS])(
+      test.each(['css', 'eot', 'otf', 'woff', 'woff2', 'js', 'png', 'jpg'])(
         'requests for .%s resources are proxied',
         async ext => {
           const type = mime.getType(ext);

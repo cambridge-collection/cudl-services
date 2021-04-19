@@ -29,6 +29,10 @@ const html = `\
         <link href="/things/css/bar.css" rel="stylesheet" type="text/css">
         <link href="css/baz.css" rel="stylesheet" type="text/css">
     </head>
+    <body>
+        <script src="js/boz.js"></script>
+        <link href="css/boz.css" rel="stylesheet" type="text/css">
+    </body>
 </html>
 `;
 
@@ -89,7 +93,7 @@ describe('parseHTML()', () => {
 });
 
 describe('rewriteResourceURLs()', () => {
-  test('rewriter is called for each src/href attr in <head>', () => {
+  test('rewriter is called for each src/href attr in <head> and <body>', () => {
     const url = 'http://example.com/things/foo';
 
     const rewriter: URLRewriter = jest.fn();
@@ -132,6 +136,18 @@ describe('rewriteResourceURLs()', () => {
           rawURL: 'css/baz.css',
           resolvedURL: 'http://example.com/things/css/baz.css',
           relativeURL: 'css/baz.css',
+        },
+        {
+          baseURL: url,
+          rawURL: 'js/boz.js',
+          resolvedURL: 'http://example.com/things/js/boz.js',
+          relativeURL: 'js/boz.js',
+        },
+        {
+          baseURL: url,
+          rawURL: 'css/boz.css',
+          resolvedURL: 'http://example.com/things/css/boz.css',
+          relativeURL: 'css/boz.css',
         },
       ].map(options => [options])
     );

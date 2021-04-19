@@ -56,19 +56,24 @@ describe('response handlers', () => {
       ).toBe(expected);
     });
 
-    test.each<[URLRewriter | undefined, string]>([
-      [createDefaultResourceURLRewriter(), 'resources/foo/css/foo.css'],
+    test.each<[URLRewriter | undefined, string, string]>([
+      [
+        createDefaultResourceURLRewriter(),
+        'resources/example-things/css/foo.css',
+        'resources/example-things/js/bar.js',
+      ],
       [
         createDefaultResourceURLRewriter({
           baseResourceURL: '/api/resources/',
         }),
-        '/api/resources/foo/css/foo.css',
+        '/api/resources/example-things/css/foo.css',
+        '/api/resources/example-things/js/bar.js',
       ],
     ])(
       'createRewriteHTMLResourceURLsResponseHandler()',
-      async (urlRewriter, rewrittenURL) => {
+      async (urlRewriter, rewrittenCssURL, rewrittenJsURL) => {
         const htmlTemplate =
-          '<!DOCTYPE html><html><head><link href="%s" rel="stylesheet"></head><body></body></html>';
+          '<!DOCTYPE html><html><head><link href="%s" rel="stylesheet"></head><body><script src="%s"></script></body></html>';
 
         const handler = createRewriteHTMLResourceURLsResponseHandler(
           urlRewriter
@@ -76,9 +81,9 @@ describe('response handlers', () => {
         const input: TransformedResponse<superagent.Response, ResponseData> = {
           originalRes: (undefined as unknown) as superagent.Response,
           currentRes: {
-            url: new URL('http://example.com/foo/bar'),
+            url: new URL('http://example.com/example-things/bar'),
             type: 'text/html',
-            body: util.format(htmlTemplate, 'css/foo.css'),
+            body: util.format(htmlTemplate, 'css/foo.css', 'js/bar.js'),
             isError: false,
             status: 200,
           },
@@ -89,7 +94,7 @@ describe('response handlers', () => {
 
         expect(resultRes).toEqual({
           ...input.currentRes,
-          body: util.format(htmlTemplate, rewrittenURL),
+          body: util.format(htmlTemplate, rewrittenCssURL, rewrittenJsURL),
         });
       }
     );

@@ -15,7 +15,6 @@ import path from 'path';
 import {mocked} from 'ts-jest/utils';
 import {parseHTML} from '../../src/html';
 import {StatusCodes} from 'http-status-codes';
-import {DEFAULT_RESOURCE_EXTENSIONS} from '../../src/routes/transcription-impl';
 import mime from 'mime';
 import assert from 'assert';
 
@@ -50,7 +49,7 @@ describe('translation routes /tei/EN/:id/:from/:to', () => {
       );
     });
 
-    test.each([...DEFAULT_RESOURCE_EXTENSIONS])(
+    test.each(['css', 'eot', 'otf', 'woff', 'woff2', 'js', 'png', 'jpg'])(
       'requests for .%s resources are proxied',
       async ext => {
         const type = mime.getType(ext);

@@ -111,7 +111,7 @@ export function isParent(parent: string | URL, child: string | URL) {
 export function rewriteResourceURLs(doc: Document, rewriter: URLRewriter) {
   const baseURL = doc.URL;
   for (const el of Array.from(
-    doc.querySelectorAll('head [href], head [src]')
+    doc.querySelectorAll('head [href], body [href], head [src], body [src]')
   )) {
     for (const attrName of ['src', 'href']) {
       const rawURL = el.getAttribute(attrName);

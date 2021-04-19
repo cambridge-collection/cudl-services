@@ -1,4 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
+
 exports[`serialiseXHTML returns expected XHTML for example 0 1`] = `
 "<html xmlns=\\"http://www.w3.org/1999/xhtml\\"><head>
         <script src=\\"//other.example.com/js/foo.js\\"/>
@@ -8,7 +9,11 @@ exports[`serialiseXHTML returns expected XHTML for example 0 1`] = `
         <link href=\\"/things/css/bar.css\\" rel=\\"stylesheet\\" type=\\"text/css\\"/>
         <link href=\\"css/baz.css\\" rel=\\"stylesheet\\" type=\\"text/css\\"/>
     </head>
-<body>
+    <body>
+        <script src=\\"js/boz.js\\"/>
+        <link href=\\"css/boz.css\\" rel=\\"stylesheet\\" type=\\"text/css\\"/>
+    
+
 </body></html>"
 `;
 
