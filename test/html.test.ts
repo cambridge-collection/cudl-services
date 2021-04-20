@@ -29,7 +29,9 @@ const html = `\
         <link href="/things/css/bar.css" rel="stylesheet" type="text/css">
         <link href="css/baz.css" rel="stylesheet" type="text/css">
     </head>
-    <body>
+    <body id="foo">
+        <a href="#foo">Link to #foo in this doc</a>
+        <a href="other/doc#foo">Link to #foo in other doc</a>
         <script src="js/boz.js"></script>
         <link href="css/boz.css" rel="stylesheet" type="text/css">
     </body>
@@ -107,47 +109,69 @@ describe('rewriteResourceURLs()', () => {
           baseURL: url,
           rawURL: '//other.example.com/js/foo.js',
           resolvedURL: 'http://other.example.com/js/foo.js',
+          context: {elementName: 'script', attribute: 'src'},
         },
         {
           baseURL: url,
           rawURL: '/things/js/bar.js',
           resolvedURL: 'http://example.com/things/js/bar.js',
           relativeURL: 'js/bar.js',
+          context: {elementName: 'script', attribute: 'src'},
         },
         {
           baseURL: url,
           rawURL: 'js/baz.js',
           resolvedURL: 'http://example.com/things/js/baz.js',
           relativeURL: 'js/baz.js',
+          context: {elementName: 'script', attribute: 'src'},
         },
         {
           baseURL: url,
           rawURL: 'http://other.example.com/css/foo.css',
           resolvedURL: 'http://other.example.com/css/foo.css',
+          context: {elementName: 'link', attribute: 'href'},
         },
         {
           baseURL: url,
           rawURL: '/things/css/bar.css',
           resolvedURL: 'http://example.com/things/css/bar.css',
           relativeURL: 'css/bar.css',
+          context: {elementName: 'link', attribute: 'href'},
         },
         {
           baseURL: url,
           rawURL: 'css/baz.css',
           resolvedURL: 'http://example.com/things/css/baz.css',
           relativeURL: 'css/baz.css',
+          context: {elementName: 'link', attribute: 'href'},
+        },
+        {
+          baseURL: url,
+          rawURL: '#foo',
+          resolvedURL: 'http://example.com/things/foo#foo',
+          relativeURL: '#foo',
+          context: {elementName: 'a', attribute: 'href'},
+        },
+        {
+          baseURL: url,
+          rawURL: 'other/doc#foo',
+          resolvedURL: 'http://example.com/things/other/doc#foo',
+          relativeURL: 'other/doc#foo',
+          context: {elementName: 'a', attribute: 'href'},
         },
         {
           baseURL: url,
           rawURL: 'js/boz.js',
           resolvedURL: 'http://example.com/things/js/boz.js',
           relativeURL: 'js/boz.js',
+          context: {elementName: 'script', attribute: 'src'},
         },
         {
           baseURL: url,
           rawURL: 'css/boz.css',
           resolvedURL: 'http://example.com/things/css/boz.css',
           relativeURL: 'css/boz.css',
+          context: {elementName: 'link', attribute: 'href'},
         },
       ].map(options => [options])
     );
