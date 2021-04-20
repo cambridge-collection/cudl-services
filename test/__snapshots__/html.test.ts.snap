@@ -9,7 +9,9 @@ exports[`serialiseXHTML returns expected XHTML for example 0 1`] = `
         <link href=\\"/things/css/bar.css\\" rel=\\"stylesheet\\" type=\\"text/css\\"/>
         <link href=\\"css/baz.css\\" rel=\\"stylesheet\\" type=\\"text/css\\"/>
     </head>
-    <body>
+    <body id=\\"foo\\">
+        <a href=\\"#foo\\">Link to #foo in this doc</a>
+        <a href=\\"other/doc#foo\\">Link to #foo in other doc</a>
         <script src=\\"js/boz.js\\"/>
         <link href=\\"css/boz.css\\" rel=\\"stylesheet\\" type=\\"text/css\\"/>
     
