@@ -52,14 +52,16 @@ describe('response handlers', () => {
           rawURL: '../css/foo.css',
           resolvedURL: 'http://example.com/things/css/foo.css',
           relativeURL: '../css/foo.css',
+          context: {elementName: 'link', attribute: 'href'},
         })
       ).toBe(expected);
     });
 
-    test.each<[URLRewriter | undefined, string, string]>([
+    test.each<[URLRewriter | undefined, ...string[]]>([
       [
         createDefaultResourceURLRewriter(),
         'resources/example-things/css/foo.css',
+        'resources/example-things/images/img.png',
         'resources/example-things/js/bar.js',
       ],
       [
@@ -67,13 +69,17 @@ describe('response handlers', () => {
           baseResourceURL: '/api/resources/',
         }),
         '/api/resources/example-things/css/foo.css',
+        '/api/resources/example-things/images/img.png',
         '/api/resources/example-things/js/bar.js',
       ],
     ])(
       'createRewriteHTMLResourceURLsResponseHandler()',
-      async (urlRewriter, rewrittenCssURL, rewrittenJsURL) => {
+      async (urlRewriter, ...rewrittenUrls) => {
         const htmlTemplate =
-          '<!DOCTYPE html><html><head><link href="%s" rel="stylesheet"></head><body><script src="%s"></script></body></html>';
+          '<!DOCTYPE html><html>' +
+          '<head><link href="%s" rel="stylesheet"></head>' +
+          '<body><a href="foo#bar">foo</a><img src="%s"><script src="%s"></script></body>' +
+          '</html>';
 
         const handler = createRewriteHTMLResourceURLsResponseHandler(
           urlRewriter
@@ -83,7 +89,12 @@ describe('response handlers', () => {
           currentRes: {
             url: new URL('http://example.com/example-things/bar'),
             type: 'text/html',
-            body: util.format(htmlTemplate, 'css/foo.css', 'js/bar.js'),
+            body: util.format(
+              htmlTemplate,
+              'css/foo.css',
+              'images/img.png',
+              'js/bar.js'
+            ),
             isError: false,
             status: 200,
           },
@@ -94,7 +105,7 @@ describe('response handlers', () => {
 
         expect(resultRes).toEqual({
           ...input.currentRes,
-          body: util.format(htmlTemplate, rewrittenCssURL, rewrittenJsURL),
+          body: util.format(htmlTemplate, ...rewrittenUrls),
         });
       }
     );

@@ -77,6 +77,7 @@ export type URLRewriter = (options: {
   resolvedURL: string;
   baseURL: string;
   relativeURL?: string;
+  context: {elementName: string; attribute: string};
 }) => string | undefined;
 
 export function ensureURL(url: string | URL): URL {
@@ -133,6 +134,10 @@ export function rewriteResourceURLs(doc: Document, rewriter: URLRewriter) {
           resolvedURL,
           baseURL,
           ...relativeURL,
+          context: {
+            elementName: el.nodeName.toLowerCase(),
+            attribute: attrName,
+          },
         });
         if (newValue !== undefined && newValue !== rawURL) {
           el.setAttribute(attrName, newValue);

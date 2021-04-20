@@ -401,6 +401,19 @@ export function createRestrictedTypeResponseHandler(options: {
   });
 }
 
+const URL_REWRITE_ELEMENT_WHITELIST = new Set([
+  'audio',
+  'embed',
+  'iframe',
+  'img',
+  'input',
+  'link',
+  'script',
+  'source',
+  'track',
+  'video',
+]);
+
 export function createDefaultResourceURLRewriter(options?: {
   upstreamRootURL?: URL;
   baseResourceURL?: string;
@@ -411,7 +424,10 @@ export function createDefaultResourceURLRewriter(options?: {
       baseResourceURL: 'resources/',
     }
   );
-  return ({baseURL, resolvedURL}) => {
+  return ({baseURL, resolvedURL, context: {elementName}}) => {
+    if (!URL_REWRITE_ELEMENT_WHITELIST.has(elementName)) {
+      return;
+    }
     if (
       options?.upstreamRootURL &&
       !isParent(options.upstreamRootURL, baseURL)
