@@ -116,13 +116,15 @@ describe('similarity route implementation', () => {
             ID: 'a',
             score: 42,
             structureNodeId: '3',
-            metadata: {...meta['a'], reduced: true},
+            ...meta['a'],
+            reduced: true,
           },
           {
             ID: 'b',
             score: 42,
             structureNodeId: '4',
-            metadata: {...meta['b'], reduced: true},
+            ...meta['b'],
+            reduced: true,
           },
         ],
       });
