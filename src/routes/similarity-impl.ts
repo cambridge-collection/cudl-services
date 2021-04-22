@@ -43,10 +43,10 @@ export async function embedMetadata(
 
       const meta =
         level === 'full'
-          ? metadata
+          ? {metadata}
           : _reduceMetadata(metadata, hit.structureNodeId);
 
-      return {...hit, metadata: meta};
+      return {...hit, ...meta};
     })
   );
 
