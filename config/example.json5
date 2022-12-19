@@ -2,13 +2,15 @@
   dataLocation: "/mnt/cudl-data",
   darwinXTF: "https://dcp-public.lib.cam.ac.uk/",
 
-  xtfBase: "https://cudl-dev.lib.cam.ac.uk/xtf/",
+  xtfBase: "https://cudl.lib.cam.ac.uk/xtf/",
   xtfIndexPath: "/usr/local/indices/index-cudl",
 
   postHost: "localhost",
   postDatabase: "viewerdev",
   postUser: "cudlservices",
   postPass: "secret",
+
+  teiServiceURL: "https://dev-cudl-transcriptions.s3.eu-west-1.amazonaws.com/",
 
   users: {
     // The key in the users object is the API key for the user

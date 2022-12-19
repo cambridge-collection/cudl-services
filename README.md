@@ -23,9 +23,21 @@ When making changes to the API, please update the documentation for a gold star 
 There is also a [document on Confluence](https://cambridge-collections.atlassian.net/wiki/spaces/ULDevelopers/pages/78577721/Cudl-Services)
 which may contain some more useful details.
 
-## Running with Docker
+## Running the application locally
 
-See [CUDL Services with Docker](docs/docker.md).
+For a quick start you can use the configuration in `config/example.json5` and run the following:
+
+    npm install
+    make docker-image
+
+This will build the image that is used for running locally.  Note the id of this image. Then you can
+run this build with (**but substitute your id for `camdl/cudl-services:xxxx`**):
+
+    docker container run -v $PWD/config/example.json5:/etc/cudl-services/conf.d/3_my-config.json  -p 3000:3000 --name cudl-services-container   camdl/cudl-services:xxxx
+
+This will start services on localhost port 3000. E.g. [http://localhost:3000/v1/transcription/tei/diplomatic/internal/MS-ADD-03958/i111](http://localhost:3000/v1/transcription/tei/diplomatic/internal/MS-ADD-03958/i111)
+
+For full details on running with odcker see [CUDL Services with Docker](docs/docker.md).
 
 ## Configuration and Deployment
 
@@ -44,14 +56,6 @@ for more details on the configuration including:
 The external hosts responsible for returning transcription data for the Newton Project, Darwin Manuscripts Project
 and Quranic Palimpsests are configured within the [`transcription.js`](routes/transcription.js)
 route file.
-
-## Running the App
-
-You can run through the tests configured by running the command:
-`docker-compose up` which uses a mock version of the AWS services.
-
-Note: This appears to be the main way of running and debugging the application by
-using tests and writing tests to cover any problem cases.
 
 ## Logging
 
