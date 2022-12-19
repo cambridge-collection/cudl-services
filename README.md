@@ -1,6 +1,6 @@
 # CUDL Services
 
-CUDL Services is an [Express](https://expressjs.com/)-powered JavaScript middleware application that exposes an API
+CUDL Services is an [Express](https://expressjs.com/)-powered JavaScript / Typescript middleware application that exposes an API
 for accessing various CUDL-related resources.
 
 CUDL Services routes requests made for data by the CUDL Viewer to a PostgreSQL database, metadata document stores
@@ -20,61 +20,49 @@ and stored in [`docs/diagrams/`](docs/diagrams/)
 (compressed XML) with PNG versions to insert here in [`docs/images/`](docs/images/).
 When making changes to the API, please update the documentation for a gold star :star:
 
+There is also a [document on Confluence](https://cambridge-collections.atlassian.net/wiki/spaces/ULDevelopers/pages/78577721/Cudl-Services)
+which may contain some more useful details.
+
 ## Running with Docker
 
 See [CUDL Services with Docker](docs/docker.md).
 
-## Configuration
+## Configuration and Deployment
 
-The main configuration file is [`default.js`](config/default.js),
- which configures:
+The configuration and deployment is handled by AWS CDK.  You can see the code here:
+[https://github.com/cambridge-collection/cudl-cdk](https://github.com/cambridge-collection/cudl-cdk).
+
+The README contains more details on updating the configuration and deploying services.
+See [https://github.com/cambridge-collection/cudl-cdk/blob/main/src/main.ts](https://github.com/cambridge-collection/cudl-cdk/blob/main/src/main.ts)
+for more details on the configuration including:
 
 * Paths to mounted volumes that store metadata
 * PostgreSQL configuration
 * Image server host
 * Darwin XTF host
 
-However, note that in deployment these values are instead set via a corresponding set of
-Puppet files (*.base.js) in [CUDL-Puppet](https://bitbucket.org/CUDL/cudl-puppet/src/HEAD/modules/cudl-services/files/?at=master).
-So to change them for the dev, staging or production servers you need to commit changes to the CUDL-Puppet repo, which
-are pulled by the Puppet agents on these machines at a set interval.
-
 The external hosts responsible for returning transcription data for the Newton Project, Darwin Manuscripts Project
 and Quranic Palimpsests are configured within the [`transcription.js`](routes/transcription.js)
 route file.
 
-(NB: the instance of CUDL Services the Viewer uses is configured in CUDL-Viewer `cudl-global.properties` file.)
-
 ## Running the App
 
-In deployment, the Services app is run using [Forever](https://github.com/foreverjs/forever)
-via a [init.d script](https://bitbucket.org/CUDL/cudl-puppet/src/HEAD/modules/cudl-services/files/cudl-node-services?at=master&fileviewer=file-view-default)
-that runs as a service called 'cudl-node-services'. Forever ensures that the app restarts even if it crashes.
+You can run through the tests configured by running the command:
+`docker-compose up` which uses a mock version of the AWS services.
 
-To check on the status of the app:
-
-`sudo service cudl-node-services status`
-
-To start the app:
-
-`sudo service cudl-node-services start`
-
-To stop the app:
-
-`sudo service cudl-node-services stop`
-
-To restart the app:
-
-`sudo service cudl-node-services restart`
-
-For instructions on running a local development version of Services see the Wiki:
-[Setting up Local CUDL-Services Middleware](https://wiki.cam.ac.uk/cudl-docs/Setting_up_a_Local_Development_Environment_for_CUDL#Setting_up_Local_CUDL-Services_Middleware_.28Optional.29).
+Note: This appears to be the main way of running and debugging the application by
+using tests and writing tests to cover any problem cases.
 
 ## Logging
 
-Morgan logging format is configured in [`app.js`](app.js#app.js-65).
+You can find the CDK logs for the deployment in CloudWatch.  There are separate logs
+for dev, staging and live deployments.
 
-The log file in deployment is found at `/usr/local/cudl-node-services/cudl-services.log`.
+Looks for Log Groups with the names e.g. `CudlDev-CudlServicesCudlServicesTaskMainLogGroup...`
+in the London (eu-west-2) region.
+
+NOTE: Not everything is logged, and it will be helpful in the future to include more logging at
+the application level for debugging.
 
 ## Routes and Responses
 
@@ -158,7 +146,7 @@ Definition: [`routes/transcription.js`](routes/transcription.js)
 Returns: Transcription XML file of specified type (e.g. normalized, diplomatic) from internally hosted storage or an
 external provider, transformed suitably for browser display.
 
-Example Usage: When loading the content for the two 'Transcription' tabs in the CUDL Viewer.
+Example Usage: When loading the content for the 'Transcription' tab in the CUDL Viewer.
 
 ### Translation
 Route: `/v1/translation/`
@@ -173,10 +161,38 @@ Example Usage: When loading the content for the 'Translation' tab in the CUDL Vi
 
 CUDL Services sends requests to a variety of resources in its current deployments.
 
-There are 3 VMs (dev, staging, live) that each run independently the full suite of CUDL Services, CUDL Viewer and XTF
-instances, each with a separate mounted EBS volume and separate RDS PostgreSQL database.
+There are 3 deployments (dev, staging, live) that run in two EC2 instances deployed using the
+container service ECS on AWS.  These are automatically restarted if they fail, and are accessed through
+and elastic load balancer using the route 53 cudl.link domain.  They access transcriptions stored on S3.
 
 In addition, there is 1 VM running for the Darwin Correspondence Project XTF instance, 2 bare metal image servers and 3
 servers external to CUDL provided by the originating projects.
 
 ![Resources](docs/images/services-resources.png)
+(NOTE: Transcriptions now come from s3 rather than from EBS Volumes.)
+
+The [document on Confluence](https://cambridge-collections.atlassian.net/wiki/spaces/ULDevelopers/pages/78577721/Cudl-Services)
+contains more details on resources.
+
+# Deploying Services
+
+In order to deploy a new version of cudl-services you need to do the following:
+
+- Run `npm install` to install the packages required.
+
+
+- Run `make docker-image` to run through the tests and create a new docker image for services.
+
+
+- Commit and Push changes to Git. NOTE: By default only the main branch will cause the CI to publish the docker image that is created.
+You can edit the CI configuration by editing the file at `.github/workflows/workflow.yml` to remove the references to `if: github.ref == 'refs/heads/main'`
+or alternatively you can manually create and push an image.
+
+
+- Check Github CI ran successfully at: [https://github.com/cambridge-collection/cudl-services/actions](https://github.com/cambridge-collection/cudl-services/actions)
+
+
+- Check that your new image exists on dockerhub at: [https://hub.docker.com/repository/docker/camdl/cudl-services](https://hub.docker.com/repository/docker/camdl/cudl-services)
+
+
+- Update [cudl-cdk](https://github.com/cambridge-collection/cudl-cdk) `src/main.ts` to use the new image.
