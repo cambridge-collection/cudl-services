@@ -5,13 +5,15 @@ export interface TranscriptionAmendment {
   footerHtml: string;
 }
 
-export function appendAdditionalContent(doc:Document, amendment:TranscriptionAmendment) {
-
-  const style = doc.createElement(`style`);
+export function appendAdditionalContent(
+  doc: Document,
+  amendment: TranscriptionAmendment
+) {
+  const style = doc.createElement('style');
   style.textContent = amendment.css;
   doc.head.appendChild(style);
 
-  const script = doc.createElement(`script`);
+  const script = doc.createElement('script');
   script.textContent = amendment.js;
   doc.body.appendChild(script);
 

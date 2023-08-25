@@ -20,7 +20,7 @@ import {appendAdditionalContent} from '../modules/transcription/transcription-am
 import {applyDefaults, applyLazyDefaults, validate} from '../util';
 import {relativeResolve} from '../uri';
 import Omit = jest.Omit;
-import {transcriptionCoordsAmendment} from "../modules/transcription/coords/transcription-coords-amendment";
+import {transcriptionCoordsAmendment} from '../modules/transcription/coords/transcription-coords-amendment';
 
 const HTML_TYPE = mime.getType('html');
 const XHTML_TYPE = mime.getType('xhtml');
@@ -358,8 +358,12 @@ export function createRewriteHTMLResourceURLsResponseHandler(
     });
     rewriteResourceURLs(dom.window.document, _urlRewriter);
 
-    // append custom style / js to transcription from module.
-    appendAdditionalContent(dom.window.document, transcriptionCoordsAmendment)
+    if (dom.window.document.body.innerHTML.includes('data-points')) {
+      appendAdditionalContent(
+        dom.window.document,
+        transcriptionCoordsAmendment
+      );
+    }
 
     return {
       originalRes,

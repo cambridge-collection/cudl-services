@@ -1,13 +1,9 @@
-import {TranscriptionAmendment} from "../transcription-amendment";
-import {css, js} from "./transcription-coords";
+import {TranscriptionAmendment} from '../transcription-amendment';
+import {css, js} from './transcription-coords';
 
-export let transcriptionCoordsAmendment: TranscriptionAmendment = {
-
+export const transcriptionCoordsAmendment: TranscriptionAmendment = {
   css: css,
   js: js,
-  headerHtml: "",
-  footerHtml: ""
+  headerHtml: '',
+  footerHtml: '',
 };
-
-
-

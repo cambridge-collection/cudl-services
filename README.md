@@ -37,7 +37,21 @@ run this build with (**but substitute your id for `camdl/cudl-services:xxxx`**):
 
 This will start services on localhost port 3000. E.g. [http://localhost:3000/v1/transcription/tei/diplomatic/internal/MS-ADD-03958/i111](http://localhost:3000/v1/transcription/tei/diplomatic/internal/MS-ADD-03958/i111)
 
-For full details on running with odcker see [CUDL Services with Docker](docs/docker.md).
+For full details on running with docker see [CUDL Services with Docker](docs/docker.md).
+
+## Running Tests
+
+You can run the tests locally by using the command:
+
+     docker-compose run --rm test
+
+You can also run lint with the command:
+
+    npm run lint
+
+and if you want to automatically fix any linting errors:
+
+    npm run fix
 
 ## Configuration and Deployment
 
