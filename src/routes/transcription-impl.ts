@@ -16,9 +16,11 @@ import {
   rewriteResourceURLs,
   URLRewriter,
 } from '../html';
+import {appendAdditionalContent} from '../modules/transcription/transcription-amendment';
 import {applyDefaults, applyLazyDefaults, validate} from '../util';
 import {relativeResolve} from '../uri';
 import Omit = jest.Omit;
+import {transcriptionCoordsAmendment} from '../modules/transcription/coords/transcription-coords-amendment';
 
 const HTML_TYPE = mime.getType('html');
 const XHTML_TYPE = mime.getType('xhtml');
@@ -355,6 +357,13 @@ export function createRewriteHTMLResourceURLsResponseHandler(
       url: currentRes.url,
     });
     rewriteResourceURLs(dom.window.document, _urlRewriter);
+
+    if (dom.window.document.body.innerHTML.includes('data-points')) {
+      appendAdditionalContent(
+        dom.window.document,
+        transcriptionCoordsAmendment
+      );
+    }
 
     return {
       originalRes,
