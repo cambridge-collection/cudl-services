@@ -103,7 +103,9 @@ describe('S3DataStore', () => {
       });
       const response = store.read('missing/key');
       await expect(response).rejects.toThrow(
-        new MetadataError('Failed to load data from S3: NoSuchKey: NoSuchKey')
+        new MetadataError(
+          `Failed to load data from S3: NoSuchKey: NoSuchKey for bucket: ${bucketName} and key: missing/key`
+        )
       );
       await expect(response).rejects.toThrowErrorTaggedWith(
         ErrorCategories.NotFound

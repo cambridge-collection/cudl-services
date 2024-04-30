@@ -37,7 +37,9 @@ export class S3DataStore implements DataStore {
       );
     } catch (e) {
       throw new MetadataError({
-        message: `Failed to load data from S3: ${e}`,
+        message: `Failed to load data from S3: ${e} for bucket: ${
+          this.options.bucket
+        } and key: ${this.options.join(this.options.keyPrefix, location)}`,
         nested: e,
         tags: e?.name === 'NoSuchKey' ? [ErrorCategories.NotFound] : [],
       });
