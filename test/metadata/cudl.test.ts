@@ -66,7 +66,7 @@ describe('LocationResolvers', () => {
   describe('DataLocationResolver', () => {
     test('resolves id to data file location', async () => {
       await expect(DataLocationResolver('example')('MS-FOO-BAR')).resolves.toBe(
-        'data/example/MS-FOO-BAR/MS-FOO-BAR.xml'
+        'items/data/example/MS-FOO-BAR/MS-FOO-BAR.xml'
       );
     });
 
