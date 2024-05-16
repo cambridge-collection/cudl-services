@@ -59,7 +59,7 @@ export function DataLocationResolver(formatDir: string): LocationResolver {
     if (!isSimplePathSegment(id)) {
       throw new Error(`invalid id: ${id}`);
     }
-    return path.join('data', formatDir, id, `${id}.xml`);
+    return path.join('items/data', formatDir, id, `${id}.xml`);
   };
 }
 
