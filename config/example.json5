@@ -10,7 +10,7 @@
   postUser: "cudlservices",
   postPass: "secret",
 
-  teiServiceURL: "https://dev-cudl-transcriptions.s3.eu-west-1.amazonaws.com/",
+  teiServiceURL: "https://dev-transcriptions.cudl.link/",
 
   users: {
     // The key in the users object is the API key for the user
