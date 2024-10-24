@@ -48,7 +48,7 @@ jobs:
           age: '0 seconds'
           skip-recent: 4
       - name: Upload image artefact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         if: github.ref == 'refs/heads/main'
         with:
           name: docker-image
