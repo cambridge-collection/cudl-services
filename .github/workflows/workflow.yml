@@ -11,7 +11,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Unit & integration tests
         run: docker compose run --rm test
   create-docker-image:
@@ -20,7 +20,7 @@ jobs:
       IMAGE_TAG_COMMIT_SHA: ${{ steps.build-docker-image.outputs.IMAGE_TAG_COMMIT_SHA }}
       IMAGE_TAG_COMMIT_TAG: ${{ steps.build-docker-image.outputs.IMAGE_TAG_COMMIT_TAG }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Build & tag image
         id: build-docker-image
         run: make docker-image github-actions-set-docker-image-tag-outputs
@@ -59,7 +59,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     steps:
       - name: Download image artefact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: docker-image
           path: build
