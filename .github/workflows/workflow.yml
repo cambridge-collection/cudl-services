@@ -13,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Unit & integration tests
-        run: docker-compose run --rm test
+        run: docker compose run --rm test
   create-docker-image:
     runs-on: ubuntu-latest
     outputs:
@@ -29,9 +29,9 @@ jobs:
           SMOKE_TEST_IMAGE: "${{ steps.build-docker-image.outputs.IMAGE_TAG_COMMIT_SHA }}"
           COMPOSE_FILE: "docker-compose.yml:docker/docker-compose_image-smoke-test.yml"
         run: |
-          docker-compose up -d smoke-test-cudl-services
-          docker-compose run wait-smoke-test-cudl-services
-          docker-compose run smoke-test
+          docker compose up -d smoke-test-cudl-services
+          docker compose run wait-smoke-test-cudl-services
+          docker compose run smoke-test
       - name: Save image artefact
         if: github.ref == 'refs/heads/main'
         run: |
