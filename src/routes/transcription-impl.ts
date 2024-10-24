@@ -38,6 +38,7 @@ export const DEFAULT_RESOURCE_EXTENSIONS: ReadonlySet<string> = new Set([
   'css',
   'eot',
   'otf',
+  'ttf',
   'woff',
   'woff2',
   'js',
