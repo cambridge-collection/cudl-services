@@ -1,5 +1,5 @@
-FROM node:14.15.0-alpine3.12 as node-base
-FROM node-base as npm-base
+FROM node:14.15.0-alpine3.12 AS node-base
+FROM node-base AS npm-base
 
 # NPM seems to experience network issues when running in a docker build. Its
 # requests occasionally hang for long periods of time.
@@ -12,7 +12,7 @@ RUN npm config set fetch-retry-mintimeout 1000 && \
   npm config set fetch-retries 2
 
 
-FROM npm-base as dev
+FROM npm-base AS dev
 
 # Install a JVM - @lib.cam/xslt-nailgun requires on to run Saxon
 RUN apk add --no-cache openjdk11-jre
@@ -35,7 +35,7 @@ CMD ["npm", "start"]
 # - install NPM dependencies
 # - build the project's package
 # - build the project's docker image (the main Dockerfile in this dir)
-FROM npm-base as build
+FROM npm-base AS build
 
 ENV CI true
 WORKDIR /code
@@ -44,17 +44,17 @@ RUN apk add --no-cache jq curl git make docker-cli bash
 
 # This image builds the project's release .tgz package for use in the
 # final main image.
-FROM build as built
+FROM build AS built
 
 COPY . ./
 # Create the release .tgz package
-RUN make pack-release
+RUN make pack
 # Put the release package at a fixed (version-independant) location
 RUN mv build/cudl-services-*.tgz build/cudl-services.tgz
 
 
 # This image contains confd for use in the final main image.
-FROM curlimages/curl:7.73.0 as confd
+FROM curlimages/curl:7.73.0 AS confd
 
 ENV CONFD_URL 'https://github.com/kelseyhightower/confd/releases/download/v0.16.0/confd-0.16.0-linux-amd64'
 ENV CONFD_URL_SHA512 '68c93fd6db55c7de94d49f596f2e3ce8b2a5de32940b455d40cb05ce832140ebcc79a266c1820da7c172969c72a6d7367b465f21bb16b53fa966892ee2b682f1'
@@ -68,7 +68,7 @@ RUN chown root:root /tmp/confd
 
 # This image contains the installed .tgz package and its dependencies for use in
 # the final main image.
-FROM npm-base as node-modules
+FROM npm-base AS node-modules
 
 ARG CUDL_SERVICES_VERSION
 COPY --from=built /code/build/cudl-services.tgz /tmp/cudl-services.tgz
@@ -77,7 +77,7 @@ RUN npm install -g /tmp/cudl-services.tgz
 
 
 # This is the final image which contains the cudl-services app.
-FROM node-base as main
+FROM node-base AS main
 
 # Install a JVM - @lib.cam/xslt-nailgun requires it to run Saxon. curl is used in the healthcheck
 # script.
