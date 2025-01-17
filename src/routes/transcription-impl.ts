@@ -207,12 +207,15 @@ export class ExternalResourceDelegator<T> {
 
   private async handleRequest(req: Request, res: Response): Promise<void> {
     const url = await this.urlGenerator(req);
+    console.log('originalURL: ' + req.originalUrl);
+    console.log(url);
     try {
       let delegatedResponse = await this.responseGenerator(url);
       for (const handler of this.responseHandler) {
         const nextResponse = await handler(delegatedResponse);
         if (nextResponse !== undefined) {
           delegatedResponse = nextResponse;
+          console.log('response: ' + nextResponse);
         }
       }
       await this.responseTransmitter({
