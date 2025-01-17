@@ -10,7 +10,7 @@
   postUser: "cudlservices",
   postPass: "secret",
 
-  teiServiceURL: "https://dev-transcriptions.cudl.link/",
+  teiServiceURL: "https://rmm98-sandbox-transcriptions.cudl-sandbox.net/",
 
   users: {
     // The key in the users object is the API key for the user

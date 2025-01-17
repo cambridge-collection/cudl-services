@@ -45,7 +45,7 @@ const partialConfigValidator = requireNotUndefined(
 );
 
 const DEFAULT_ZACYNTHIUS_SERVICE_URL =
-  'http://codex-zacynthius-transcription.cudl.lib.cam.ac.uk';
+  'http://sandbox-codex-zacynthius-transcription.s3-website.eu-west-2.amazonaws.com/';
 
 export function splitEnvarPaths(paths: string | undefined) {
   return (paths || '').split(':').filter(p => !!p);
