@@ -34,6 +34,7 @@ export interface CudlOptions {
   teiServiceURL: URL;
   xtf: XTF;
   zacynthiusServiceURL: URL;
+  iiifBaseURL?: string;
 }
 
 export async function cudlComponents(
