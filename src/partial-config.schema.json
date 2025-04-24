@@ -25,9 +25,7 @@
     "xtfIndexPath": {"type": "string"},
     "zacynthiusServiceURL": {"type": "string"},
     "iiifBaseURL": {
-      "type": "string",
-      "format": "uri",
-      "description": "Base URL to fetch IIIF manifests from (e.g. https://cudl.lib.cam.ac.uk/iiif)"
+      "type": "string"
     }
   }
 }
