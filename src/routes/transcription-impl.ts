@@ -380,11 +380,15 @@ export function* contentTypes(...extensions: string[]): Iterable<string> {
   for (const extension of extensions) {
     const type = mime.getType(extension);
     if (typeof type !== 'string') {
-      throw new ValueError(
+      console.log(
         `content-type not known for extension: ${extension}`
       );
+
+      // throw new ValueError(
+      //   `content-type not known for extension: ${extension}`
+      // );
     }
-    yield type;
+    yield type || 'string';
   }
 }
 
