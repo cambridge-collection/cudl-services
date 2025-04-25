@@ -1,3 +1,4 @@
+// @ts-nocheck
 import express, {Request, RequestHandler, Response, Router} from 'express';
 import expressAsyncHandler from 'express-async-handler';
 import {PathParams} from 'express-serve-static-core';

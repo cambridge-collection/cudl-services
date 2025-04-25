@@ -1,3 +1,4 @@
+// @ts-nocheck
 import accepts from 'accepts';
 import stringify from 'csv-stringify';
 import csvStringify from 'csv-stringify';

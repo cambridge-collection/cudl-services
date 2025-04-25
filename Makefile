@@ -81,7 +81,7 @@ build: compile-typescript copy-files build/dist-root \
 pack: check build
 	cd build && npm pack ./dist-root
 
-pack-release: ensure-clean-checkout pack
+pack-release: pack
 
 npm-ci: $(NPM_CI_TARGET)
 

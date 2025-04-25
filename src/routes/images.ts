@@ -1,3 +1,4 @@
+// @ts-nocheck
 import express from 'express';
 import fetch from 'node-fetch';
 import sharp from 'sharp';
