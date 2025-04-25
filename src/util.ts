@@ -94,7 +94,7 @@ export function validateEnumMember<E extends string>(
 }
 
 export function requireRequestParam(req: Request, param: string): string {
-  const value = req.params[param] as typeof req.params[string] | undefined;
+  const value = req.params[param] as (typeof req.params)[string] | undefined;
   if (typeof value !== 'string') {
     throw new Error(`Request has no value for param ${util.inspect(param)}`);
   }
@@ -119,9 +119,8 @@ export function factory<A, B>(
 }
 
 /** The type of the only argument of a 1-ary constructor. */
-export type UnaryConstructorArg<
-  T extends new (arg: unknown) => unknown
-> = ConstructorParameters<T>[0];
+export type UnaryConstructorArg<T extends new (arg: unknown) => unknown> =
+  ConstructorParameters<T>[0];
 
 export type ComparePrimitive = string | number | boolean | ComparePrimitive[];
 export type CompareModifier = [Direction, CompareValue];
@@ -184,10 +183,10 @@ export function sorted<T>(
 ): T[] {
   if (key === undefined) {
     const sorted = Array.from(
-      (items as Iterable<unknown>) as Iterable<ComparePrimitive>
+      items as Iterable<unknown> as Iterable<ComparePrimitive>
     );
     sorted.sort((a, b) => compare(a, b));
-    return (sorted as unknown[]) as T[];
+    return sorted as unknown[] as T[];
   }
 
   const indexedItems = index(items);
@@ -195,7 +194,7 @@ export function sorted<T>(
   indexedItems.sort(([ia], [ib]) => compare(keys[ia], keys[ib]));
 
   // Remove indexes in place
-  const sorted = (indexedItems as unknown) as T[];
+  const sorted = indexedItems as unknown as T[];
   for (let i = 0; i < indexedItems.length; ++i) {
     sorted[i] = indexedItems[i][1];
   }
@@ -241,8 +240,7 @@ export type PickOptional<T> = {
  */
 export type OmittableOptional<T> = {
   [K in keyof PickOptional<T>]?: Exclude<T[K], null>;
-} &
-  PickRequired<T>;
+} & PickRequired<T>;
 
 export type NonOptional<T> = {
   [K in keyof T]-?: Exclude<T[K], null | undefined>;
@@ -264,7 +262,7 @@ export function pickDefined<T extends {}>(obj: T): OmittableOptional<T> {
       result[key] = obj[key];
     }
   }
-  return (result as unknown) as OmittableOptional<T>;
+  return result as unknown as OmittableOptional<T>;
 }
 
 export function applyDefaults<T extends {}>(

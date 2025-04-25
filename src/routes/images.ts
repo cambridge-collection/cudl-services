@@ -3,7 +3,7 @@ import fetch from 'node-fetch';
 import sharp from 'sharp';
 
 interface IIIFManifest {
-  sequences?: { canvases?: any[] }[];
+  sequences?: {canvases?: any[]}[];
   attribution?: string;
 }
 interface MetadataJson {
@@ -16,50 +16,54 @@ export function getRoutes(iiifBaseURL: string): express.Router {
   const router = express.Router();
 
   router.get('/download/:itemId/:pageId', async (req, res) => {
-    const { itemId, pageId } = req.params;
-    const { width, height } = req.query;
+    const {itemId, pageId} = req.params;
+    const {width, height} = req.query;
 
     try {
       // Fetch IIIF manifest
       const manifestUrl = `${iiifBaseURL}/${itemId}`;
       const manifestRes = await fetch(manifestUrl);
       if (!manifestRes.ok) {
-        return res.status(502).json({ error: 'Failed to fetch IIIF manifest' });
+        return res.status(502).json({error: 'Failed to fetch IIIF manifest'});
       }
 
-      const manifest = await manifestRes.json() as IIIFManifest;
+      const manifest = (await manifestRes.json()) as IIIFManifest;
       const index = parseInt(pageId, 10);
 
       // Validate that pageId is a positive integer
       if (isNaN(index) || index < 1) {
-        return res.status(400).json({ error: 'Invalid page number. Must be a positive integer.' });
+        return res
+          .status(400)
+          .json({error: 'Invalid page number. Must be a positive integer.'});
       }
 
       const canvas = manifest?.sequences?.[0]?.canvases?.[index - 1];
 
       if (!canvas) {
-        return res.status(404).json({ error: 'Page not found' });
+        return res.status(404).json({error: 'Page not found'});
       }
 
       const serviceId = canvas?.images?.[0]?.resource?.service?.['@id'];
       if (!serviceId) {
-        return res.status(500).json({ error: 'No image service found' });
+        return res.status(500).json({error: 'No image service found'});
       }
 
       // Fetch attribution from CUDL metadata
       const metadataUrl = `https://cudl.lib.cam.ac.uk/view/${itemId}.json`;
       console.log(`Fetching metadata from: ${metadataUrl}`);
       const metadataRes = await fetch(metadataUrl);
-      const metadataJson = await metadataRes.json() as MetadataJson;
-      const attribution = metadataJson?.descriptiveMetadata?.[0]?.downloadImageRights || 'Contact UL for Download Image rights.';
+      const metadataJson = (await metadataRes.json()) as MetadataJson;
+      const attribution =
+        metadataJson?.descriptiveMetadata?.[0]?.downloadImageRights ||
+        'Contact UL for Download Image rights.';
       console.log(`Resolved attribution: "${attribution}"`);
 
       // Fetch IIIF image
-      const size = (width || height) ? `${width || ''},${height || ''}` : 'full';
+      const size = width || height ? `${width || ''},${height || ''}` : 'full';
       const iiifImageUrl = `${serviceId}/full/${size}/0/default.jpg`;
       const imageRes = await fetch(iiifImageUrl);
       if (!imageRes.ok) {
-        return res.status(502).json({ error: 'Failed to fetch IIIF image' });
+        return res.status(502).json({error: 'Failed to fetch IIIF image'});
       }
 
       const imageBuffer = await imageRes.buffer();
@@ -89,19 +93,30 @@ export function getRoutes(iiifBaseURL: string): express.Router {
         return lines;
       };
 
-      const safeText = attribution.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const safeText = attribution
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
       const wrappedLines = wrapText(safeText, charsPerLine);
       const lineHeight = fontSize + 4;
       const totalTextHeight = wrappedLines.length * lineHeight;
 
-      const svgLines = wrappedLines.map((line, i) => `
-        <tspan x="50%" dy="${i === 0 ? 0 : lineHeight}" dominant-baseline="middle">${line}</tspan>
-      `).join('');
+      const svgLines = wrappedLines
+        .map(
+          (line, i) => `
+        <tspan x="50%" dy="${
+          i === 0 ? 0 : lineHeight
+        }" dominant-baseline="middle">${line}</tspan>
+      `
+        )
+        .join('');
 
       const svg = `
         <svg width="${imgWidth}" height="${totalTextHeight}">
           <rect width="100%" height="100%" fill="black"/>
-          <text x="50%" y="${lineHeight / 2}" font-size="${fontSize}" fill="white" text-anchor="middle" font-family="sans-serif">
+          <text x="50%" y="${
+            lineHeight / 2
+          }" font-size="${fontSize}" fill="white" text-anchor="middle" font-family="sans-serif">
             ${svgLines}
           </text>
         </svg>
@@ -112,12 +127,12 @@ export function getRoutes(iiifBaseURL: string): express.Router {
           width: imgWidth,
           height: metadata.height! + totalTextHeight,
           channels: 3,
-          background: 'white'
-        }
+          background: 'white',
+        },
       })
         .composite([
-          { input: imageBuffer, top: 0, left: 0 },
-          { input: Buffer.from(svg), top: metadata.height!, left: 0 }
+          {input: imageBuffer, top: 0, left: 0},
+          {input: Buffer.from(svg), top: metadata.height!, left: 0},
         ])
         .jpeg()
         .toBuffer();
@@ -125,10 +140,12 @@ export function getRoutes(iiifBaseURL: string): express.Router {
       res.setHeader('Content-Type', 'image/jpeg');
       res.setHeader('Cache-Control', 'public, max-age=86400'); // 1 day
       res.send(finalImageBuffer);
-
     } catch (error) {
-      console.error(`Error handling image request for ${itemId}/${pageId}:`, error);
-      res.status(500).json({ error: 'Internal server error' });
+      console.error(
+        `Error handling image request for ${itemId}/${pageId}:`,
+        error
+      );
+      res.status(500).json({error: 'Internal server error'});
     }
   });
 

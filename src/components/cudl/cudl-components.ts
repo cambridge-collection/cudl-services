@@ -40,13 +40,8 @@ export interface CudlOptions {
 export async function cudlComponents(
   options: CudlOptions
 ): Promise<Components> {
-  const {
-    cudlDataDataStore,
-    dbPool,
-    teiServiceURL,
-    xtf,
-    zacynthiusServiceURL,
-  } = options;
+  const {cudlDataDataStore, dbPool, teiServiceURL, xtf, zacynthiusServiceURL} =
+    options;
   const internalDomainName = options.internalDomainName || CUDL_HOST;
   const metadataProviders = cudlProvidersForDataStore(
     options.cudlDataDataStore

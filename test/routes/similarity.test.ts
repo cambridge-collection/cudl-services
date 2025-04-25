@@ -62,14 +62,14 @@ describe('similarity routes /:itemid/:similarityId', () => {
     'responds with hits from XTF with meta attached',
     async (query, count, embedLevel) => {
       mocked(xtf).getSimilarItems.mockResolvedValueOnce(
-        ('<example/>' as unknown) as ReturnType<XTF['getSimilarItems']>
+        '<example/>' as unknown as ReturnType<XTF['getSimilarItems']>
       );
-      mocked(mapToJson).mockReturnValueOnce(({
+      mocked(mapToJson).mockReturnValueOnce({
         example: 'a',
-      } as unknown) as ReturnType<typeof mapToJson>);
-      mocked(embedMetadata).mockResolvedValueOnce(({
+      } as unknown as ReturnType<typeof mapToJson>);
+      mocked(embedMetadata).mockResolvedValueOnce({
         example: 'b',
-      } as unknown) as ReturnType<typeof embedMetadata>);
+      } as unknown as ReturnType<typeof embedMetadata>);
 
       const response = await request(getTestApp()).get(`/MS-FOO/0${query}`);
 

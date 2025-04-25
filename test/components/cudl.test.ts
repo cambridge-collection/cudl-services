@@ -147,12 +147,12 @@ describe('metadataComponents()', () => {
     expect(metadata.getRoutes).toHaveBeenCalled();
     const getRoutesOptions = mocked(metadata.getRoutes).mock.calls[0][0];
 
-    const corsReqFromInternal = ({
+    const corsReqFromInternal = {
       headers: {origin: 'http://internal.example.com'},
-    } as Partial<express.Request>) as express.Request;
-    const corsReqFromExternal = ({
+    } as Partial<express.Request> as express.Request;
+    const corsReqFromExternal = {
       headers: {origin: 'http://external.example.com'},
-    } as Partial<express.Request>) as express.Request;
+    } as Partial<express.Request> as express.Request;
     expect(
       getRoutesOptions.isExternalCorsRequest(corsReqFromInternal)
     ).not.toBeTruthy();
@@ -192,7 +192,7 @@ describe('collectionMembershipComponents()', () => {
     const {app} = await registerComponents(
       express(),
       collectionMembershipComponents(
-        ({} as Partial<CollectionMembershipOptions>) as CollectionMembershipOptions
+        {} as Partial<CollectionMembershipOptions> as CollectionMembershipOptions
       )
     );
 
@@ -217,9 +217,9 @@ describe('collectionMembershipComponents()', () => {
 
     await registerComponents(
       express(),
-      collectionMembershipComponents(({
+      collectionMembershipComponents({
         collectionsDAOPool,
-      } as Partial<CollectionMembershipOptions>) as CollectionMembershipOptions)
+      } as Partial<CollectionMembershipOptions> as CollectionMembershipOptions)
     );
 
     expect(membership.getRoutes).toHaveBeenCalled();

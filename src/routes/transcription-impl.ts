@@ -380,9 +380,7 @@ export function* contentTypes(...extensions: string[]): Iterable<string> {
   for (const extension of extensions) {
     const type = mime.getType(extension);
     if (typeof type !== 'string') {
-      console.log(
-        `content-type not known for extension: ${extension}`
-      );
+      console.log(`content-type not known for extension: ${extension}`);
 
       // throw new ValueError(
       //   `content-type not known for extension: ${extension}`
@@ -465,14 +463,11 @@ export function createDefaultResourceURLRewriter(options?: {
   };
 }
 
-export const overrideAcceptHeaderFromQueryParameterMiddleware: express.Handler = (
-  req,
-  res,
-  next
-) => {
-  const overriddenAccept = req.query['Accept'];
-  if (typeof overriddenAccept === 'string') {
-    req.headers.accept = overriddenAccept;
-  }
-  next();
-};
+export const overrideAcceptHeaderFromQueryParameterMiddleware: express.Handler =
+  (req, res, next) => {
+    const overriddenAccept = req.query['Accept'];
+    if (typeof overriddenAccept === 'string') {
+      req.headers.accept = overriddenAccept;
+    }
+    next();
+  };

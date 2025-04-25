@@ -202,9 +202,8 @@ export function createTranscriptionHandler<T>(
 
     try {
       const html = await transcriptionService.getTranscription(options);
-      const {html: negotiatedHtml, contentType} = negotiateHtmlResponseType(
-        req
-      )(html);
+      const {html: negotiatedHtml, contentType} =
+        negotiateHtmlResponseType(req)(html);
       res.type(contentType).send(negotiatedHtml);
       return;
     } catch (e) {
@@ -327,7 +326,8 @@ interface TransformStage<Opt> {
 class XSLTTranscriptionService<
   Opt extends {id: string; format: Fmt},
   Fmt extends string = string
-> implements TranscriptionService<Opt> {
+> implements TranscriptionService<Opt>
+{
   protected readonly metadataRepository: MetadataRepository<Fmt>;
   protected readonly xsltExecutor: XSLTExecutor;
   protected readonly transforms: Array<TransformStage<Opt>>;

@@ -117,7 +117,7 @@ export function rewriteResourceURLs(doc: Document, rewriter: URLRewriter) {
     for (const attrName of ['src', 'href']) {
       const rawURL = el.getAttribute(attrName);
       if (typeof rawURL === 'string') {
-        const resolvedURL = ((el as unknown) as Record<string, unknown>)[
+        const resolvedURL = (el as unknown as Record<string, unknown>)[
           attrName
         ];
         if (typeof resolvedURL !== 'string') {

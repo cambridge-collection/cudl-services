@@ -55,6 +55,7 @@ const EXAMPLE_CONFIG: CUDLConfigData = {
   xtfBase: 'example',
   xtfIndexPath: 'example',
   zacynthiusServiceURL: 'http://zac.example.com/',
+  iiifBaseURL: ''
 };
 
 describe('config', () => {
@@ -357,6 +358,7 @@ describe('CUDLConfig', () => {
       xtfBase: 'http://xtf.example.com/',
       xtfIndexPath: '/example-xtf-index',
       zacynthiusServiceURL: 'http://zac.example.com/',
+      iiifBaseURL: ''
     };
 
     let mockCudlComponents: Component;

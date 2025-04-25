@@ -27,29 +27,27 @@ const XML_FORMATS = Object.values(CUDLFormat).filter(
   cf => cf !== CUDLFormat.TRANSCRIPTION && cf !== CUDLFormat.JSON
 );
 
-export const resolveTranscriptionLocation: LocationResolver = async function resolveTranscriptionLocation(
-  id
-) {
-  const idParts = /^([\w-]+)\/([\w-]+)(?:\.xml)?$/.exec(id);
-  if (!idParts) {
-    throw new Error(`Invalid ${CUDLFormat.TRANSCRIPTION} id: ${id}`);
-  }
-  return path.join(
-    'data',
-    CUDLFormat.TRANSCRIPTION,
-    idParts[1],
-    `${idParts[2]}.xml`
-  );
-};
+export const resolveTranscriptionLocation: LocationResolver =
+  async function resolveTranscriptionLocation(id) {
+    const idParts = /^([\w-]+)\/([\w-]+)(?:\.xml)?$/.exec(id);
+    if (!idParts) {
+      throw new Error(`Invalid ${CUDLFormat.TRANSCRIPTION} id: ${id}`);
+    }
+    return path.join(
+      'data',
+      CUDLFormat.TRANSCRIPTION,
+      idParts[1],
+      `${idParts[2]}.xml`
+    );
+  };
 
-export const resolveItemJsonLocation: LocationResolver = async function resolveItemJsonLocation(
-  id
-) {
-  if (!isSimplePathSegment(id)) {
-    throw new Error(`invalid id: ${id}`);
-  }
-  return path.join('json', `${id}.json`);
-};
+export const resolveItemJsonLocation: LocationResolver =
+  async function resolveItemJsonLocation(id) {
+    if (!isSimplePathSegment(id)) {
+      throw new Error(`invalid id: ${id}`);
+    }
+    return path.join('json', `${id}.json`);
+  };
 
 export function DataLocationResolver(formatDir: string): LocationResolver {
   if (!isSimplePathSegment(formatDir)) {
@@ -111,7 +109,8 @@ export function cudlProvidersForDataStore(dataStore: DataStore): CUDLProviders {
  * obtained from location-independent DataStores.
  */
 export class MetadataProviderCUDLMetadataRepository
-  implements CUDLMetadataRepository {
+  implements CUDLMetadataRepository
+{
   private readonly providers: CUDLProviders;
 
   constructor(providers: CUDLProviders) {

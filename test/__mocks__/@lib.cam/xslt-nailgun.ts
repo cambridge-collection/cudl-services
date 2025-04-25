@@ -5,16 +5,14 @@ import {
 
 export const XSLTExecutor = jest.fn<_XSLTExecutor, []>(
   () =>
-    (({
+    ({
       execute: jest.fn(),
       close: jest.fn(),
-    } as Partial<_XSLTExecutor>) as _XSLTExecutor)
+    } as Partial<_XSLTExecutor> as _XSLTExecutor)
 );
 
-((XSLTExecutor as unknown) as typeof _XSLTExecutor).getInstance = jest.fn(
-  () => {
-    return new XSLTExecutor();
-  }
-);
+(XSLTExecutor as unknown as typeof _XSLTExecutor).getInstance = jest.fn(() => {
+  return new XSLTExecutor();
+});
 
 export const execute: typeof _execute = jest.fn();

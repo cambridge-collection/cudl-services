@@ -101,7 +101,8 @@ export interface MetadataResponseGenerator<ResponseType> {
 }
 
 export class DefaultMetadataProvider<ResponseType extends MetadataResponse>
-  implements MetadataProvider<ResponseType> {
+  implements MetadataProvider<ResponseType>
+{
   readonly metadataStore: DataStore;
   readonly locationResolver: LocationResolver;
   readonly responseGenerator: MetadataResponseGenerator<ResponseType>;
@@ -148,7 +149,8 @@ export class DefaultMetadataResponse implements MetadataResponse {
 
 export class ItemJsonMetadataResponse
   extends DefaultMetadataResponse
-  implements ExternalAccessAware, ExternalEmbedAware {
+  implements ExternalAccessAware, ExternalEmbedAware
+{
   static async generateResponse(id: string, dataProvider: DataProvider) {
     return new ItemJsonMetadataResponse(id, dataProvider);
   }
@@ -175,7 +177,8 @@ export class ItemJsonMetadataResponse
 }
 
 export class ItemJsonMetadataResponseEmitter
-  implements MetadataResponseEmitter {
+  implements MetadataResponseEmitter
+{
   private constructor() {}
 
   @Memoize()

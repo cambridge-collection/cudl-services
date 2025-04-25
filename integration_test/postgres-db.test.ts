@@ -19,7 +19,9 @@ describe('PostgresDatabasePool', () => {
           dbPool.getClient(factory(BasePostgresDAO)),
           async (db: BasePostgresDAO) => {
             await expect(
-              (await db.getClient().query('SELECT 1 AS value')).rows
+              (
+                await db.getClient().query('SELECT 1 AS value')
+              ).rows
             ).toEqual([{value: 1}]);
           }
         );
@@ -44,7 +46,9 @@ describe('BasePostgresDAO', () => {
 
         await using(pool.getInstance(), async dao => {
           await expect(
-            (await dao.getClient().query('SELECT 1 AS value')).rows
+            (
+              await dao.getClient().query('SELECT 1 AS value')
+            ).rows
           ).toEqual([{value: 1}]);
         });
       }
