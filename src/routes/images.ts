@@ -55,7 +55,7 @@ export function getRoutes(iiifBaseURL: string): express.Router {
       const metadataRes = await fetch(metadataUrl);
       const metadataJson = (await metadataRes.json()) as MetadataJson;
       const attribution =
-        metadataJson?.descriptiveMetadata?.[0]?.downloadImageRights ||
+        metadataJson?.descriptiveMetadata?.[0]?.watermarkStatement ||
         'Contact UL for Download Image rights.';
       console.log(`Resolved attribution: "${attribution}"`);
 
