@@ -175,6 +175,15 @@ Returns: Translation TEI-XML file from internally hosted storage, transformed su
 
 Example Usage: When loading the content for the 'Translation' tab in the CUDL Viewer.
 
+### Download Images
+Route: `/v1/images/download/`
+
+Definition: [`routes/images.ts`](routes/images.ts)
+
+Returns: Takes a IIIF image (with optional height and/or width params) and adds the 'watermark' rights text from JSON.
+
+Example Usage: Downloading image in CUDL.
+
 ## Resources in Deployment
 
 CUDL Services sends requests to a variety of resources in its current deployments.

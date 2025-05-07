@@ -26,6 +26,9 @@
     "zacynthiusServiceURL": {"type": "string"},
     "iiifBaseURL": {
       "type": "string"
+    },
+    "cudlBaseURL": {
+      "type": "string"
     }
   }
 }
