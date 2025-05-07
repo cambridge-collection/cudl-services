@@ -23,6 +23,9 @@
     },
     "xtfBase": {"type": "string"},
     "xtfIndexPath": {"type": "string"},
-    "zacynthiusServiceURL": {"type": "string"}
+    "zacynthiusServiceURL": {"type": "string"},
+    "iiifBaseURL": {
+      "type": "string"
+    }
   }
 }

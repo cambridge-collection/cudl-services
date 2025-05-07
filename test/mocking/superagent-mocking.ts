@@ -25,8 +25,6 @@ export class MockRequest implements PromiseLike<PartialResponse> {
   }
 }
 
-export const get = jest.fn(
-  (url: string): MockRequest => {
-    return new MockRequest(mockGetResponder(url));
-  }
-);
+export const get = jest.fn((url: string): MockRequest => {
+  return new MockRequest(mockGetResponder(url));
+});

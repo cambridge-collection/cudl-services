@@ -1,4 +1,4 @@
-FROM node:14.15.0-alpine3.12 as node-base
+FROM node:18-alpine AS node-base
 FROM node-base as npm-base
 
 # NPM seems to experience network issues when running in a docker build. Its
@@ -41,12 +41,13 @@ ENV CI true
 WORKDIR /code
 RUN apk add --no-cache jq curl git make docker-cli bash
 
-
 # This image builds the project's release .tgz package for use in the
 # final main image.
 FROM build as built
 
 COPY . ./
+RUN npm install
+RUN npm ci
 # Create the release .tgz package
 RUN make pack-release
 # Put the release package at a fixed (version-independant) location
@@ -81,7 +82,7 @@ FROM node-base as main
 
 # Install a JVM - @lib.cam/xslt-nailgun requires it to run Saxon. curl is used in the healthcheck
 # script.
-RUN apk add --no-cache openjdk11-jre curl su-exec tini
+RUN apk add --no-cache openjdk11-jre curl su-exec tini fontconfig ttf-dejavu
 
 COPY --from=node-modules /usr/local/lib/node_modules/cudl-services/ /usr/local/lib/node_modules/cudl-services/
 RUN ln -s ../lib/node_modules/cudl-services/bin/cudl-services.js /usr/local/bin/cudl-services
@@ -95,6 +96,7 @@ RUN chmod a=rx,u=+w \
   /usr/local/bin/confd
 COPY ./docker/confd/ /etc/confd/
 COPY ./docker/0_default-settings.json5 /etc/cudl-services/conf.d/0_default-settings.json5
+
 
 EXPOSE 3000
 # Run under the tini init process to handle reaping zombie processes (which can

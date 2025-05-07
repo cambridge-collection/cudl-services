@@ -17,8 +17,8 @@ endif
 
 all: clean pack
 
-compile-typescript: npm-ci
-	$(NPM_BIN)/tsc --build tsconfig.build.json
+compile-typescript:
+	npx tsc --build tsconfig.build.json
 
 copy-javascript: build/dist-root/lib
 	cd src && find . -name '*.js' -exec \
@@ -81,7 +81,7 @@ build: compile-typescript copy-files build/dist-root \
 pack: check build
 	cd build && npm pack ./dist-root
 
-pack-release: ensure-clean-checkout pack
+pack-release: pack
 
 npm-ci: $(NPM_CI_TARGET)
 

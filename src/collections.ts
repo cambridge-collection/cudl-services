@@ -15,7 +15,8 @@ export interface CollectionDAO extends Resource {
 
 export class PostgresCollectionDAO
   extends BasePostgresDAO
-  implements CollectionDAO {
+  implements CollectionDAO
+{
   async getItemCollections(itemID: string): Promise<Collection[]> {
     const sql = `\
 WITH RECURSIVE collection_membership(collectionid, title, collectionorder) AS (

@@ -51,17 +51,15 @@ describe('DefaultMetadataProvider', () => {
   beforeEach(() => {
     dataStore = {read: jest.fn().mockReturnValue(Promise.resolve(data))};
     locationResolver = jest.fn().mockReturnValue(Promise.resolve('/path'));
-    const generateResponse: MetadataResponseGenerator<MetadataResponse>['generateResponse'] = async (
-      id,
-      dataProvider
-    ) => {
-      return {
-        getBytes: () => dataProvider(),
-        getId() {
-          return id;
-        },
+    const generateResponse: MetadataResponseGenerator<MetadataResponse>['generateResponse'] =
+      async (id, dataProvider) => {
+        return {
+          getBytes: () => dataProvider(),
+          getId() {
+            return id;
+          },
+        };
       };
-    };
     responseGenerator = {
       generateResponse: jest.fn().mockImplementation(generateResponse),
     };
@@ -344,7 +342,7 @@ describe('MetadataPredicates', () => {
       });
 
       test('returns result of isExternalEmbedPermitted method if available', async () => {
-        ((metadataResponse as unknown) as ExternalEmbedAware)[
+        (metadataResponse as unknown as ExternalEmbedAware)[
           isExternalEmbedPermitted
         ] = decisionMethod;
         decisionMethod.mockReturnValue(true);
@@ -366,7 +364,7 @@ describe('MetadataPredicates', () => {
       });
 
       test('returns result of isExternalAccessPermitted method if available', async () => {
-        ((metadataResponse as unknown) as ExternalAccessAware)[
+        (metadataResponse as unknown as ExternalAccessAware)[
           isExternalAccessPermitted
         ] = decisionMethod;
         decisionMethod.mockReturnValue(true);

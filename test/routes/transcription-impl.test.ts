@@ -81,11 +81,10 @@ describe('response handlers', () => {
           '<body><a href="foo#bar">foo</a><img src="%s"><script src="%s"></script></body>' +
           '</html>';
 
-        const handler = createRewriteHTMLResourceURLsResponseHandler(
-          urlRewriter
-        );
+        const handler =
+          createRewriteHTMLResourceURLsResponseHandler(urlRewriter);
         const input: TransformedResponse<superagent.Response, ResponseData> = {
-          originalRes: (undefined as unknown) as superagent.Response,
+          originalRes: undefined as unknown as superagent.Response,
           currentRes: {
             url: new URL('http://example.com/example-things/bar'),
             type: 'text/html',
@@ -125,7 +124,7 @@ describe('response handlers', () => {
         await createRestrictedTypeResponseHandler({
           contentTypeWhitelist: ['text/html'],
         })({
-          originalRes: (undefined as unknown) as Response,
+          originalRes: undefined as unknown as Response,
           currentRes,
         })
       ).toBe(undefined);
@@ -144,7 +143,7 @@ describe('response handlers', () => {
         await createRestrictedTypeResponseHandler({
           contentTypeWhitelist: ['text/css'],
         })({
-          originalRes: (undefined as unknown) as Response,
+          originalRes: undefined as unknown as Response,
           currentRes,
         })
       ).toEqual({

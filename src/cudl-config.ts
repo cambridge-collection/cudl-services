@@ -11,6 +11,7 @@ import fullConfigSchema from './full-config.schema.json';
 import partialConfigSchema from './partial-config.schema.json';
 import {NonOptional, requireNotUndefined} from './util';
 import {Config} from './config';
+import {imageComponents} from './components/images';
 import {
   Application,
   ComponentApp,
@@ -192,6 +193,7 @@ export function validateObjectIsFullConfig(
 }
 
 export interface CUDLConfigData<U = Users> extends XTFConfig, DatabaseConfig {
+  iiifBaseURL: string;
   dataLocation: string;
   users: U;
   darwinXTF: string;
@@ -309,11 +311,15 @@ export class CUDLConfig implements Config {
             config.zacynthiusServiceURL,
             'zacynthiusServiceURL'
           ),
+          iiifBaseURL: config.iiifBaseURL ?? 'https://cudl.lib.cam.ac.uk/iiif',
         });
 
         return ComponentApp.from(
           commonLeadingComponents,
           components,
+          imageComponents(
+            config.iiifBaseURL ?? 'https://cudl.lib.cam.ac.uk/iiif'
+          ),
           ResourceCleanupComponent.closing(dbPool)
         );
       }

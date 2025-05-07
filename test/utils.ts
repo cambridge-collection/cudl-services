@@ -110,7 +110,8 @@ export class MemoryDatabasePool<Data> implements DatabasePool<Data> {
 
 export class MemoryCollectionsDAO
   extends BaseDAO<ItemCollections>
-  implements CollectionDAO {
+  implements CollectionDAO
+{
   async getItemCollections(itemID: string): Promise<Collection[]> {
     return this.db[itemID] || [];
   }
@@ -120,7 +121,8 @@ export class MemoryCollectionsDAO
 
 export class MemoryTagsDAO
   extends BaseDAO<Record<string, Record<TagSourceName, Tag[]>>>
-  implements TagsDAO {
+  implements TagsDAO
+{
   private getTags(type: TagSourceName, docID: string) {
     return new DefaultTagSet(this.db![docID][type] || []);
   }

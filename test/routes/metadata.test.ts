@@ -26,7 +26,8 @@ describe('metadata routes /:format/:id', () => {
     Promise.resolve(Buffer.from('data\n'))
   );
   beforeEach(() => {
-    const isExternalCorsRequest = (jest.fn() as unknown) as ExternalCorsRequestMatcher;
+    const isExternalCorsRequest =
+      jest.fn() as unknown as ExternalCorsRequestMatcher;
     isExternalCorsRequest.internalDomainNameMatcher = {
       matches: jest.fn(),
       describeMatchingDomains: jest.fn(),

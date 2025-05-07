@@ -14,18 +14,16 @@ export const MockCUDLMetadataRepository = jest
 
 export const MockXSLTExecutor = jest.fn<XSLTExecutor, []>().mockImplementation(
   () =>
-    (({
+    ({
       close: jest.fn(),
       execute: jest.fn(),
-    } as Partial<XSLTExecutor>) as XSLTExecutor)
+    } as Partial<XSLTExecutor> as XSLTExecutor)
 );
 
 export function MockDAOPool<T extends Resource>(): DAOPool<T> {
-  return jest.fn<DAOPool<T>, []>(
-    (): DAOPool<T> => {
-      return {getInstance: jest.fn()} as DAOPool<T>;
-    }
-  )();
+  return jest.fn<DAOPool<T>, []>((): DAOPool<T> => {
+    return {getInstance: jest.fn()} as DAOPool<T>;
+  })();
 }
 
 export const MockDataStore = jest.fn<DataStore, []>(() => ({
@@ -43,10 +41,10 @@ export const MockXTF = jest.fn<XTF, []>(() => ({
 
 export const MockPostgresDatabasePool = jest.fn<PostgresDatabasePool, []>(
   () =>
-    (({
+    ({
       getClient: jest.fn(),
       close: jest.fn(),
-    } as Partial<PostgresDatabasePool>) as PostgresDatabasePool)
+    } as Partial<PostgresDatabasePool> as PostgresDatabasePool)
 );
 
 export const MockComponent = jest.fn<Component, []>(() => ({

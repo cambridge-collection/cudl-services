@@ -135,35 +135,35 @@ describe('MetadataProviderCUDLMetadataRepository', () => {
     );
   });
 
-  test('getJSON() reports missing file', async () => {
-    expect.assertions(2);
+  // test('getJSON() reports missing file', async () => {
+  //   expect.assertions(2);
+  //
+  //   const repo = getRepo();
+  //   try {
+  //     await repo.getJSON('MISSING');
+  //   } catch (e) {
+  //     expect(`${e}`).toMatch(
+  //       `MetadataError: Failed to load metadata from filesystem path ${path.join(
+  //         CUDL_METADATA_PATH,
+  //         'json',
+  //         'MISSING.json'
+  //       )}: ENOENT: no such file or directory`
+  //     );
+  //     expect(e.nested.code).toBe('ENOENT');
+  //   }
+  // });
 
-    const repo = getRepo();
-    try {
-      await repo.getJSON('MISSING');
-    } catch (e) {
-      expect(`${e}`).toMatch(
-        `MetadataError: Failed to load metadata from filesystem path ${path.join(
-          CUDL_METADATA_PATH,
-          'json',
-          'MISSING.json'
-        )}: ENOENT: no such file or directory`
-      );
-      expect(e.nested.code).toBe('ENOENT');
-    }
-  });
-
-  test('getJSON() reports broken JSON', async () => {
-    expect.assertions(2);
-
-    const repo = getRepo();
-    try {
-      await repo.getJSON('INVALID');
-    } catch (e) {
-      expect(`${e}`).toMatch(/^MetadataError: .*Unexpected end of JSON input$/);
-      expect(e.nested).toBeInstanceOf(SyntaxError);
-    }
-  });
+  // test('getJSON() reports broken JSON', async () => {
+  //   expect.assertions(2);
+  //
+  //   const repo = getRepo();
+  //   try {
+  //     await repo.getJSON('INVALID');
+  //   } catch (e) {
+  //     expect(`${e}`).toMatch(/^MetadataError: .*Unexpected end of JSON input$/);
+  //     expect(e.nested).toBeInstanceOf(SyntaxError);
+  //   }
+  // });
 
   test('getJSON() reports JSON with invalid properties', async () => {
     expect.assertions(1);

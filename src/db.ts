@@ -68,7 +68,8 @@ export interface DAOPool<DAO extends Resource> {
 }
 
 export class DefaultDAOPool<DAO extends Resource, Client>
-  implements DAOPool<DAO> {
+  implements DAOPool<DAO>
+{
   private readonly pool: DatabasePool<Client>;
   private readonly factory: ClientFactory<Client, DAO>;
 
@@ -100,7 +101,8 @@ export class BaseDAO<DB> extends BaseResource {
 
 export class BasePostgresDAO
   extends BaseDAO<pg.PoolClient>
-  implements Resource {
+  implements Resource
+{
   getClient(): pg.PoolClient {
     return this.db;
   }
