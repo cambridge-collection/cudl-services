@@ -13,7 +13,7 @@ interface MetadataJson {
   }[];
 }
 
-export function getRoutes(iiifBaseURL: string): express.Router {
+export function getRoutes(iiifBaseURL: string, cudlBaseURL: string): express.Router {
   const router = express.Router();
 
   router.get('/download/:itemId/:pageId', async (req, res) => {
@@ -50,14 +50,12 @@ export function getRoutes(iiifBaseURL: string): express.Router {
       }
 
       // Fetch attribution from CUDL metadata
-      const metadataUrl = `https://cudl.lib.cam.ac.uk/view/${itemId}.json`;
-      console.log(`Fetching metadata from: ${metadataUrl}`);
+      const metadataUrl = cudlBaseURL+`/view/${itemId}.json`;
       const metadataRes = await fetch(metadataUrl);
       const metadataJson = (await metadataRes.json()) as MetadataJson;
       const attribution =
         metadataJson?.descriptiveMetadata?.[0]?.watermarkStatement ||
         'Contact UL for Download Image rights.';
-      console.log(`Resolved attribution: "${attribution}"`);
 
       // Fetch IIIF image
       const size = width || height ? `${width || ''},${height || ''}` : 'full';

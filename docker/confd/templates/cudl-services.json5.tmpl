@@ -31,6 +31,13 @@
     postPass: "{{getv "/cudl/services/db/password" | js}}",
   {{end}}
 
+  {{if exists "/cudl/services/iiif/base/url"}}
+    iiifBaseURL: "{{getv "/cudl/services/iiif/base/url" | js}}",
+  {{end}}
+  {{if exists "/cudl/services/cudl/base/url"}}
+    cudlBaseURL: "{{getv "/cudl/services/cudl/base/url" | js}}",
+  {{end}}
+
   users: {
     {{range gets "/cudl/services/user/*/key"}}
       {{$base := printf "/cudl/services/user/%s" (index (split .Key "/") 4)}}
