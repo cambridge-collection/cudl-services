@@ -34,8 +34,14 @@
   {{if exists "/cudl/services/iiif/base/url"}}
     iiifBaseURL: "{{getv "/cudl/services/iiif/base/url" | js}}",
   {{end}}
+  {{if exists "/cudl/services/iiif/base/url/credentials"}}
+      iiifBaseURLCredentials: "{{getv "/cudl/services/iiif/base/url/credentials" | js}}",
+  {{end}}
   {{if exists "/cudl/services/cudl/base/url"}}
     cudlBaseURL: "{{getv "/cudl/services/cudl/base/url" | js}}",
+  {{end}}
+  {{if exists "/cudl/services/cudl/base/url/credentials"}}
+    cudlBaseURLCredentials: "{{getv "/cudl/services/cudl/base/url/credentials" | js}}",
   {{end}}
 
   users: {

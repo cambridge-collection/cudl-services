@@ -4,54 +4,68 @@ import fetch from 'node-fetch';
 import sharp from 'sharp';
 
 interface IIIFManifest {
-  sequences?: {canvases?: any[]}[];
+  sequences?: { canvases?: any[] }[];
   attribution?: string;
 }
 interface MetadataJson {
   descriptiveMetadata?: {
     downloadImageRights?: string;
+    watermarkStatement?: string;
   }[];
 }
 
-export function getRoutes(iiifBaseURL: string, cudlBaseURL: string): express.Router {
+let cachedAuthHeader: string | null = null;
+
+async function getBasicAuthHeader(credentials: string): Promise<string> {
+  const auth = Buffer.from(credentials).toString('base64');
+  cachedAuthHeader = `Basic ${auth}`;
+  return cachedAuthHeader;
+}
+
+export function getRoutes(iiifBaseURL: string, iiifBaseURLCredentials: string, cudlBaseURL: string, cudlBaseURLCredentials: string): express.Router {
   const router = express.Router();
 
   router.get('/download/:itemId/:pageId', async (req, res) => {
-    const {itemId, pageId} = req.params;
-    const {width, height} = req.query;
+    const { itemId, pageId } = req.params;
+    const { width, height } = req.query;
 
     try {
-      // Fetch IIIF manifest
+      const iiifAuthHeader = await getBasicAuthHeader(iiifBaseURLCredentials);
+
+      // Fetch IIIF manifest (with Basic Auth)
       const manifestUrl = `${iiifBaseURL}/${itemId}`;
-      const manifestRes = await fetch(manifestUrl);
+      console.log("manifestUrl: " + manifestUrl);
+      const manifestRes = await fetch(manifestUrl, {
+        headers: { Authorization: iiifAuthHeader }
+      });
       if (!manifestRes.ok) {
-        return res.status(502).json({error: 'Failed to fetch IIIF manifest'});
+        return res.status(502).json({ error: 'Failed to fetch IIIF manifest' });
       }
 
       const manifest = (await manifestRes.json()) as IIIFManifest;
       const index = parseInt(pageId, 10);
 
-      // Validate that pageId is a positive integer
       if (isNaN(index) || index < 1) {
-        return res
-          .status(400)
-          .json({error: 'Invalid page number. Must be a positive integer.'});
+        return res.status(400).json({ error: 'Invalid page number. Must be a positive integer.' });
       }
 
       const canvas = manifest?.sequences?.[0]?.canvases?.[index - 1];
-
       if (!canvas) {
-        return res.status(404).json({error: 'Page not found'});
+        return res.status(404).json({ error: 'Page not found' });
       }
 
       const serviceId = canvas?.images?.[0]?.resource?.service?.['@id'];
       if (!serviceId) {
-        return res.status(500).json({error: 'No image service found'});
+        return res.status(500).json({ error: 'No image service found' });
       }
 
-      // Fetch attribution from CUDL metadata
-      const metadataUrl = cudlBaseURL+`/view/${itemId}.json`;
-      const metadataRes = await fetch(metadataUrl);
+      // Fetch CUDL metadata (with Basic Auth)
+      const cudlAuthHeader = await getBasicAuthHeader(cudlBaseURLCredentials);
+
+      const metadataUrl = cudlBaseURL + `/view/${itemId}.json`;
+      const metadataRes = await fetch(metadataUrl, {
+        headers: { Authorization: cudlAuthHeader }
+      });
       const metadataJson = (await metadataRes.json()) as MetadataJson;
       const attribution =
         metadataJson?.descriptiveMetadata?.[0]?.watermarkStatement ||
@@ -62,7 +76,7 @@ export function getRoutes(iiifBaseURL: string, cudlBaseURL: string): express.Rou
       const iiifImageUrl = `${serviceId}/full/${size}/0/default.jpg`;
       const imageRes = await fetch(iiifImageUrl);
       if (!imageRes.ok) {
-        return res.status(502).json({error: 'Failed to fetch IIIF image'});
+        return res.status(502).json({ error: 'Failed to fetch IIIF image' });
       }
 
       const imageBuffer = await imageRes.buffer();
@@ -70,12 +84,10 @@ export function getRoutes(iiifBaseURL: string, cudlBaseURL: string): express.Rou
       const metadata = await image.metadata();
       const imgWidth = metadata.width || 1024;
 
-      // Dynamically determine font size (max 20)
       const fontSize = Math.min(20, Math.round(imgWidth * 0.015));
       const charWidth = fontSize * 0.6;
       const charsPerLine = Math.floor(imgWidth / charWidth);
 
-      // Word-wrap the text
       const wrapText = (text: string, maxCharsPerLine: number): string[] => {
         const words = text.split(/\s+/);
         const lines: string[] = [];
@@ -103,9 +115,7 @@ export function getRoutes(iiifBaseURL: string, cudlBaseURL: string): express.Rou
       const svgLines = wrappedLines
         .map(
           (line, i) => `
-        <tspan x="50%" dy="${
-          i === 0 ? 0 : lineHeight
-        }" dominant-baseline="middle">${line}</tspan>
+        <tspan x="50%" dy="${i === 0 ? 0 : lineHeight}" dominant-baseline="middle">${line}</tspan>
       `
         )
         .join('');
@@ -114,8 +124,8 @@ export function getRoutes(iiifBaseURL: string, cudlBaseURL: string): express.Rou
         <svg width="${imgWidth}" height="${totalTextHeight}">
           <rect width="100%" height="100%" fill="black"/>
           <text x="50%" y="${
-            lineHeight / 2
-          }" font-size="${fontSize}" fill="white" text-anchor="middle" font-family="sans-serif">
+        lineHeight / 2
+      }" font-size="${fontSize}" fill="white" text-anchor="middle" font-family="sans-serif">
             ${svgLines}
           </text>
         </svg>
@@ -130,21 +140,18 @@ export function getRoutes(iiifBaseURL: string, cudlBaseURL: string): express.Rou
         },
       })
         .composite([
-          {input: imageBuffer, top: 0, left: 0},
-          {input: Buffer.from(svg), top: metadata.height!, left: 0},
+          { input: imageBuffer, top: 0, left: 0 },
+          { input: Buffer.from(svg), top: metadata.height!, left: 0 },
         ])
         .jpeg()
         .toBuffer();
 
       res.setHeader('Content-Type', 'image/jpeg');
-      res.setHeader('Cache-Control', 'public, max-age=86400'); // 1 day
+      res.setHeader('Cache-Control', 'public, max-age=86400');
       res.send(finalImageBuffer);
     } catch (error) {
-      console.error(
-        `Error handling image request for ${itemId}/${pageId}:`,
-        error
-      );
-      res.status(500).json({error: 'Internal server error'});
+      console.error(`Error handling image request for ${itemId}/${pageId}:`, error);
+      res.status(500).json({ error: 'Internal server error' });
     }
   });
 

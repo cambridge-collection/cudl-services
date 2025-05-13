@@ -194,7 +194,9 @@ export function validateObjectIsFullConfig(
 
 export interface CUDLConfigData<U = Users> extends XTFConfig, DatabaseConfig {
   iiifBaseURL: string;
+  iiifBaseURLCredentials: string;
   cudlBaseURL: string;
+  cudlBaseURLCredentials: string;
   dataLocation: string;
   users: U;
   darwinXTF: string;
@@ -313,7 +315,9 @@ export class CUDLConfig implements Config {
             'zacynthiusServiceURL'
           ),
           iiifBaseURL: config.iiifBaseURL ?? 'https://cudl.lib.cam.ac.uk/iiif',
+          iiifBaseURLCredentials: config.iiifBaseURLCredentials ?? '',
           cudlBaseURL: config.cudlBaseURL ?? 'https://cudl.lib.cam.ac.uk',
+          cudlBaseURLCredentials: config.cudlBaseURLCredentials ?? '',
         });
 
         return ComponentApp.from(
@@ -321,7 +325,9 @@ export class CUDLConfig implements Config {
           components,
           imageComponents(
             config.iiifBaseURL ?? 'https://cudl.lib.cam.ac.uk/iiif',
+            config.iiifBaseURLCredentials ?? '',
             config.cudlBaseURL ?? 'https://cudl.lib.cam.ac.uk',
+            config.cudlBaseURLCredentials ?? '',
           ),
           ResourceCleanupComponent.closing(dbPool)
         );
