@@ -13,7 +13,9 @@
   teiServiceURL: "https://transcriptions.cudl.lib.cam.ac.uk/",
 
   iiifBaseURL: "https://cudl.lib.cam.ac.uk/iiif",
+  iiifBaseURLCredentials: "",
   cudlBaseURL: "https://cudl.lib.cam.ac.uk",
+  cudlBaseURLCredentials: "",
 
   users: {
     // The key in the users object is the API key for the user

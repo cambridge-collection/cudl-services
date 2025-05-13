@@ -27,7 +27,13 @@
     "iiifBaseURL": {
       "type": "string"
     },
+    "iiifBaseURLCredentials": {
+      "type": "string"
+    },
     "cudlBaseURL": {
+      "type": "string"
+    },
+    "cudlBaseURLCredentials": {
       "type": "string"
     }
   }

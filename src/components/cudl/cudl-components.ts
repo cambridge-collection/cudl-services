@@ -35,7 +35,9 @@ export interface CudlOptions {
   xtf: XTF;
   zacynthiusServiceURL: URL;
   iiifBaseURL?: string;
+  iiifBaseURLCredentials?: string;
   cudlBaseURL?: string;
+  cudlBaseURLCredentials?: string;
 }
 
 export async function cudlComponents(
