@@ -97,7 +97,7 @@ clean:
 	rm -rf build
 
 docker-image:
-	docker image build \
+	docker image build --network=host \
 		$(if $(COMMIT_TAG), --tag "$(DOCKER_IMAGE_NAME):$(COMMIT_TAG)") \
 		--tag "$(DOCKER_IMAGE_NAME):$(COMMIT_SHORT_HASH)" \
 		--target main \

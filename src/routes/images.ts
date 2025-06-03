@@ -2,6 +2,7 @@
 import express from 'express';
 import fetch from 'node-fetch';
 import sharp from 'sharp';
+import {CORS_HEADERS, isEnumMember, requireRequestParam} from '../util';
 
 interface IIIFManifest {
   sequences?: { canvases?: any[] }[];
@@ -146,8 +147,10 @@ export function getRoutes(iiifBaseURL: string, iiifBaseURLCredentials: string, c
         .jpeg()
         .toBuffer();
 
+      res.set(CORS_HEADERS);
       res.setHeader('Content-Type', 'image/jpeg');
       res.setHeader('Cache-Control', 'public, max-age=86400');
+      res.setHeader('Content-Disposition', `attachment; filename="${itemId}_page${pageId}.jpg"`);
       res.send(finalImageBuffer);
     } catch (error) {
       console.error(`Error handling image request for ${itemId}/${pageId}:`, error);
