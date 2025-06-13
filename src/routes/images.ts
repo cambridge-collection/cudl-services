@@ -2,6 +2,7 @@
 import express from 'express';
 import fetch from 'node-fetch';
 import sharp from 'sharp';
+import {CORS_HEADERS, isEnumMember, requireRequestParam} from '../util';
 
 interface IIIFManifest {
   sequences?: { canvases?: any[] }[];
@@ -70,6 +71,7 @@ export function getRoutes(iiifBaseURL: string, iiifBaseURLCredentials: string, c
       const attribution =
         metadataJson?.descriptiveMetadata?.[0]?.watermarkStatement ||
         'Contact UL for Download Image rights.';
+      const filename = metadataJson?.pages?.[(index-1)]?.downloadImageURL;
 
       // Fetch IIIF image
       const size = width || height ? `${width || ''},${height || ''}` : 'full';
@@ -146,8 +148,10 @@ export function getRoutes(iiifBaseURL: string, iiifBaseURLCredentials: string, c
         .jpeg()
         .toBuffer();
 
+      res.set(CORS_HEADERS);
       res.setHeader('Content-Type', 'image/jpeg');
       res.setHeader('Cache-Control', 'public, max-age=86400');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}.jpg"`);
       res.send(finalImageBuffer);
     } catch (error) {
       console.error(`Error handling image request for ${itemId}/${pageId}:`, error);
