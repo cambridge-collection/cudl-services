@@ -327,7 +327,7 @@ export class CUDLConfig implements Config {
             config.iiifBaseURL ?? 'https://cudl.lib.cam.ac.uk/iiif',
             config.iiifBaseURLCredentials ?? '',
             config.cudlBaseURL ?? 'https://cudl.lib.cam.ac.uk',
-            config.cudlBaseURLCredentials ?? '',
+            config.cudlBaseURLCredentials ?? ''
           ),
           ResourceCleanupComponent.closing(dbPool)
         );

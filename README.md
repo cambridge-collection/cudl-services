@@ -39,6 +39,29 @@ This will start services on localhost port 3000. E.g. [http://localhost:3000/v1/
 
 For full details on running with docker see [CUDL Services with Docker](docs/docker.md).
 
+### Testing transcription/translation content against a local checkout
+
+The `tei` transcription and translation routes (see [Transcription](#transcription) below) proxy requests to
+`teiServiceURL`, which in deployment is an S3-backed HTTP service. To test against a local checkout of the data
+(e.g. `cudl-data-releases`) instead of the real deployed service, serve the checkout with a static file server and
+point `teiServiceURL` at it:
+
+    npx http-server ~/projects/cudl-data-releases -p 8090 --cors -c-1
+
+Then build and run cudl-services with `teiServiceURL` overridden to the local static server, on a different port to
+any instance you already have running:
+
+    npm run build
+    PORT=3001 \
+    NODE_CONFIG_MODULE="$PWD/build/dist-root/lib/cudl-config" \
+    NODE_CONFIG_FILE="$PWD/config/example.json5" \
+    NODE_CONFIG='{"teiServiceURL": "http://localhost:8090/"}' \
+    node bin/cudl-services.js
+
+Requests to e.g. [http://localhost:3001/v1/transcription/tei/diplomatic/internal/MS-ADD-03958/i111](http://localhost:3001/v1/transcription/tei/diplomatic/internal/MS-ADD-03958/i111)
+will now be served from the local checkout, including the `unreleased/` fallback described in
+[Transcription](#transcription).
+
 ## Running Tests
 
 You can run the tests locally by using the command:
@@ -166,6 +189,14 @@ external provider, transformed suitably for browser display.
 
 Example Usage: When loading the content for the 'Transcription' tab in the CUDL Viewer.
 
+**Unreleased content fallback:** The `tei` transcription route (`routes/cudl-tei-html-service-impl.ts`) proxies
+requests to `teiServiceURL` at a path such as `html/data/tei/<id>/<id>-<page>.html`. If that path returns a 404, the
+request is retried once against the same path nested under an `unreleased/` prefix (e.g.
+`unreleased/html/data/tei/<id>/<id>-<page>.html`), to support content that has been processed but not yet publicly
+released. This is implemented generically as `unreleasedFallback` on `delegateToExternalHTML`
+(`routes/transcription-impl.ts`), so it only applies to routes that opt into it, not to the third-party proxies
+(Newton, DMP, Palimpsest).
+
 ### Translation
 Route: `/v1/translation/`
 
@@ -174,6 +205,8 @@ Definition: [`routes/translation.js`](routes/translation.js)
 Returns: Translation TEI-XML file from internally hosted storage, transformed suitably for browser display.
 
 Example Usage: When loading the content for the 'Translation' tab in the CUDL Viewer.
+
+Uses the same `tei` proxy mechanism and `unreleased/` fallback as the [Transcription](#transcription) route above.
 
 ### Download Images
 Route: `/v1/images/download/`
