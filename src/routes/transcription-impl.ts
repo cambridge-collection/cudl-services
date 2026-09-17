@@ -68,6 +68,12 @@ export function delegateToExternalHTML(options: {
   externalPathGenerator: (req: Request) => string | Promise<string>;
   baseResourceURL?: string;
   resourceExtensions?: Iterable<string>;
+  /**
+   * If true, a request whose content is not found at the normal path is
+   * retried once against the same path nested under an "unreleased/" prefix,
+   * to support content which has not yet been publicly released.
+   */
+  unreleasedFallback?: boolean;
 }): RequestHandler[] {
   const {
     externalBaseURL: _externalBaseURL,
@@ -75,9 +81,11 @@ export function delegateToExternalHTML(options: {
     externalPathGenerator,
     resourceExtensions: _resourceExtensions,
     baseResourceURL,
+    unreleasedFallback,
   } = applyLazyDefaults(options, {
     resourceExtensions: () => DEFAULT_RESOURCE_EXTENSIONS,
     baseResourceURL: () => defaultBaseResourceURL(options.pathPattern),
+    unreleasedFallback: () => false,
   });
 
   const externalBaseURL = new URL(`${_externalBaseURL}`);
@@ -94,6 +102,13 @@ export function delegateToExternalHTML(options: {
     pathPattern,
     urlGenerator: async req =>
       new URL(await externalPathGenerator(req), externalBaseURL),
+    fallbackURLGenerator: unreleasedFallback
+      ? async req =>
+          new URL(
+            `unreleased/${await externalPathGenerator(req)}`,
+            externalBaseURL
+          )
+      : undefined,
     responseHandler: [
       defaultErrorHandler,
       createRestrictedTypeResponseHandler({
@@ -126,9 +141,23 @@ export function delegateToExternalHTML(options: {
 interface ExternalResourceDelegatorOptions<T> {
   pathPattern?: PathParams;
   urlGenerator: URLGenerator;
+  /**
+   * Generates an alternate URL to retry against if the request to the
+   * urlGenerator's URL fails with a 404 Not Found response.
+   */
+  fallbackURLGenerator?: URLGenerator;
   responseHandler?: ResponseHandler<T> | Array<ResponseHandler<T>>;
   responseGenerator: ResponseGenerator<T>;
   responseTransmitter: ResponseTransmitter<T>;
+}
+
+function isNotFoundError(e: unknown): boolean {
+  const status = (e as {status?: number; response?: {status?: number}})?.status;
+  const responseStatus = (e as {response?: {status?: number}})?.response
+    ?.status;
+  return (
+    status === StatusCodes.NOT_FOUND || responseStatus === StatusCodes.NOT_FOUND
+  );
 }
 
 type ExternalResourceDelegatorCreateOptions<T> = Omit<
@@ -165,6 +194,7 @@ interface ResponseTransmitter<T> {
 export class ExternalResourceDelegator<T> {
   private readonly pathPattern: PathParams;
   private readonly urlGenerator: URLGenerator;
+  private readonly fallbackURLGenerator?: URLGenerator;
   private readonly responseGenerator: ResponseGenerator<T>;
   private readonly responseHandler: Array<ResponseHandler<T>>;
   private readonly responseTransmitter: ResponseTransmitter<T>;
@@ -178,6 +208,7 @@ export class ExternalResourceDelegator<T> {
     });
     this.pathPattern = defaultOptions.pathPattern;
     this.urlGenerator = defaultOptions.urlGenerator;
+    this.fallbackURLGenerator = options.fallbackURLGenerator;
     this.responseGenerator = defaultOptions.responseGenerator;
     this.responseHandler = Array.isArray(defaultOptions.responseHandler)
       ? Array.from(defaultOptions.responseHandler)
@@ -198,6 +229,7 @@ export class ExternalResourceDelegator<T> {
       pathPattern: options.pathPattern,
       responseHandler: options.responseHandler || [],
       urlGenerator: options.urlGenerator,
+      fallbackURLGenerator: options.fallbackURLGenerator,
       responseGenerator:
         options.responseGenerator ||
         superagentResponseGenerator(defaultSuperagentResponseDataGenerator),
@@ -206,10 +238,23 @@ export class ExternalResourceDelegator<T> {
     });
   }
 
+  private async fetchDelegatedResponse(req: Request, url: URL): Promise<T> {
+    try {
+      return await this.responseGenerator(url);
+    } catch (e) {
+      if (this.fallbackURLGenerator !== undefined && isNotFoundError(e)) {
+        return await this.responseGenerator(
+          await this.fallbackURLGenerator(req)
+        );
+      }
+      throw e;
+    }
+  }
+
   private async handleRequest(req: Request, res: Response): Promise<void> {
     const url = await this.urlGenerator(req);
     try {
-      let delegatedResponse = await this.responseGenerator(url);
+      let delegatedResponse = await this.fetchDelegatedResponse(req, url);
       for (const handler of this.responseHandler) {
         const nextResponse = await handler(delegatedResponse);
         if (nextResponse !== undefined) {

@@ -51,11 +51,13 @@ export function teiHtmlServiceHandler(
       pathPattern: `${pathBase}/:id/:start$`,
       externalBaseURL: teiServiceURL,
       externalPathGenerator: teiHtmlServicePathGenerator(type),
+      unreleasedFallback: true,
     }),
     delegateToExternalHTML({
       pathPattern: `${pathBase}/:id/:start/:end$`,
       externalBaseURL: teiServiceURL,
       externalPathGenerator: teiHtmlServicePathGenerator(type),
+      unreleasedFallback: true,
     })
   );
 

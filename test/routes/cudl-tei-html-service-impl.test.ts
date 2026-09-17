@@ -1,8 +1,13 @@
 import {
   TeiHtmlServiceContent,
+  teiHtmlServiceHandler,
   teiHtmlServicePathGenerator,
 } from '../../src/routes/cudl-tei-html-service-impl';
 import {product} from '../utils';
+import express from 'express';
+import request from 'supertest';
+import {mockGetResponder} from '../mocking/superagent-mocking';
+import {StatusCodes} from 'http-status-codes';
 
 describe('teiTranscriptionPathGenerator', () => {
   test.each([
@@ -61,4 +66,88 @@ describe('teiTranscriptionPathGenerator', () => {
       ).toThrowErrorMatchingSnapshot();
     }
   );
+});
+
+describe('teiHtmlServiceHandler unreleased fallback', () => {
+  beforeEach(() => {
+    mockGetResponder.mockReset();
+  });
+
+  function getApp() {
+    const app = express();
+    app.use(
+      teiHtmlServiceHandler(
+        TeiHtmlServiceContent.TRANSCRIPTION,
+        new URL('http://example.com/')
+      )
+    );
+    return app;
+  }
+
+  function notFoundError() {
+    const error: {status?: number} = new Error('Not Found');
+    error.status = StatusCodes.NOT_FOUND;
+    return error;
+  }
+
+  test('serves the response from the normal path when it is found there', async () => {
+    mockGetResponder.mockResolvedValueOnce({
+      status: 200,
+      type: 'text/html',
+      text: '<html><body>normal</body></html>',
+      body: Buffer.from('<html><body>normal</body></html>', 'utf8'),
+      ok: true,
+      serverError: false,
+    });
+
+    const res = await request(getApp()).get(
+      '/tei/diplomatic/internal/MS-FOO/i1'
+    );
+
+    expect(res.status).toBe(200);
+    expect(res.text).toContain('normal');
+    expect(mockGetResponder.mock.calls).toEqual([
+      ['http://example.com/html/data/tei/MS-FOO/MS-FOO-i1.html'],
+    ]);
+  });
+
+  test('falls back to the unreleased path when not found at the normal path', async () => {
+    mockGetResponder
+      .mockRejectedValueOnce(notFoundError())
+      .mockResolvedValueOnce({
+        status: 200,
+        type: 'text/html',
+        text: '<html><body>unreleased</body></html>',
+        body: Buffer.from('<html><body>unreleased</body></html>', 'utf8'),
+        ok: true,
+        serverError: false,
+      });
+
+    const res = await request(getApp()).get(
+      '/tei/diplomatic/internal/MS-FOO/i1'
+    );
+
+    expect(res.status).toBe(200);
+    expect(res.text).toContain('unreleased');
+    expect(mockGetResponder.mock.calls).toEqual([
+      ['http://example.com/html/data/tei/MS-FOO/MS-FOO-i1.html'],
+      ['http://example.com/unreleased/html/data/tei/MS-FOO/MS-FOO-i1.html'],
+    ]);
+  });
+
+  test('responds 404 when the content is missing from both the normal and unreleased paths', async () => {
+    mockGetResponder
+      .mockRejectedValueOnce(notFoundError())
+      .mockRejectedValueOnce(notFoundError());
+
+    const res = await request(getApp()).get(
+      '/tei/diplomatic/internal/MS-FOO/i1'
+    );
+
+    expect(res.status).toBe(StatusCodes.NOT_FOUND);
+    expect(mockGetResponder.mock.calls).toEqual([
+      ['http://example.com/html/data/tei/MS-FOO/MS-FOO-i1.html'],
+      ['http://example.com/unreleased/html/data/tei/MS-FOO/MS-FOO-i1.html'],
+    ]);
+  });
 });
