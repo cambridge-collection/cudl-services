@@ -11,7 +11,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
       - name: Unit & integration tests
         run: docker compose run --rm test
   create-docker-image:
@@ -20,7 +20,7 @@ jobs:
       IMAGE_TAG_COMMIT_SHA: ${{ steps.build-docker-image.outputs.IMAGE_TAG_COMMIT_SHA }}
       IMAGE_TAG_COMMIT_TAG: ${{ steps.build-docker-image.outputs.IMAGE_TAG_COMMIT_TAG }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
       - name: Build & tag image
         id: build-docker-image
         run: make docker-image github-actions-set-docker-image-tag-outputs
@@ -48,7 +48,7 @@ jobs:
           age: '0 seconds'
           skip-recent: 4
       - name: Upload image artefact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: github.ref == 'refs/heads/main'
         with:
           name: docker-image
@@ -59,13 +59,13 @@ jobs:
     if: github.ref == 'refs/heads/main'
     steps:
       - name: Download image artefact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: docker-image
           path: build
       - run: gzip -d --stdout build/docker-image.tar.gz | docker image load
       - name: Login to DockerHub
-        uses: docker/login-action@v1
+        uses: docker/login-action@v4
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
