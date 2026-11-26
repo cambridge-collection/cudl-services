@@ -1,4 +1,4 @@
-import {BaseError} from './errors';
+import {BaseError, ErrorCategories, isTagged} from './errors';
 import {asUnknownObject} from './util';
 import {Memoize} from 'typescript-memoize';
 import {MetadataResponseEmitter} from './routes/metadata';
@@ -89,6 +89,48 @@ export type LocationResolver = (id: string) => Promise<string>;
 
 export interface DataStore {
   read(location: string): Promise<Buffer>;
+}
+
+/**
+ * Prefix under which processed-but-not-yet-released content is stored,
+ * mirroring the released layout (e.g. unreleased/items/data/tei/<id>/<id>.xml).
+ */
+export const UNRELEASED_PREFIX = 'unreleased';
+
+/**
+ * A DataStore which retries a read under the unreleased/ prefix when the
+ * location is not found, so draft items' metadata can be served. Errors other
+ * than NotFound are not retried. If both reads fail, the original error is
+ * thrown so the reported path is the released one.
+ */
+export class UnreleasedFallbackDataStore implements DataStore {
+  readonly dataStore: DataStore;
+
+  constructor(dataStore: DataStore) {
+    this.dataStore = dataStore;
+  }
+
+  async read(location: string): Promise<Buffer> {
+    try {
+      return await this.dataStore.read(location);
+    } catch (e) {
+      if (!isNotFoundError(e)) {
+        throw e;
+      }
+      try {
+        return await this.dataStore.read(`${UNRELEASED_PREFIX}/${location}`);
+      } catch (fallbackError) {
+        if (isNotFoundError(fallbackError)) {
+          throw e;
+        }
+        throw fallbackError;
+      }
+    }
+  }
+}
+
+function isNotFoundError(e: unknown): boolean {
+  return isTagged(e) && new Set(e.tags).has(ErrorCategories.NotFound);
 }
 
 type DataProvider = () => Promise<Buffer>;

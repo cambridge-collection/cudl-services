@@ -12,7 +12,11 @@ import {
 } from '../../src/metadata/cudl';
 import {FilesystemDataStore} from '../../src/metadata/filesystem';
 import {ErrorCategories} from '../../src/errors';
-import {DataStore} from '../../src/metadata';
+import {
+  DataStore,
+  MetadataError,
+  UnreleasedFallbackDataStore,
+} from '../../src/metadata';
 
 import 'jest-extended';
 
@@ -105,6 +109,76 @@ describe('cudlProvidersForDataStore', () => {
       ).resolves.toEqual(Buffer.from('data'));
     }
   );
+});
+
+describe('UnreleasedFallbackDataStore', () => {
+  function notFound(location: string) {
+    return new MetadataError({
+      message: `missing ${location}`,
+      tags: [ErrorCategories.NotFound],
+    });
+  }
+
+  test('reads the released location when present', async () => {
+    const read = jest.fn().mockResolvedValue(Buffer.from('released'));
+    const store = new UnreleasedFallbackDataStore({read});
+    await expect(store.read('items/data/tei/X/X.xml')).resolves.toEqual(
+      Buffer.from('released')
+    );
+    expect(read).toHaveBeenCalledTimes(1);
+  });
+
+  test('falls back to unreleased/ when the location is not found', async () => {
+    const read = jest
+      .fn()
+      .mockImplementationOnce(async (loc: string) => {
+        throw notFound(loc);
+      })
+      .mockResolvedValueOnce(Buffer.from('draft'));
+    const store = new UnreleasedFallbackDataStore({read});
+    await expect(store.read('items/data/tei/X/X.xml')).resolves.toEqual(
+      Buffer.from('draft')
+    );
+    expect(read).toHaveBeenLastCalledWith('unreleased/items/data/tei/X/X.xml');
+  });
+
+  test('throws the original error when neither location exists', async () => {
+    const read = jest.fn(async (loc: string) => {
+      throw notFound(loc);
+    });
+    const store = new UnreleasedFallbackDataStore({read});
+    const result = store.read('items/data/tei/X/X.xml');
+    await expect(result).rejects.toThrow('missing items/data/tei/X/X.xml');
+    await expect(result).rejects.toThrowErrorTaggedWith(
+      ErrorCategories.NotFound
+    );
+  });
+
+  test('does not fall back for errors other than NotFound', async () => {
+    const read = jest.fn().mockRejectedValue(new Error('boom'));
+    const store = new UnreleasedFallbackDataStore({read});
+    await expect(store.read('items/data/tei/X/X.xml')).rejects.toThrow('boom');
+    expect(read).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('cudlProvidersForDataStore unreleased fallback', () => {
+  const providers = () =>
+    cudlProvidersForDataStore(new FilesystemDataStore(CUDL_METADATA_PATH));
+
+  test('serves draft TEI from unreleased/', async () => {
+    await expect(
+      (await providers()[CUDLFormat.TEI].query('MS-DRAFT')).getBytes()
+    ).resolves.toEqual(
+      Buffer.from('<TEI xmlns="http://www.tei-c.org/ns/1.0"/>\n')
+    );
+  });
+
+  test('reports NotFound for TEI missing from both locations', async () => {
+    await expect(
+      (await providers()[CUDLFormat.TEI].query('MS-MISSING')).getBytes()
+    ).rejects.toThrowErrorTaggedWith(ErrorCategories.NotFound);
+  });
 });
 
 describe('MetadataProviderCUDLMetadataRepository', () => {

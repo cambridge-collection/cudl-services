@@ -9,6 +9,7 @@ import {
   ItemJsonMetadataResponse,
   LocationResolver,
   MetadataProvider,
+  UnreleasedFallbackDataStore,
 } from '../metadata';
 
 export interface MetadataRepository<F extends string = string> {
@@ -72,11 +73,13 @@ export type CUDLProviders = {
 };
 
 export function cudlProvidersForDataStore(dataStore: DataStore): CUDLProviders {
+  // Draft items' XML (TEI etc.) lives under unreleased/ until it is released.
+  const xmlDataStore = new UnreleasedFallbackDataStore(dataStore);
   const xmlProviders = Object.fromEntries(
     XML_FORMATS.map(format => [
       format,
       new DefaultMetadataProvider(
-        dataStore,
+        xmlDataStore,
         DataLocationResolver(format),
         DefaultMetadataResponse
       ),
